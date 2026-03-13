@@ -288,7 +288,7 @@ const trackerRows = [
   {label:"Last meal",field:"mLast",type:"time",ph:"",section:"meals"},
   {label:"IF ratio",field:"_ifRatio",type:"computed",section:"meals"},
   {label:"🚶 After meal move",field:"moveAfter",type:"select",ph:"",opts:["x1","x2","x3"],section:"activity"},
-  {label:"🏋️ Exercise",field:"act",type:"select",ph:"",opts:actOpts,section:"activity"},
+  {label:"🏋️ Exercise",field:"act",type:"text",ph:"walk, cardio...",section:"activity"},
   {label:"🌿 Berberine",field:"berb",type:"select",ph:"",opts:["0","x1","x2"],section:"supps"},
   {label:"🐟 Fish Oil",field:"fish",type:"select",ph:"",opts:["0","x1","x2","x3"],section:"supps"},
   {label:"💊 Magnesium",field:"mag",type:"select",ph:"",opts:["0","x1","x2","x3"],section:"supps"},
