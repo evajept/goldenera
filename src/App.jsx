@@ -475,9 +475,9 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
 
   const getInsights=()=>{const tips=[];let berb=0,move=0,sweet=0,sleep=0,fiber=0,mag=0,water=0;weekDates.forEach(d=>{const wd=weekData[d]||{};if(wd.berb&&wd.berb!=="0")berb++;if(wd.moveAfter||wd.act)move++;if(wd.noSweet)sweet++;if(wd.sleep==="7+"||wd.sleep==="8+")sleep++;if(wd.fiberFirst)fiber++;if(wd.mag&&wd.mag!=="0")mag++;if(wd.water)water++;});if(ts.score>0)tips.push({icon:"📊",title:`Score: ${ts.score}/100${ts.bonus?" (+"+ts.bonus+")":""}`,text:`Avg ${ts.score} pts across ${ts.trackedDays} days. ${ts.score>=80?"Full Send pace.":ts.score>=50?"Solid effort.":"Needs more consistency."}`});if(berb>0&&berb<5)tips.push({icon:"🌿",title:"Berberine",text:`${berb}/7 days. Aim for daily.`});if(berb>=5)tips.push({icon:"🌿",title:"Berberine strong",text:`${berb}/7 — excellent.`});if(move<5&&move>0)tips.push({icon:"🚶",title:"Move more",text:`${move}/7 days active. Even 10 min walks count.`});if(sweet>=5)tips.push({icon:"🚫",title:"Sugar-free",text:`${sweet}/7 days — biggest trig driver.`});if(sweet<5&&sweet>0)tips.push({icon:"⚠️",title:"Drinks",text:`${sweet}/7 sugar-free. Each ชาเย็น = +30-50 trig.`});if(sleep<5&&sleep>0)tips.push({icon:"😴",title:"Sleep",text:`${sleep}/7 nights 7+hrs. Poor sleep → glucose +15-30.`});if(mag===0)tips.push({icon:"💊",title:"Magnesium missing",text:"Start tonight. Helps sleep + lowers fasting glucose 5-15 pts."});if(tips.length===0){tips.push({icon:"📊",title:"Start tracking",text:"Fill in the table above to get personalized insights."});tips.push({icon:"💡",title:"Priorities",text:"Zero sweet drinks, berberine, movement, sleep 7+."});tips.push({icon:"🎯",title:"Glucose",text:"Track fasting glucose daily — best predictor of A1C."});}return tips;};
 
-  const Pill=({active,children,onClick,color})=>(<button onClick={onClick} style={{padding:"5px 12px",borderRadius:t.radius,fontSize:12,border:`1px solid ${active?(color||t.accent):t.cardBorder}`,cursor:"pointer",background:active?(color||t.accent):t.card,color:active?"#fff":t.textMuted,fontWeight:active?700:500,fontFamily:t.font}}>{children}</button>);
+  const Pill=({active,children,onClick,color})=>(<button onClick={onClick} style={{padding:"5px 12px",borderRadius:t.radius,fontSize:13,border:`1px solid ${active?(color||t.accent):t.cardBorder}`,cursor:"pointer",background:active?(color||t.accent):t.card,color:active?"#fff":t.textMuted,fontWeight:active?700:500,fontFamily:t.font}}>{children}</button>);
   const Card=({children,style:s={}})=>(<div style={{background:t.card,border:`1px solid ${t.cardBorder}`,borderRadius:t.radius,padding:"14px 16px",marginBottom:10,...s}}>{children}</div>);
-  const inp={padding:"6px 8px",borderRadius:8,border:`1px solid ${t.cardBorder}`,fontSize:12,fontFamily:t.font,boxSizing:"border-box",color:t.text,background:t.card,width:"100%"};
+  const inp={padding:"6px 8px",borderRadius:8,border:`1px solid ${t.cardBorder}`,fontSize:13,fontFamily:t.font,boxSizing:"border-box",color:t.text,background:t.card,width:"100%"};
 
   const chD=chartData.strict;
   const cSets={hb:{data:chD.hb,label:"HbA1C",ref:5.7,refL:"<5.7%",dom:[4,10]},trig:{data:chD.trig,label:"Trig",ref:150,refL:"<150",dom:[0,750]},wt:{data:chD.wt,label:"Weight",ref:60,refL:"60kg",dom:[55,75]},ggt:{data:chD.ggt,label:"GGT",ref:39,refL:"<39",dom:[0,200]},chol:{data:chD.chol,label:"Chol",ref:200,refL:"<200",dom:[150,240]},gluc:{data:chD.gluc,label:"Glucose",ref:99,refL:"<99",dom:[50,230]},bmi:{data:chD.bmi,label:"BMI",ref:23,refL:"<23",dom:[18,28]}};
@@ -490,20 +490,20 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
 
       {/* SIDEBAR — responsive: top bar on mobile, side on desktop */}
       <div style={{width:sidebarOpen?180:48,minHeight:"100vh",background:t.sidebarBg,borderRight:`1px solid ${t.cardBorder}`,padding:sidebarOpen?"16px 12px":"16px 4px",display:"flex",flexDirection:"column",flexShrink:0,transition:"width 0.2s",overflow:"hidden"}}>
-        <button onClick={()=>setSidebarOpen(!sidebarOpen)} style={{background:"none",border:"none",color:t.textLight,fontSize:14,cursor:"pointer",alignSelf:sidebarOpen?"flex-end":"center",marginBottom:8}}>{sidebarOpen?"◁":"▷"}</button>
+        <button onClick={()=>setSidebarOpen(!sidebarOpen)} style={{background:"none",border:"none",color:t.textLight,fontSize:15,cursor:"pointer",alignSelf:sidebarOpen?"flex-end":"center",marginBottom:8}}>{sidebarOpen?"◁":"▷"}</button>
         {sidebarOpen&&<>
           <div style={{marginBottom:14}}>
             <div style={{display:"flex",alignItems:"center",gap:6}}>
-              <div style={{fontSize:14,fontWeight:700,color:t.text,lineHeight:1.2}}>Golden Era</div>
+              <div style={{fontSize:15,fontWeight:700,color:t.text,lineHeight:1.2}}>Golden Era</div>
               {sheetStatus==="synced"&&<span style={{fontSize:8,padding:"2px 5px",borderRadius:4,background:"#16a34a18",color:"#16a34a"}}>☁️</span>}
               {sheetStatus==="loading"&&<span style={{fontSize:8,padding:"2px 5px",borderRadius:4,background:"#d4850f18",color:"#d4850f"}}>⏳</span>}
             </div>
           </div>
           <div style={{display:"flex",flexDirection:"column",gap:2,flex:1}}>
-            {tabDefs.map((td,i)=>(<button key={td.label} onClick={()=>setTab(i)} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 10px",borderRadius:t.radiusSm,border:"none",background:tab===i?t.accent:"transparent",color:tab===i?"#fff":t.textMuted,fontSize:12,fontWeight:tab===i?700:400,cursor:"pointer",fontFamily:t.font,textAlign:"left",letterSpacing:tab===i?1:0.5}}><span style={{fontSize:14}}>{td.icon}</span><span>{td.label}</span></button>))}
+            {tabDefs.map((td,i)=>(<button key={td.label} onClick={()=>setTab(i)} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 10px",borderRadius:t.radiusSm,border:"none",background:tab===i?t.accent:"transparent",color:tab===i?"#fff":t.textMuted,fontSize:13,fontWeight:tab===i?700:400,cursor:"pointer",fontFamily:t.font,textAlign:"left",letterSpacing:tab===i?1:0.5}}><span style={{fontSize:15}}>{td.icon}</span><span>{td.label}</span></button>))}
           </div>
         </>}
-        {!sidebarOpen&&<div style={{display:"flex",flexDirection:"column",gap:3,alignItems:"center"}}>{tabDefs.map((td,i)=>(<button key={td.label} onClick={()=>setTab(i)} style={{width:34,height:34,borderRadius:t.radiusSm,border:"none",background:tab===i?t.accent:"transparent",color:tab===i?"#fff":t.textMuted,fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>{td.icon}</button>))}</div>}
+        {!sidebarOpen&&<div style={{display:"flex",flexDirection:"column",gap:3,alignItems:"center"}}>{tabDefs.map((td,i)=>(<button key={td.label} onClick={()=>setTab(i)} style={{width:34,height:34,borderRadius:t.radiusSm,border:"none",background:tab===i?t.accent:"transparent",color:tab===i?"#fff":t.textMuted,fontSize:15,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>{td.icon}</button>))}</div>}
       </div>
 
       {/* CONTENT */}
@@ -511,25 +511,25 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
 
         {/* ══ LABS ══ */}
         {tab===1&&(<div>
-          <h2 style={{fontSize:20,fontWeight:700,margin:"0 0 4px"}}>Lab Results & Prediction</h2>
-          <p style={{color:t.textMuted,fontSize:13,marginBottom:14}}>Confirmed data vs predicted trajectory (Full Send protocol)</p>
+          <h2 style={{fontSize:22,fontWeight:700,margin:"0 0 4px"}}>Lab Results & Prediction</h2>
+          <p style={{color:t.textMuted,fontSize:14,marginBottom:14}}>Confirmed data vs predicted trajectory (Full Send protocol)</p>
 
           <div style={{overflowX:"auto",border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,background:t.card}}>
             <table style={{width:"100%",borderCollapse:"collapse",minWidth:750}}>
               <thead><tr style={{background:t.sidebarBg}}>
-                <th style={{position:"sticky",left:0,zIndex:3,background:t.sidebarBg,padding:"10px 12px",textAlign:"left",fontSize:12,color:t.textMuted,borderBottom:`1px solid ${t.cardBorder}`,borderRight:`1px solid ${t.cardBorder}`,fontWeight:600,minWidth:120}}>Marker</th>
-                <th style={{position:"sticky",left:120,zIndex:3,background:t.sidebarBg,padding:"10px 8px",textAlign:"center",fontSize:11,color:t.textLight,borderBottom:`1px solid ${t.cardBorder}`,borderRight:`1px solid ${t.cardBorder}`,minWidth:60}}>Normal</th>
-                <th style={{position:"sticky",left:180,zIndex:3,background:t.sidebarBg,padding:"10px 10px",textAlign:"center",fontSize:12,borderBottom:`1px solid ${t.cardBorder}`,borderRight:`1px solid ${t.cardBorder}`,fontWeight:700,color:t.text,minWidth:70}}>26 Feb<br/><span style={{fontSize:10,color:t.textLight,fontWeight:400}}>Confirmed</span></th>
-                {["Day 30","Day 60","Day 90"].map(d=>(<th key={d} style={{padding:"10px 12px",textAlign:"center",fontSize:12,borderBottom:`1px solid ${t.cardBorder}`,fontWeight:700,color:sc,minWidth:80}}>{d}<br/><span style={{fontSize:10,fontWeight:400,opacity:.7}}>Predicted</span></th>))}
+                <th style={{position:"sticky",left:0,zIndex:3,background:t.sidebarBg,padding:"10px 12px",textAlign:"left",fontSize:13,color:t.textMuted,borderBottom:`1px solid ${t.cardBorder}`,borderRight:`1px solid ${t.cardBorder}`,fontWeight:600,minWidth:120}}>Marker</th>
+                <th style={{position:"sticky",left:120,zIndex:3,background:t.sidebarBg,padding:"10px 8px",textAlign:"center",fontSize:12,color:t.textLight,borderBottom:`1px solid ${t.cardBorder}`,borderRight:`1px solid ${t.cardBorder}`,minWidth:60}}>Normal</th>
+                <th style={{position:"sticky",left:180,zIndex:3,background:t.sidebarBg,padding:"10px 10px",textAlign:"center",fontSize:13,borderBottom:`1px solid ${t.cardBorder}`,borderRight:`1px solid ${t.cardBorder}`,fontWeight:700,color:t.text,minWidth:70}}>26 Feb<br/><span style={{fontSize:11,color:t.textLight,fontWeight:400}}>Confirmed</span></th>
+                {["Day 30","Day 60","Day 90"].map(d=>(<th key={d} style={{padding:"10px 12px",textAlign:"center",fontSize:13,borderBottom:`1px solid ${t.cardBorder}`,fontWeight:700,color:sc,minWidth:80}}>{d}<br/><span style={{fontSize:11,fontWeight:400,opacity:.7}}>Predicted</span></th>))}
               </tr></thead>
               <tbody>{labMarkers.map((r,ri)=>{const sc2=stC[r.status];const p30=r.s30;const p60=r.s60;const p90=r.s90;const bg=ri%2===0?t.card:t.bg;return(
                 <tr key={r.marker} style={{background:bg}}>
-                  <td style={{position:"sticky",left:0,zIndex:2,background:bg,padding:"8px 12px",fontSize:13,fontWeight:600,borderRight:`1px solid ${t.cardBorder}`}}><div style={{display:"flex",alignItems:"center",gap:6}}><div style={{width:7,height:7,borderRadius:"50%",background:sc2.tx,flexShrink:0}}/>{r.marker}</div></td>
-                  <td style={{position:"sticky",left:120,zIndex:2,background:bg,padding:"8px 8px",textAlign:"center",fontSize:11,color:t.textLight,borderRight:`1px solid ${t.cardBorder}`}}>{r.normal}</td>
-                  <td style={{position:"sticky",left:180,zIndex:2,background:bg,padding:"8px 10px",textAlign:"center",fontSize:15,fontWeight:800,color:sc2.tx,borderRight:`1px solid ${t.cardBorder}`}}>{r.confirmed}</td>
-                  <td style={{padding:"8px 12px",textAlign:"center",fontSize:13,fontWeight:600,color:sc,opacity:.8}}>{p30}</td>
-                  <td style={{padding:"8px 12px",textAlign:"center",fontSize:13,fontWeight:600,color:sc,opacity:.9}}>{p60}</td>
-                  <td style={{padding:"8px 12px",textAlign:"center",fontSize:14,fontWeight:700,color:sc}}>{p90}</td>
+                  <td style={{position:"sticky",left:0,zIndex:2,background:bg,padding:"8px 12px",fontSize:14,fontWeight:600,borderRight:`1px solid ${t.cardBorder}`}}><div style={{display:"flex",alignItems:"center",gap:6}}><div style={{width:7,height:7,borderRadius:"50%",background:sc2.tx,flexShrink:0}}/>{r.marker}</div></td>
+                  <td style={{position:"sticky",left:120,zIndex:2,background:bg,padding:"8px 8px",textAlign:"center",fontSize:12,color:t.textLight,borderRight:`1px solid ${t.cardBorder}`}}>{r.normal}</td>
+                  <td style={{position:"sticky",left:180,zIndex:2,background:bg,padding:"8px 10px",textAlign:"center",fontSize:16,fontWeight:800,color:sc2.tx,borderRight:`1px solid ${t.cardBorder}`}}>{r.confirmed}</td>
+                  <td style={{padding:"8px 12px",textAlign:"center",fontSize:14,fontWeight:600,color:sc,opacity:.8}}>{p30}</td>
+                  <td style={{padding:"8px 12px",textAlign:"center",fontSize:14,fontWeight:600,color:sc,opacity:.9}}>{p60}</td>
+                  <td style={{padding:"8px 12px",textAlign:"center",fontSize:15,fontWeight:700,color:sc}}>{p90}</td>
                 </tr>);})}</tbody>
             </table>
           </div>
@@ -539,8 +539,8 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
             <div style={{display:"flex",gap:4,flexWrap:"wrap",marginBottom:8}}>{[["hb","HbA1C"],["trig","Trig"],["gluc","Glucose"],["ggt","GGT"],["chol","Chol"],["wt","Weight"]].map(([k,l])=>(<Pill key={k} active={labChart===k} onClick={()=>setLabChart(k)}>{l}</Pill>))}</div>
             <Card style={{padding:14}}>
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
-                  <span style={{fontSize:13,fontWeight:700,color:sc}}>{ch.label}</span>
-                  <div style={{display:"flex",gap:10,fontSize:10}}>
+                  <span style={{fontSize:14,fontWeight:700,color:sc}}>{ch.label}</span>
+                  <div style={{display:"flex",gap:10,fontSize:11}}>
                     <span style={{color:sc}}>● Confirmed</span>
                     <span style={{color:sc,opacity:0.4}}>○ Predicted</span>
                   </div>
@@ -548,7 +548,7 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
                 {/* Line chart with SVG */}
                 {(()=>{
                   const pts=ch.data.filter(p=>p.v!==null);
-                  if(pts.length===0)return <div style={{fontSize:12,color:t.textMuted}}>No data yet</div>;
+                  if(pts.length===0)return <div style={{fontSize:13,color:t.textMuted}}>No data yet</div>;
                   const W=400,H=120,PX=50,PY=15;
                   const minV=ch.dom[0],maxV=ch.dom[1],rangeV=maxV-minV;
                   const xStep=(W-PX*2)/(ch.data.length-1);
@@ -588,8 +588,8 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
           </div>
 
           {/* ══ LAB MEANINGS ══ */}
-          <h2 style={{fontSize:20,fontWeight:700,margin:"24px 0 4px"}}>Lab Insights</h2>
-          <p style={{color:t.textMuted,fontSize:12,marginBottom:12}}>Tap any marker to see what it means</p>
+          <h2 style={{fontSize:22,fontWeight:700,margin:"24px 0 4px"}}>Lab Insights</h2>
+          <p style={{color:t.textMuted,fontSize:13,marginBottom:12}}>Tap any marker to see what it means</p>
           {(()=>{
             const labTabs = [
               {key:"baseline",label:"26 Feb",sublabel:"Confirmed",type:"baseline"},
@@ -629,15 +629,15 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
               <div style={{display:"flex",gap:4,flexWrap:"wrap",marginBottom:14}}>
                 {labTabs.map((lt,li)=>{
                   const isActive = li===activeLabIdx;
-                  return(<button key={lt.key} onClick={()=>setLabMeanTab(li)} style={{padding:"7px 14px",borderRadius:t.radius,fontSize:12,border:`1px solid ${isActive?t.accent:t.cardBorder}`,cursor:"pointer",background:isActive?t.accent:t.card,color:isActive?"#fff":t.textMuted,fontWeight:isActive?700:500,fontFamily:t.font,display:"flex",flexDirection:"column",alignItems:"center",gap:1,minWidth:70}}>
+                  return(<button key={lt.key} onClick={()=>setLabMeanTab(li)} style={{padding:"7px 14px",borderRadius:t.radius,fontSize:13,border:`1px solid ${isActive?t.accent:t.cardBorder}`,cursor:"pointer",background:isActive?t.accent:t.card,color:isActive?"#fff":t.textMuted,fontWeight:isActive?700:500,fontFamily:t.font,display:"flex",flexDirection:"column",alignItems:"center",gap:1,minWidth:70}}>
                     <span>{lt.label}</span>
-                    <span style={{fontSize:9,opacity:0.8,fontWeight:400}}>{lt.sublabel}</span>
+                    <span style={{fontSize:10,opacity:0.8,fontWeight:400}}>{lt.sublabel}</span>
                   </button>);
                 })}
               </div>
 
               {/* Summary strip */}
-              <div style={{padding:"12px 16px",background:t.bg,borderRadius:t.radius,marginBottom:12,fontSize:13,color:t.text,lineHeight:1.7}}>
+              <div style={{padding:"12px 16px",background:t.bg,borderRadius:t.radius,marginBottom:12,fontSize:14,color:t.text,lineHeight:1.7}}>
                 {tabSummaries[activeTab.key]}
               </div>
 
@@ -664,17 +664,17 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
                     <div onClick={()=>setExpandedLab(isOpen?null:ri)} style={{display:"flex",alignItems:"center",gap:8,padding:"10px 14px",cursor:"pointer"}}>
                       <div style={{display:"flex",alignItems:"center",gap:8,flex:1}}>
                         <div style={{width:7,height:7,borderRadius:"50%",background:sc2.tx,flexShrink:0}}/>
-                        <span style={{fontSize:13,fontWeight:600}}>{r.marker}</span>
-                        <span style={{fontSize:10,padding:"2px 7px",borderRadius:t.radiusSm,background:sc2.bg,color:sc2.tx,fontWeight:600}}>{r.status}</span>
+                        <span style={{fontSize:14,fontWeight:600}}>{r.marker}</span>
+                        <span style={{fontSize:11,padding:"2px 7px",borderRadius:t.radiusSm,background:sc2.bg,color:sc2.tx,fontWeight:600}}>{r.status}</span>
                       </div>
                       <div style={{display:"flex",gap:14}}>
-                        <div style={{textAlign:"center"}}><div style={{fontSize:9,color:t.textLight,textTransform:"uppercase",letterSpacing:.5}}>{leftLabel}</div><div style={{fontSize:16,fontWeight:700,color:activeTab.type==="baseline"?sc2.tx:t.accent}}>{leftVal}</div></div>
-                        <div style={{textAlign:"center"}}><div style={{fontSize:9,color:t.textLight,textTransform:"uppercase",letterSpacing:.5}}>{rightLabel}</div><div style={{fontSize:rightVal?14:12,fontWeight:rightVal?700:400,color:rightVal?t.ok:t.textLight,fontStyle:rightVal?"normal":"italic"}}>{rightVal||"Not yet"}</div></div>
+                        <div style={{textAlign:"center"}}><div style={{fontSize:10,color:t.textLight,textTransform:"uppercase",letterSpacing:.5}}>{leftLabel}</div><div style={{fontSize:18,fontWeight:700,color:activeTab.type==="baseline"?sc2.tx:t.accent}}>{leftVal}</div></div>
+                        <div style={{textAlign:"center"}}><div style={{fontSize:10,color:t.textLight,textTransform:"uppercase",letterSpacing:.5}}>{rightLabel}</div><div style={{fontSize:rightVal?14:12,fontWeight:rightVal?700:400,color:rightVal?t.ok:t.textLight,fontStyle:rightVal?"normal":"italic"}}>{rightVal||"Not yet"}</div></div>
                       </div>
-                      <span style={{fontSize:11,color:t.textLight,marginLeft:4}}>{isOpen?"▲":"▼"}</span>
+                      <span style={{fontSize:12,color:t.textLight,marginLeft:4}}>{isOpen?"▲":"▼"}</span>
                     </div>
                     {/* Expanded meaning — stacked lines */}
-                    {isOpen&&<div style={{padding:"0 14px 10px 29px",fontSize:12,lineHeight:1.7,color:t.text}}>
+                    {isOpen&&<div style={{padding:"0 14px 10px 29px",fontSize:13,lineHeight:1.7,color:t.text}}>
                       <div>{meaning.what}</div>
                       <div>{meaning.why}</div>
                       <div style={{color:t.danger}}>{meaning.risk}</div>
@@ -692,8 +692,8 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
         {/* ══ LIFESTYLE ══ */}
         {tab===2&&(<div>
           <div style={{marginBottom:12}}>
-            <h2 style={{fontSize:20,fontWeight:700,margin:"0 0 4px"}}>Daily Habits</h2>
-            <p style={{color:t.textMuted,fontSize:13,margin:0}}>3 meals in 10-hr window (7:00-17:00) · Fiber first · Move after · Sleep 7+</p>
+            <h2 style={{fontSize:22,fontWeight:700,margin:"0 0 4px"}}>Daily Habits</h2>
+            <p style={{color:t.textMuted,fontSize:14,margin:0}}>3 meals in 10-hr window (7:00-17:00) · Fiber first · Move after · Sleep 7+</p>
           </div>
 
           <div style={{display:"flex",flexDirection:"column",gap:6,marginBottom:24}}>
@@ -701,23 +701,23 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
               <div key={i} style={{background:t.card,border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,padding:"10px 14px",display:"flex",gap:10,alignItems:"flex-start"}}>
                 <span style={{fontSize:18,flexShrink:0,marginTop:1}}>{h.icon}</span>
                 <div style={{flex:1}}>
-                  <div style={{fontSize:13,color:t.text,fontWeight:600,lineHeight:1.3}}>{h.step}</div>
-                  <div style={{fontSize:11,color:t.textMuted,marginTop:2,fontStyle:"italic"}}>{h.impact}</div>
+                  <div style={{fontSize:14,color:t.text,fontWeight:600,lineHeight:1.3}}>{h.step}</div>
+                  <div style={{fontSize:12,color:t.textMuted,marginTop:2,fontStyle:"italic"}}>{h.impact}</div>
                 </div>
               </div>
             ))}
           </div>
 
           {/* Hunger Toolkit - single table, two columns */}
-          <h3 style={{fontSize:16,fontWeight:700,margin:"0 0 4px"}}>If Hungry</h3>
-          <p style={{color:t.textMuted,fontSize:12,marginBottom:10}}>What you can have without disrupting fat-burning or spiking insulin</p>
+          <h3 style={{fontSize:18,fontWeight:700,margin:"0 0 4px"}}>If Hungry</h3>
+          <p style={{color:t.textMuted,fontSize:13,marginBottom:10}}>What you can have without disrupting fat-burning or spiking insulin</p>
           <div style={{border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,background:t.card,marginBottom:16,overflow:"hidden"}}>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr"}}>
               {[hungerToolkit.between, hungerToolkit.after].map((col,ci)=>(
                 <div key={ci} style={{padding:"12px 14px",borderRight:ci===0?`1px solid ${t.cardBorder}`:"none"}}>
-                  <div style={{fontSize:12,fontWeight:700,color:t.accent,marginBottom:8}}>{col.title}</div>
+                  <div style={{fontSize:13,fontWeight:700,color:t.accent,marginBottom:8}}>{col.title}</div>
                   {col.safe.map((item,ii)=>(
-                    <div key={ii} style={{fontSize:12,color:t.text,padding:"3px 0",display:"flex",gap:6}}>
+                    <div key={ii} style={{fontSize:13,color:t.text,padding:"3px 0",display:"flex",gap:6}}>
                       <span style={{color:t.okBorder}}>•</span>{item}
                     </div>
                   ))}
@@ -727,52 +727,52 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
           </div>
 
           {/* Why am I hungry - single table */}
-          <div style={{fontSize:13,fontWeight:700,color:t.text,marginBottom:8}}>Why am I hungry? (check before eating)</div>
+          <div style={{fontSize:14,fontWeight:700,color:t.text,marginBottom:8}}>Why am I hungry? (check before eating)</div>
           <div style={{border:`1px solid ${t.accent}22`,borderRadius:t.radiusSm,background:t.accentBg,marginBottom:24,overflow:"hidden"}}>
             {hungerToolkit.tips.map((tip,i)=>(
               <div key={i} style={{padding:"10px 14px",display:"flex",gap:10,alignItems:"flex-start",borderBottom:i<hungerToolkit.tips.length-1?`1px solid ${t.accent}15`:"none"}}>
                 <span style={{fontSize:18,flexShrink:0}}>{tip.icon}</span>
                 <div style={{flex:1}}>
-                  <div style={{fontSize:13,fontWeight:700,color:t.accent}}>{tip.q}</div>
-                  <div style={{fontSize:12,color:t.text,lineHeight:1.5,marginTop:2}}>{tip.a}</div>
+                  <div style={{fontSize:14,fontWeight:700,color:t.accent}}>{tip.q}</div>
+                  <div style={{fontSize:13,color:t.text,lineHeight:1.5,marginTop:2}}>{tip.a}</div>
                 </div>
               </div>
             ))}
           </div>
 
           {/* Activity Ideas - 2 columns: Activities | Recovery */}
-          <h3 style={{fontSize:16,fontWeight:700,margin:"0 0 10px"}}>Activity Ideas</h3>
-          <p style={{color:t.textMuted,fontSize:12,marginBottom:10}}>Sorted by glucose impact. Recovery is often underestimated.</p>
+          <h3 style={{fontSize:18,fontWeight:700,margin:"0 0 10px"}}>Activity Ideas</h3>
+          <p style={{color:t.textMuted,fontSize:13,marginBottom:10}}>Sorted by glucose impact. Recovery is often underestimated.</p>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
             {/* Activities */}
             <div style={{background:t.card,border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,padding:"12px 14px"}}>
-              <div style={{fontSize:13,fontWeight:700,color:t.accent,marginBottom:8}}>🏃 Activities</div>
+              <div style={{fontSize:14,fontWeight:700,color:t.accent,marginBottom:8}}>🏃 Activities</div>
               {activityActivities.map((a,i)=>(
                 <div key={i} style={{padding:"5px 0",borderBottom:i<activityActivities.length-1?`1px solid ${t.cardBorder}33`:"none",display:"flex",gap:8,alignItems:"flex-start"}}>
-                  <span style={{fontSize:14}}>{a.emoji}</span>
+                  <span style={{fontSize:15}}>{a.emoji}</span>
                   <div style={{flex:1}}>
                     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                      <span style={{fontSize:12,fontWeight:600}}>{a.name}</span>
-                      <span style={{fontSize:10,color:t.ok,fontWeight:700}}>{a.pts}</span>
+                      <span style={{fontSize:13,fontWeight:600}}>{a.name}</span>
+                      <span style={{fontSize:11,color:t.ok,fontWeight:700}}>{a.pts}</span>
                     </div>
-                    <div style={{fontSize:10,color:t.textMuted}}>{a.note}</div>
+                    <div style={{fontSize:11,color:t.textMuted}}>{a.note}</div>
                   </div>
                 </div>
               ))}
             </div>
             {/* Recovery */}
             <div style={{background:t.card,border:`1px solid ${t.accent}22`,borderRadius:t.radiusSm,padding:"12px 14px"}}>
-              <div style={{fontSize:13,fontWeight:700,color:t.accent,marginBottom:4}}>🧘 Recovery</div>
-              <div style={{fontSize:10,color:t.textMuted,marginBottom:8,fontStyle:"italic"}}>Recovery accelerates results more than people think. It lowers cortisol, improves insulin sensitivity, and helps the body repair.</div>
+              <div style={{fontSize:14,fontWeight:700,color:t.accent,marginBottom:4}}>🧘 Recovery</div>
+              <div style={{fontSize:11,color:t.textMuted,marginBottom:8,fontStyle:"italic"}}>Recovery accelerates results more than people think. It lowers cortisol, improves insulin sensitivity, and helps the body repair.</div>
               {activityRecovery.map((a,i)=>(
                 <div key={i} style={{padding:"6px 0",borderBottom:i<activityRecovery.length-1?`1px solid ${t.cardBorder}33`:"none",display:"flex",gap:8,alignItems:"flex-start"}}>
-                  <span style={{fontSize:14}}>{a.emoji}</span>
+                  <span style={{fontSize:15}}>{a.emoji}</span>
                   <div style={{flex:1}}>
                     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                      <span style={{fontSize:12,fontWeight:600}}>{a.name}</span>
-                      <span style={{fontSize:10,color:t.accent,fontWeight:700}}>{a.pts}</span>
+                      <span style={{fontSize:13,fontWeight:600}}>{a.name}</span>
+                      <span style={{fontSize:11,color:t.accent,fontWeight:700}}>{a.pts}</span>
                     </div>
-                    <div style={{fontSize:10,color:t.textMuted}}>{a.benefit}</div>
+                    <div style={{fontSize:11,color:t.textMuted}}>{a.benefit}</div>
                   </div>
                 </div>
               ))}
@@ -782,21 +782,21 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
 
         {/* ══ FOOD & SUPPS ══ */}
         {tab===3&&(<div>
-          <h2 style={{fontSize:20,fontWeight:700,margin:"0 0 4px"}}>Food & Supplements</h2>
-          <p style={{color:t.textMuted,fontSize:13,marginBottom:14}}>What to eat, what to skip, and the supplement stack</p>
+          <h2 style={{fontSize:22,fontWeight:700,margin:"0 0 4px"}}>Food & Supplements</h2>
+          <p style={{color:t.textMuted,fontSize:14,marginBottom:14}}>What to eat, what to skip, and the supplement stack</p>
 
           {/* Nutrition Needs + Portion Guide merged */}
-          <h3 style={{fontSize:15,fontWeight:700,margin:"0 0 4px"}}>What Your Body Needs</h3>
-          <p style={{color:t.textMuted,fontSize:12,marginBottom:10}}>Updated Day 12: Weight ~71kg, fasting glucose 116, low-carb protocol</p>
+          <h3 style={{fontSize:16,fontWeight:700,margin:"0 0 4px"}}>What Your Body Needs</h3>
+          <p style={{color:t.textMuted,fontSize:13,marginBottom:10}}>Updated Day 12: Weight ~71kg, fasting glucose 116, low-carb protocol</p>
 
           <div style={{border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,background:t.card,marginBottom:12,overflow:"hidden"}}>
             <table style={{width:"100%",borderCollapse:"collapse"}}>
               <thead><tr style={{background:t.sidebarBg}}>
-                <th style={{padding:"8px 12px",textAlign:"left",fontSize:12,color:t.textMuted,borderBottom:`1px solid ${t.cardBorder}`,fontWeight:600}}>Nutrient</th>
-                <th style={{padding:"8px 12px",textAlign:"center",fontSize:12,color:t.textMuted,borderBottom:`1px solid ${t.cardBorder}`,fontWeight:600}}>Daily</th>
-                <th style={{padding:"8px 12px",textAlign:"center",fontSize:12,color:t.textMuted,borderBottom:`1px solid ${t.cardBorder}`,fontWeight:600}}>Per Meal</th>
-                <th style={{padding:"8px 12px",textAlign:"left",fontSize:12,color:t.textMuted,borderBottom:`1px solid ${t.cardBorder}`,fontWeight:600}}>Portion Guide</th>
-                <th style={{padding:"8px 12px",textAlign:"left",fontSize:12,color:t.textMuted,borderBottom:`1px solid ${t.cardBorder}`,fontWeight:600}}>Why</th>
+                <th style={{padding:"8px 12px",textAlign:"left",fontSize:13,color:t.textMuted,borderBottom:`1px solid ${t.cardBorder}`,fontWeight:600}}>Nutrient</th>
+                <th style={{padding:"8px 12px",textAlign:"center",fontSize:13,color:t.textMuted,borderBottom:`1px solid ${t.cardBorder}`,fontWeight:600}}>Daily</th>
+                <th style={{padding:"8px 12px",textAlign:"center",fontSize:13,color:t.textMuted,borderBottom:`1px solid ${t.cardBorder}`,fontWeight:600}}>Per Meal</th>
+                <th style={{padding:"8px 12px",textAlign:"left",fontSize:13,color:t.textMuted,borderBottom:`1px solid ${t.cardBorder}`,fontWeight:600}}>Portion Guide</th>
+                <th style={{padding:"8px 12px",textAlign:"left",fontSize:13,color:t.textMuted,borderBottom:`1px solid ${t.cardBorder}`,fontWeight:600}}>Why</th>
               </tr></thead>
               <tbody>
                 {[
@@ -807,11 +807,11 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
                   ["💧 Water","2-2.5L","8-10 glasses","","Flushes toxins, prevents false hunger, helps kidneys",t.ok],
                 ].map(([n,daily,meal,portion,why,color],i)=>(
                   <tr key={i} style={{background:i%2===0?t.card:t.bg}}>
-                    <td style={{padding:"8px 12px",fontSize:13,fontWeight:700}}>{n}</td>
-                    <td style={{padding:"8px 12px",textAlign:"center",fontSize:14,fontWeight:800,color}}>{daily}</td>
-                    <td style={{padding:"8px 12px",textAlign:"center",fontSize:13,color:t.textMuted}}>{meal}</td>
-                    <td style={{padding:"8px 12px",fontSize:11,color:t.text,lineHeight:1.4}}>{portion}</td>
-                    <td style={{padding:"8px 12px",fontSize:11,color:t.textMuted,lineHeight:1.4}}>{why}</td>
+                    <td style={{padding:"8px 12px",fontSize:14,fontWeight:700}}>{n}</td>
+                    <td style={{padding:"8px 12px",textAlign:"center",fontSize:15,fontWeight:800,color}}>{daily}</td>
+                    <td style={{padding:"8px 12px",textAlign:"center",fontSize:14,color:t.textMuted}}>{meal}</td>
+                    <td style={{padding:"8px 12px",fontSize:12,color:t.text,lineHeight:1.4}}>{portion}</td>
+                    <td style={{padding:"8px 12px",fontSize:12,color:t.textMuted,lineHeight:1.4}}>{why}</td>
                   </tr>
                 ))}
               </tbody>
@@ -819,23 +819,23 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
           </div>
 
           {/* Supplements — table format */}
-          <h3 style={{fontSize:15,fontWeight:700,margin:"0 0 4px"}}>Supplements</h3>
-          <p style={{color:t.textMuted,fontSize:12,marginBottom:10}}>Berberine + fish oil WITH meals · Mg + D3/K2 BEDTIME</p>
+          <h3 style={{fontSize:16,fontWeight:700,margin:"0 0 4px"}}>Supplements</h3>
+          <p style={{color:t.textMuted,fontSize:13,marginBottom:10}}>Berberine + fish oil WITH meals · Mg + D3/K2 BEDTIME</p>
           <div style={{border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,background:t.card,marginBottom:20,overflow:"hidden"}}>
             <table style={{width:"100%",borderCollapse:"collapse"}}>
               <thead><tr style={{background:t.sidebarBg}}>
-                <th style={{padding:"8px 12px",textAlign:"left",fontSize:12,color:t.textMuted,borderBottom:`1px solid ${t.cardBorder}`,fontWeight:600}}>Supplement</th>
-                <th style={{padding:"8px 12px",textAlign:"left",fontSize:12,color:t.textMuted,borderBottom:`1px solid ${t.cardBorder}`,fontWeight:600}}>Dose</th>
-                <th style={{padding:"8px 12px",textAlign:"center",fontSize:12,color:t.textMuted,borderBottom:`1px solid ${t.cardBorder}`,fontWeight:600}}>Trig</th>
-                <th style={{padding:"8px 12px",textAlign:"center",fontSize:12,color:t.textMuted,borderBottom:`1px solid ${t.cardBorder}`,fontWeight:600}}>A1C</th>
+                <th style={{padding:"8px 12px",textAlign:"left",fontSize:13,color:t.textMuted,borderBottom:`1px solid ${t.cardBorder}`,fontWeight:600}}>Supplement</th>
+                <th style={{padding:"8px 12px",textAlign:"left",fontSize:13,color:t.textMuted,borderBottom:`1px solid ${t.cardBorder}`,fontWeight:600}}>Dose</th>
+                <th style={{padding:"8px 12px",textAlign:"center",fontSize:13,color:t.textMuted,borderBottom:`1px solid ${t.cardBorder}`,fontWeight:600}}>Trig</th>
+                <th style={{padding:"8px 12px",textAlign:"center",fontSize:13,color:t.textMuted,borderBottom:`1px solid ${t.cardBorder}`,fontWeight:600}}>A1C</th>
               </tr></thead>
               <tbody>
                 {supps.map((s,i)=>(
                   <tr key={s.name} style={{background:i%2===0?t.card:t.bg}}>
-                    <td style={{padding:"8px 12px",fontSize:13,fontWeight:700}}>{s.icon} {s.name}</td>
-                    <td style={{padding:"8px 12px",fontSize:12,color:t.textMuted}}>{s.dose}</td>
-                    <td style={{padding:"8px 12px",textAlign:"center",fontSize:12,fontWeight:600,color:t.danger}}>{s.trig}</td>
-                    <td style={{padding:"8px 12px",textAlign:"center",fontSize:12,fontWeight:600,color:t.ok}}>{s.hb}</td>
+                    <td style={{padding:"8px 12px",fontSize:14,fontWeight:700}}>{s.icon} {s.name}</td>
+                    <td style={{padding:"8px 12px",fontSize:13,color:t.textMuted}}>{s.dose}</td>
+                    <td style={{padding:"8px 12px",textAlign:"center",fontSize:13,fontWeight:600,color:t.danger}}>{s.trig}</td>
+                    <td style={{padding:"8px 12px",textAlign:"center",fontSize:13,fontWeight:600,color:t.ok}}>{s.hb}</td>
                   </tr>
                 ))}
               </tbody>
@@ -843,7 +843,7 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
           </div>
 
           {/* Quick Rules — 2 column table */}
-          <div style={{fontSize:13,fontWeight:700,color:t.accent,marginBottom:6,marginTop:14}}>📌 Quick Rules</div>
+          <div style={{fontSize:14,fontWeight:700,color:t.accent,marginBottom:6,marginTop:14}}>📌 Quick Rules</div>
           <div style={{border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,background:t.card,marginBottom:20,overflow:"hidden"}}>
             <table style={{width:"100%",borderCollapse:"collapse"}}>
               <tbody>
@@ -853,8 +853,8 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
                   {tip:"🚫 Added sugar limit", detail:"Day 1-30: 0g · Day 31-60: max 10g (if glucose <100) · Day 61-90: max 15g (if trig <200)", isDanger:true},
                 ].map((h,i)=>(
                   <tr key={i} style={{background:i%2===0?t.card:t.bg}}>
-                    <td style={{padding:"10px 14px",fontSize:13,fontWeight:700,color:h.isDanger?t.danger:t.text,borderBottom:i<2?`1px solid ${t.cardBorder}`:"none",whiteSpace:"nowrap",verticalAlign:"top"}}>{h.tip}</td>
-                    <td style={{padding:"10px 14px",fontSize:12,color:t.textMuted,lineHeight:1.5,borderBottom:i<2?`1px solid ${t.cardBorder}`:"none",verticalAlign:"top"}}>{h.detail}</td>
+                    <td style={{padding:"10px 14px",fontSize:14,fontWeight:700,color:h.isDanger?t.danger:t.text,borderBottom:i<2?`1px solid ${t.cardBorder}`:"none",whiteSpace:"nowrap",verticalAlign:"top"}}>{h.tip}</td>
+                    <td style={{padding:"10px 14px",fontSize:13,color:t.textMuted,lineHeight:1.5,borderBottom:i<2?`1px solid ${t.cardBorder}`:"none",verticalAlign:"top"}}>{h.detail}</td>
                   </tr>
                 ))}
               </tbody>
@@ -862,11 +862,11 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
           </div>
 
           {/* Carb Guide — 3 columns like fruit */}
-          <h3 style={{fontSize:15,fontWeight:700,margin:"0 0 4px"}}>🍚 Carb Guide (Glycemic Index)</h3>
-          <p style={{color:t.textMuted,fontSize:12,marginBottom:10}}>Always eat carbs LAST after protein and veggies · Max 25-33g per meal</p>
+          <h3 style={{fontSize:16,fontWeight:700,margin:"0 0 4px"}}>🍚 Carb Guide (Glycemic Index)</h3>
+          <p style={{color:t.textMuted,fontSize:13,marginBottom:10}}>Always eat carbs LAST after protein and veggies · Max 25-33g per meal</p>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:20}}>
             <div style={{border:`1px solid ${t.okBorder}`,borderRadius:t.radiusSm,background:t.okBg,padding:"10px 12px"}}>
-              <div style={{fontSize:12,fontWeight:800,color:t.ok,marginBottom:8,textAlign:"center"}}>✅ SAFE</div>
+              <div style={{fontSize:13,fontWeight:800,color:t.ok,marginBottom:8,textAlign:"center"}}>✅ SAFE</div>
               {[
                 ["Konjac rice บุก","0"],
                 ["Shirataki noodle","0"],
@@ -877,12 +877,12 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
                 ["Basmati rice","50"],
                 ["Low GI rice","54"],
               ].map(([name,gi],i)=>(<div key={i} style={{display:"flex",justifyContent:"space-between",padding:"3px 0",borderBottom:i<7?`1px solid ${t.okBorder}33`:"none"}}>
-                <span style={{fontSize:11,color:t.text,fontWeight:600}}>{name}</span>
-                <span style={{fontSize:10,color:t.ok,fontWeight:700}}>GI {gi}</span>
+                <span style={{fontSize:12,color:t.text,fontWeight:600}}>{name}</span>
+                <span style={{fontSize:11,color:t.ok,fontWeight:700}}>GI {gi}</span>
               </div>))}
             </div>
             <div style={{border:`1px solid ${t.warnBorder}`,borderRadius:t.radiusSm,background:t.warnBg,padding:"10px 12px"}}>
-              <div style={{fontSize:12,fontWeight:800,color:t.warn,marginBottom:8,textAlign:"center"}}>⚠️ LIMIT</div>
+              <div style={{fontSize:13,fontWeight:800,color:t.warn,marginBottom:8,textAlign:"center"}}>⚠️ LIMIT</div>
               {[
                 ["Corn ข้าวโพด","52"],
                 ["Taro เผือก","53"],
@@ -892,12 +892,12 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
                 ["Pumpkin ฟักทอง","64"],
                 ["Brown rice ข้าวกล้อง","68"],
               ].map(([name,gi],i)=>(<div key={i} style={{display:"flex",justifyContent:"space-between",padding:"3px 0",borderBottom:i<6?`1px solid ${t.warnBorder}33`:"none"}}>
-                <span style={{fontSize:11,color:t.text,fontWeight:600}}>{name}</span>
-                <span style={{fontSize:10,color:t.warn,fontWeight:700}}>GI {gi}</span>
+                <span style={{fontSize:12,color:t.text,fontWeight:600}}>{name}</span>
+                <span style={{fontSize:11,color:t.warn,fontWeight:700}}>GI {gi}</span>
               </div>))}
             </div>
             <div style={{border:`1px solid ${t.dangerBorder}`,borderRadius:t.radiusSm,background:t.dangerBg,padding:"10px 12px"}}>
-              <div style={{fontSize:12,fontWeight:800,color:t.danger,marginBottom:8,textAlign:"center"}}>🚫 AVOID</div>
+              <div style={{fontSize:13,fontWeight:800,color:t.danger,marginBottom:8,textAlign:"center"}}>🚫 AVOID</div>
               {[
                 ["Pastries/croissant","70"],
                 ["Instant noodle มาม่า","73"],
@@ -907,18 +907,18 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
                 ["Sticky rice ข้าวเหนียว","87"],
                 ["Jasmine rice ข้าวหอมมะลิ","89"],
               ].map(([name,gi],i)=>(<div key={i} style={{display:"flex",justifyContent:"space-between",padding:"3px 0",borderBottom:i<6?`1px solid ${t.dangerBorder}33`:"none"}}>
-                <span style={{fontSize:11,color:t.text,fontWeight:600}}>{name}</span>
-                <span style={{fontSize:10,color:t.danger,fontWeight:700}}>GI {gi}</span>
+                <span style={{fontSize:12,color:t.text,fontWeight:600}}>{name}</span>
+                <span style={{fontSize:11,color:t.danger,fontWeight:700}}>GI {gi}</span>
               </div>))}
             </div>
           </div>
 
-          <h3 style={{fontSize:15,fontWeight:700,margin:"0 0 4px"}}>🍎 Fruit Guide (Glycemic Index)</h3>
-          <p style={{color:t.textMuted,fontSize:12,marginBottom:10}}>Max 1 serving/day during Day 1-30 · Always eat AFTER protein, never alone · Never drink fruit juice</p>
+          <h3 style={{fontSize:16,fontWeight:700,margin:"0 0 4px"}}>🍎 Fruit Guide (Glycemic Index)</h3>
+          <p style={{color:t.textMuted,fontSize:13,marginBottom:10}}>Max 1 serving/day during Day 1-30 · Always eat AFTER protein, never alone · Never drink fruit juice</p>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:20}}>
             {/* SAFE */}
             <div style={{border:`1px solid ${t.okBorder}`,borderRadius:t.radiusSm,background:t.okBg,padding:"10px 12px"}}>
-              <div style={{fontSize:12,fontWeight:800,color:t.ok,marginBottom:8,textAlign:"center"}}>✅ SAFE (GI &lt; 40)</div>
+              <div style={{fontSize:13,fontWeight:800,color:t.ok,marginBottom:8,textAlign:"center"}}>✅ SAFE (GI &lt; 40)</div>
               {[
                 ["Guava ฝรั่ง","12"],
                 ["Cherries","22"],
@@ -930,13 +930,13 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
                 ["Apple","36"],
                 ["Pear","38"],
               ].map(([name,gi],i)=>(<div key={i} style={{display:"flex",justifyContent:"space-between",padding:"3px 0",borderBottom:i<8?`1px solid ${t.okBorder}33`:"none"}}>
-                <span style={{fontSize:11,color:t.text,fontWeight:600}}>{name}</span>
-                <span style={{fontSize:10,color:t.ok,fontWeight:700}}>GI {gi}</span>
+                <span style={{fontSize:12,color:t.text,fontWeight:600}}>{name}</span>
+                <span style={{fontSize:11,color:t.ok,fontWeight:700}}>GI {gi}</span>
               </div>))}
             </div>
             {/* MODERATE */}
             <div style={{border:`1px solid ${t.warnBorder}`,borderRadius:t.radiusSm,background:t.warnBg,padding:"10px 12px"}}>
-              <div style={{fontSize:12,fontWeight:800,color:t.warn,marginBottom:8,textAlign:"center"}}>⚠️ LIMIT (GI 40-59)</div>
+              <div style={{fontSize:13,fontWeight:800,color:t.warn,marginBottom:8,textAlign:"center"}}>⚠️ LIMIT (GI 40-59)</div>
               {[
                 ["Peach","42"],
                 ["Orange","43"],
@@ -948,13 +948,13 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
                 ["Banana กล้วย","51"],
                 ["Papaya มะละกอ","56"],
               ].map(([name,gi],i)=>(<div key={i} style={{display:"flex",justifyContent:"space-between",padding:"3px 0",borderBottom:i<8?`1px solid ${t.warnBorder}33`:"none"}}>
-                <span style={{fontSize:11,color:t.text,fontWeight:600}}>{name}</span>
-                <span style={{fontSize:10,color:t.warn,fontWeight:700}}>GI {gi}</span>
+                <span style={{fontSize:12,color:t.text,fontWeight:600}}>{name}</span>
+                <span style={{fontSize:11,color:t.warn,fontWeight:700}}>GI {gi}</span>
               </div>))}
             </div>
             {/* AVOID */}
             <div style={{border:`1px solid ${t.dangerBorder}`,borderRadius:t.radiusSm,background:t.dangerBg,padding:"10px 12px"}}>
-              <div style={{fontSize:12,fontWeight:800,color:t.danger,marginBottom:8,textAlign:"center"}}>🚫 AVOID (GI 60+)</div>
+              <div style={{fontSize:13,fontWeight:800,color:t.danger,marginBottom:8,textAlign:"center"}}>🚫 AVOID (GI 60+)</div>
               {[
                 ["Durian ทุเรียน","44*"],
                 ["Lychee ลิ้นจี่","57"],
@@ -963,112 +963,112 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
                 ["Ripe banana","70"],
                 ["Watermelon แตงโม","72"],
               ].map(([name,gi],i)=>(<div key={i} style={{display:"flex",justifyContent:"space-between",padding:"3px 0",borderBottom:i<5?`1px solid ${t.dangerBorder}33`:"none"}}>
-                <span style={{fontSize:11,color:t.text,fontWeight:600}}>{name}</span>
-                <span style={{fontSize:10,color:t.danger,fontWeight:700}}>GI {gi}</span>
+                <span style={{fontSize:12,color:t.text,fontWeight:600}}>{name}</span>
+                <span style={{fontSize:11,color:t.danger,fontWeight:700}}>GI {gi}</span>
               </div>))}
-              <div style={{fontSize:10,color:t.danger,marginTop:6,fontStyle:"italic"}}>*Durian GI looks OK but GL 18 = sugar bomb. Lychee/longan/rambutan easy to overeat (10 pcs = 20g sugar)</div>
+              <div style={{fontSize:11,color:t.danger,marginTop:6,fontStyle:"italic"}}>*Durian GI looks OK but GL 18 = sugar bomb. Lychee/longan/rambutan easy to overeat (10 pcs = 20g sugar)</div>
             </div>
           </div>
 
 
           {/* Food Guide — 3-column format per category */}
-          <h3 style={{fontSize:15,fontWeight:700,margin:"0 0 8px"}}>Food Guide</h3>
+          <h3 style={{fontSize:16,fontWeight:700,margin:"0 0 8px"}}>Food Guide</h3>
           {/* Protein */}
-          <div style={{fontSize:14,fontWeight:700,color:t.accent,marginBottom:6}}>🥩 Protein</div>
+          <div style={{fontSize:15,fontWeight:700,color:t.accent,marginBottom:6}}>🥩 Protein</div>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:16}}>
             <div style={{border:`1px solid ${t.okBorder}`,borderRadius:t.radiusSm,background:t.okBg,padding:"10px 12px"}}>
-              <div style={{fontSize:12,fontWeight:800,color:t.ok,marginBottom:8,textAlign:"center"}}>✅ SAFE</div>
-              {["Eggs (any style, 2-3/meal)","Salmon, ปลาทู, sardines","Chicken breast/thigh","Pork tenderloin","Firm tofu","Greek yogurt (plain)","Shrimp, squid"].map((x,i)=>(<div key={i} style={{fontSize:11,color:t.text,fontWeight:600,padding:"3px 0",borderBottom:i<6?`1px solid ${t.okBorder}33`:"none"}}>{x}</div>))}
+              <div style={{fontSize:13,fontWeight:800,color:t.ok,marginBottom:8,textAlign:"center"}}>✅ SAFE</div>
+              {["Eggs (any style, 2-3/meal)","Salmon, ปลาทู, sardines","Chicken breast/thigh","Pork tenderloin","Firm tofu","Greek yogurt (plain)","Shrimp, squid"].map((x,i)=>(<div key={i} style={{fontSize:12,color:t.text,fontWeight:600,padding:"3px 0",borderBottom:i<6?`1px solid ${t.okBorder}33`:"none"}}>{x}</div>))}
             </div>
             <div style={{border:`1px solid ${t.warnBorder}`,borderRadius:t.radiusSm,background:t.warnBg,padding:"10px 12px"}}>
-              <div style={{fontSize:12,fontWeight:800,color:t.warn,marginBottom:8,textAlign:"center"}}>⚠️ LIMIT</div>
-              {["Fried chicken (no batter)","Pork belly (small)","Sausage (real, unprocessed)","Duck","Beef (lean cuts)"].map((x,i)=>(<div key={i} style={{fontSize:11,color:t.text,fontWeight:600,padding:"3px 0",borderBottom:i<4?`1px solid ${t.warnBorder}33`:"none"}}>{x}</div>))}
+              <div style={{fontSize:13,fontWeight:800,color:t.warn,marginBottom:8,textAlign:"center"}}>⚠️ LIMIT</div>
+              {["Fried chicken (no batter)","Pork belly (small)","Sausage (real, unprocessed)","Duck","Beef (lean cuts)"].map((x,i)=>(<div key={i} style={{fontSize:12,color:t.text,fontWeight:600,padding:"3px 0",borderBottom:i<4?`1px solid ${t.warnBorder}33`:"none"}}>{x}</div>))}
             </div>
             <div style={{border:`1px solid ${t.dangerBorder}`,borderRadius:t.radiusSm,background:t.dangerBg,padding:"10px 12px"}}>
-              <div style={{fontSize:12,fontWeight:800,color:t.danger,marginBottom:8,textAlign:"center"}}>🚫 AVOID</div>
-              {["Hotdog, ไส้กรอก","Processed ham, bacon","KFC / battered fried","Fish balls, meat balls","Tocino, longganisa","Canned meat"].map((x,i)=>(<div key={i} style={{fontSize:11,color:t.text,fontWeight:600,padding:"3px 0",borderBottom:i<5?`1px solid ${t.dangerBorder}33`:"none"}}>{x}</div>))}
+              <div style={{fontSize:13,fontWeight:800,color:t.danger,marginBottom:8,textAlign:"center"}}>🚫 AVOID</div>
+              {["Hotdog, ไส้กรอก","Processed ham, bacon","KFC / battered fried","Fish balls, meat balls","Tocino, longganisa","Canned meat"].map((x,i)=>(<div key={i} style={{fontSize:12,color:t.text,fontWeight:600,padding:"3px 0",borderBottom:i<5?`1px solid ${t.dangerBorder}33`:"none"}}>{x}</div>))}
             </div>
           </div>
 
           {/* Vegetables */}
-          <div style={{fontSize:14,fontWeight:700,color:t.accent,marginBottom:6}}>🥬 Vegetables</div>
+          <div style={{fontSize:15,fontWeight:700,color:t.accent,marginBottom:6}}>🥬 Vegetables</div>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:16}}>
             <div style={{border:`1px solid ${t.okBorder}`,borderRadius:t.radiusSm,background:t.okBg,padding:"10px 12px"}}>
-              <div style={{fontSize:12,fontWeight:800,color:t.ok,marginBottom:8,textAlign:"center"}}>✅ SAFE</div>
-              {["ผักบุ้ง morning glory","Bitter gourd มะระ","Broccoli, cauliflower","Spinach, kale, ผักคะน้า","Mushrooms (all kinds)","Cucumber, tomato","Cabbage, lettuce","Kimchi / fermented"].map((x,i)=>(<div key={i} style={{fontSize:11,color:t.text,fontWeight:600,padding:"3px 0",borderBottom:i<7?`1px solid ${t.okBorder}33`:"none"}}>{x}</div>))}
+              <div style={{fontSize:13,fontWeight:800,color:t.ok,marginBottom:8,textAlign:"center"}}>✅ SAFE</div>
+              {["ผักบุ้ง morning glory","Bitter gourd มะระ","Broccoli, cauliflower","Spinach, kale, ผักคะน้า","Mushrooms (all kinds)","Cucumber, tomato","Cabbage, lettuce","Kimchi / fermented"].map((x,i)=>(<div key={i} style={{fontSize:12,color:t.text,fontWeight:600,padding:"3px 0",borderBottom:i<7?`1px solid ${t.okBorder}33`:"none"}}>{x}</div>))}
             </div>
             <div style={{border:`1px solid ${t.warnBorder}`,borderRadius:t.radiusSm,background:t.warnBg,padding:"10px 12px"}}>
-              <div style={{fontSize:12,fontWeight:800,color:t.warn,marginBottom:8,textAlign:"center"}}>⚠️ LIMIT</div>
-              {["Carrots (cooked)","Peas","Bell pepper","Beetroot","Onion (caramelized)"].map((x,i)=>(<div key={i} style={{fontSize:11,color:t.text,fontWeight:600,padding:"3px 0",borderBottom:i<4?`1px solid ${t.warnBorder}33`:"none"}}>{x}</div>))}
+              <div style={{fontSize:13,fontWeight:800,color:t.warn,marginBottom:8,textAlign:"center"}}>⚠️ LIMIT</div>
+              {["Carrots (cooked)","Peas","Bell pepper","Beetroot","Onion (caramelized)"].map((x,i)=>(<div key={i} style={{fontSize:12,color:t.text,fontWeight:600,padding:"3px 0",borderBottom:i<4?`1px solid ${t.warnBorder}33`:"none"}}>{x}</div>))}
             </div>
             <div style={{border:`1px solid ${t.dangerBorder}`,borderRadius:t.radiusSm,background:t.dangerBg,padding:"10px 12px"}}>
-              <div style={{fontSize:12,fontWeight:800,color:t.danger,marginBottom:8,textAlign:"center"}}>🚫 AVOID</div>
-              {["Corn ข้าวโพด (high starch)","Potato / taro / มัน","Canned vegs with sugar"].map((x,i)=>(<div key={i} style={{fontSize:11,color:t.text,fontWeight:600,padding:"3px 0",borderBottom:i<2?`1px solid ${t.dangerBorder}33`:"none"}}>{x}</div>))}
+              <div style={{fontSize:13,fontWeight:800,color:t.danger,marginBottom:8,textAlign:"center"}}>🚫 AVOID</div>
+              {["Corn ข้าวโพด (high starch)","Potato / taro / มัน","Canned vegs with sugar"].map((x,i)=>(<div key={i} style={{fontSize:12,color:t.text,fontWeight:600,padding:"3px 0",borderBottom:i<2?`1px solid ${t.dangerBorder}33`:"none"}}>{x}</div>))}
             </div>
           </div>
 
           {/* Healthy Fats */}
-          <div style={{fontSize:14,fontWeight:700,color:t.accent,marginBottom:6}}>🥑 Healthy Fats</div>
+          <div style={{fontSize:15,fontWeight:700,color:t.accent,marginBottom:6}}>🥑 Healthy Fats</div>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:16}}>
             <div style={{border:`1px solid ${t.okBorder}`,borderRadius:t.radiusSm,background:t.okBg,padding:"10px 12px"}}>
-              <div style={{fontSize:12,fontWeight:800,color:t.ok,marginBottom:8,textAlign:"center"}}>✅ SAFE</div>
-              {["Olive oil","Coconut oil","Avocado","Almonds, walnuts (30g)","Pumpkin seeds (30g)","Macadamia nuts","Dark chocolate 85%+"].map((x,i)=>(<div key={i} style={{fontSize:11,color:t.text,fontWeight:600,padding:"3px 0",borderBottom:i<6?`1px solid ${t.okBorder}33`:"none"}}>{x}</div>))}
+              <div style={{fontSize:13,fontWeight:800,color:t.ok,marginBottom:8,textAlign:"center"}}>✅ SAFE</div>
+              {["Olive oil","Coconut oil","Avocado","Almonds, walnuts (30g)","Pumpkin seeds (30g)","Macadamia nuts","Dark chocolate 85%+"].map((x,i)=>(<div key={i} style={{fontSize:12,color:t.text,fontWeight:600,padding:"3px 0",borderBottom:i<6?`1px solid ${t.okBorder}33`:"none"}}>{x}</div>))}
             </div>
             <div style={{border:`1px solid ${t.warnBorder}`,borderRadius:t.radiusSm,background:t.warnBg,padding:"10px 12px"}}>
-              <div style={{fontSize:12,fontWeight:800,color:t.warn,marginBottom:8,textAlign:"center"}}>⚠️ LIMIT</div>
-              {["Butter (small amounts)","Cheese (small)","Coconut cream","Dark chocolate 70%"].map((x,i)=>(<div key={i} style={{fontSize:11,color:t.text,fontWeight:600,padding:"3px 0",borderBottom:i<3?`1px solid ${t.warnBorder}33`:"none"}}>{x}</div>))}
+              <div style={{fontSize:13,fontWeight:800,color:t.warn,marginBottom:8,textAlign:"center"}}>⚠️ LIMIT</div>
+              {["Butter (small amounts)","Cheese (small)","Coconut cream","Dark chocolate 70%"].map((x,i)=>(<div key={i} style={{fontSize:12,color:t.text,fontWeight:600,padding:"3px 0",borderBottom:i<3?`1px solid ${t.warnBorder}33`:"none"}}>{x}</div>))}
             </div>
             <div style={{border:`1px solid ${t.dangerBorder}`,borderRadius:t.radiusSm,background:t.dangerBg,padding:"10px 12px"}}>
-              <div style={{fontSize:12,fontWeight:800,color:t.danger,marginBottom:8,textAlign:"center"}}>🚫 AVOID</div>
-              {["Soybean / canola oil","Sunflower oil","Margarine / trans fats","Honey-roasted nuts","Fried street food oils","Palm oil (excessive)"].map((x,i)=>(<div key={i} style={{fontSize:11,color:t.text,fontWeight:600,padding:"3px 0",borderBottom:i<5?`1px solid ${t.dangerBorder}33`:"none"}}>{x}</div>))}
+              <div style={{fontSize:13,fontWeight:800,color:t.danger,marginBottom:8,textAlign:"center"}}>🚫 AVOID</div>
+              {["Soybean / canola oil","Sunflower oil","Margarine / trans fats","Honey-roasted nuts","Fried street food oils","Palm oil (excessive)"].map((x,i)=>(<div key={i} style={{fontSize:12,color:t.text,fontWeight:600,padding:"3px 0",borderBottom:i<5?`1px solid ${t.dangerBorder}33`:"none"}}>{x}</div>))}
             </div>
           </div>
 
           {/* Drinks */}
-          <div style={{fontSize:14,fontWeight:700,color:t.accent,marginBottom:6}}>☕ Drinks</div>
+          <div style={{fontSize:15,fontWeight:700,color:t.accent,marginBottom:6}}>☕ Drinks</div>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:16}}>
             <div style={{border:`1px solid ${t.okBorder}`,borderRadius:t.radiusSm,background:t.okBg,padding:"10px 12px"}}>
-              <div style={{fontSize:12,fontWeight:800,color:t.ok,marginBottom:8,textAlign:"center"}}>✅ SAFE</div>
-              {["Water (8-10 glasses)","Green tea","Ginger tea","Black coffee","Unsweetened almond milk","Chrysanthemum tea"].map((x,i)=>(<div key={i} style={{fontSize:11,color:t.text,fontWeight:600,padding:"3px 0",borderBottom:i<5?`1px solid ${t.okBorder}33`:"none"}}>{x}</div>))}
+              <div style={{fontSize:13,fontWeight:800,color:t.ok,marginBottom:8,textAlign:"center"}}>✅ SAFE</div>
+              {["Water (8-10 glasses)","Green tea","Ginger tea","Black coffee","Unsweetened almond milk","Chrysanthemum tea"].map((x,i)=>(<div key={i} style={{fontSize:12,color:t.text,fontWeight:600,padding:"3px 0",borderBottom:i<5?`1px solid ${t.okBorder}33`:"none"}}>{x}</div>))}
             </div>
             <div style={{border:`1px solid ${t.warnBorder}`,borderRadius:t.radiusSm,background:t.warnBg,padding:"10px 12px"}}>
-              <div style={{fontSize:12,fontWeight:800,color:t.warn,marginBottom:8,textAlign:"center"}}>⚠️ LIMIT</div>
-              {["Unsweetened soy milk","Coconut water (small)","Sparkling water","Decaf coffee"].map((x,i)=>(<div key={i} style={{fontSize:11,color:t.text,fontWeight:600,padding:"3px 0",borderBottom:i<3?`1px solid ${t.warnBorder}33`:"none"}}>{x}</div>))}
+              <div style={{fontSize:13,fontWeight:800,color:t.warn,marginBottom:8,textAlign:"center"}}>⚠️ LIMIT</div>
+              {["Unsweetened soy milk","Coconut water (small)","Sparkling water","Decaf coffee"].map((x,i)=>(<div key={i} style={{fontSize:12,color:t.text,fontWeight:600,padding:"3px 0",borderBottom:i<3?`1px solid ${t.warnBorder}33`:"none"}}>{x}</div>))}
             </div>
             <div style={{border:`1px solid ${t.dangerBorder}`,borderRadius:t.radiusSm,background:t.dangerBg,padding:"10px 12px"}}>
-              <div style={{fontSize:12,fontWeight:800,color:t.danger,marginBottom:8,textAlign:"center"}}>🚫 AVOID</div>
-              {["ชาเย็น milk tea","น้ำอัดลม soda","3-in-1 coffee","Rice milk, oat milk","Fruit juice น้ำผลไม้","Energy drinks","Alcohol"].map((x,i)=>(<div key={i} style={{fontSize:11,color:t.text,fontWeight:600,padding:"3px 0",borderBottom:i<6?`1px solid ${t.dangerBorder}33`:"none"}}>{x}</div>))}
+              <div style={{fontSize:13,fontWeight:800,color:t.danger,marginBottom:8,textAlign:"center"}}>🚫 AVOID</div>
+              {["ชาเย็น milk tea","น้ำอัดลม soda","3-in-1 coffee","Rice milk, oat milk","Fruit juice น้ำผลไม้","Energy drinks","Alcohol"].map((x,i)=>(<div key={i} style={{fontSize:12,color:t.text,fontWeight:600,padding:"3px 0",borderBottom:i<6?`1px solid ${t.dangerBorder}33`:"none"}}>{x}</div>))}
             </div>
           </div>
 
           {/* Treats & Sweeteners */}
-          <div style={{fontSize:14,fontWeight:700,color:t.accent,marginBottom:6}}>🍫 Treats & Sweeteners</div>
+          <div style={{fontSize:15,fontWeight:700,color:t.accent,marginBottom:6}}>🍫 Treats & Sweeteners</div>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:20}}>
             <div style={{border:`1px solid ${t.okBorder}`,borderRadius:t.radiusSm,background:t.okBg,padding:"10px 12px"}}>
-              <div style={{fontSize:12,fontWeight:800,color:t.ok,marginBottom:8,textAlign:"center"}}>✅ SAFE</div>
-              {["Dark chocolate 85%+","Stevia หญ้าหวาน","Monk fruit หล่อฮั่นก๊วย","Unsweetened cacao drink","Sugar-free jelly"].map((x,i)=>(<div key={i} style={{fontSize:11,color:t.text,fontWeight:600,padding:"3px 0",borderBottom:i<4?`1px solid ${t.okBorder}33`:"none"}}>{x}</div>))}
+              <div style={{fontSize:13,fontWeight:800,color:t.ok,marginBottom:8,textAlign:"center"}}>✅ SAFE</div>
+              {["Dark chocolate 85%+","Stevia หญ้าหวาน","Monk fruit หล่อฮั่นก๊วย","Unsweetened cacao drink","Sugar-free jelly"].map((x,i)=>(<div key={i} style={{fontSize:12,color:t.text,fontWeight:600,padding:"3px 0",borderBottom:i<4?`1px solid ${t.okBorder}33`:"none"}}>{x}</div>))}
             </div>
             <div style={{border:`1px solid ${t.warnBorder}`,borderRadius:t.radiusSm,background:t.warnBg,padding:"10px 12px"}}>
-              <div style={{fontSize:12,fontWeight:800,color:t.warn,marginBottom:8,textAlign:"center"}}>⚠️ LIMIT</div>
-              {["Dark chocolate 70%","Coconut cream dessert","Plain yogurt + berries"].map((x,i)=>(<div key={i} style={{fontSize:11,color:t.text,fontWeight:600,padding:"3px 0",borderBottom:i<2?`1px solid ${t.warnBorder}33`:"none"}}>{x}</div>))}
+              <div style={{fontSize:13,fontWeight:800,color:t.warn,marginBottom:8,textAlign:"center"}}>⚠️ LIMIT</div>
+              {["Dark chocolate 70%","Coconut cream dessert","Plain yogurt + berries"].map((x,i)=>(<div key={i} style={{fontSize:12,color:t.text,fontWeight:600,padding:"3px 0",borderBottom:i<2?`1px solid ${t.warnBorder}33`:"none"}}>{x}</div>))}
             </div>
             <div style={{border:`1px solid ${t.dangerBorder}`,borderRadius:t.radiusSm,background:t.dangerBg,padding:"10px 12px"}}>
-              <div style={{fontSize:12,fontWeight:800,color:t.danger,marginBottom:8,textAlign:"center"}}>🚫 AVOID</div>
-              {["Milk/white chocolate","Candy, ลูกอม","Ice cream, sweetened yogurt","Erythritol (cardio risk)","Honey, agave, maple syrup","น้ำตาล coconut sugar","Regular sugar น้ำตาลทราย","Sucralose / Splenda"].map((x,i)=>(<div key={i} style={{fontSize:11,color:t.text,fontWeight:600,padding:"3px 0",borderBottom:i<7?`1px solid ${t.dangerBorder}33`:"none"}}>{x}</div>))}
+              <div style={{fontSize:13,fontWeight:800,color:t.danger,marginBottom:8,textAlign:"center"}}>🚫 AVOID</div>
+              {["Milk/white chocolate","Candy, ลูกอม","Ice cream, sweetened yogurt","Erythritol (cardio risk)","Honey, agave, maple syrup","น้ำตาล coconut sugar","Regular sugar น้ำตาลทราย","Sucralose / Splenda"].map((x,i)=>(<div key={i} style={{fontSize:12,color:t.text,fontWeight:600,padding:"3px 0",borderBottom:i<7?`1px solid ${t.dangerBorder}33`:"none"}}>{x}</div>))}
             </div>
           </div>
 
           {/* Joy Without the Spike — collapsible */}
           <div onClick={()=>setJoyOpen(!joyOpen)} style={{cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center",margin:"20px 0 4px",padding:"10px 14px",background:t.card,border:`1px solid ${joyOpen?t.accent+"44":t.cardBorder}`,borderRadius:t.radiusSm}}>
             <div>
-              <h3 style={{fontSize:16,fontWeight:700,margin:0}}>Joy Without the Spike</h3>
-              <p style={{color:t.textMuted,fontSize:12,margin:"2px 0 0"}}>You don't have to give up delicious. Just swap smarter.</p>
+              <h3 style={{fontSize:18,fontWeight:700,margin:0}}>Joy Without the Spike</h3>
+              <p style={{color:t.textMuted,fontSize:13,margin:"2px 0 0"}}>You don't have to give up delicious. Just swap smarter.</p>
             </div>
-            <span style={{fontSize:14,color:t.textMuted}}>{joyOpen?"▼":"▶"}</span>
+            <span style={{fontSize:15,color:t.textMuted}}>{joyOpen?"▼":"▶"}</span>
           </div>
 
           {joyOpen&&<div>
-          <div style={{fontSize:14,fontWeight:700,color:t.accent,marginBottom:8,marginTop:8}}>Sweet Drinks (zero spike)</div>
+          <div style={{fontSize:15,fontWeight:700,color:t.accent,marginBottom:8,marginTop:8}}>Sweet Drinks (zero spike)</div>
           <div style={{border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,background:t.card,marginBottom:16,overflow:"hidden"}}>
             {[
               {name:"Cacao Latte", recipe:"1 tbsp raw cacao + 180ml warm almond milk + stevia", note:"Rich in magnesium, kills sugar cravings. Tastes like hot chocolate", icon:"🍫"},
@@ -1079,9 +1079,9 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
               {name:"Iced Coconut Cacao", recipe:"1 tbsp cacao + coconut milk (2 tbsp) + water + ice + stevia", note:"Creamy, tropical, satisfying. Coconut fat keeps you full", icon:"🥥"},
             ].map((d,i)=>(
               <div key={i} style={{padding:"10px 14px",borderBottom:i<5?`1px solid ${t.cardBorder}`:"none",background:i%2===0?t.card:t.bg}}>
-                <div style={{display:"flex",gap:8,alignItems:"center"}}><span style={{fontSize:16}}>{d.icon}</span><span style={{fontSize:13,fontWeight:700,color:t.text}}>{d.name}</span></div>
-                <div style={{fontSize:12,color:t.accent,marginTop:3,marginLeft:24}}>{d.recipe}</div>
-                <div style={{fontSize:11,color:t.textMuted,fontStyle:"italic",marginTop:2,marginLeft:24}}>{d.note}</div>
+                <div style={{display:"flex",gap:8,alignItems:"center"}}><span style={{fontSize:18}}>{d.icon}</span><span style={{fontSize:14,fontWeight:700,color:t.text}}>{d.name}</span></div>
+                <div style={{fontSize:13,color:t.accent,marginTop:3,marginLeft:24}}>{d.recipe}</div>
+                <div style={{fontSize:12,color:t.textMuted,fontStyle:"italic",marginTop:2,marginLeft:24}}>{d.note}</div>
               </div>
             ))}
           </div>
@@ -1096,19 +1096,19 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
 
         {/* ══ PROGRESS ══ */}
         {tab===0&&(<div>
-          <h2 style={{fontSize:20,fontWeight:700,margin:"0 0 4px"}}>Habit Tracker</h2>
+          <h2 style={{fontSize:22,fontWeight:700,margin:"0 0 4px"}}>Habit Tracker</h2>
           <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:14}}>
-            <button onClick={()=>shiftW(-1)} style={{background:"none",border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,padding:"4px 10px",cursor:"pointer",fontSize:14,color:t.text}}>◀</button>
-            <span style={{fontSize:14,fontWeight:700,color:t.accent}}>{new Date(weekDates[0]).toLocaleDateString("en-GB",{day:"numeric",month:"short"})} — {new Date(weekDates[6]).toLocaleDateString("en-GB",{day:"numeric",month:"short"})}</span>
-            <button onClick={()=>shiftW(1)} style={{background:"none",border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,padding:"4px 10px",cursor:"pointer",fontSize:14,color:t.text}}>▶</button>
+            <button onClick={()=>shiftW(-1)} style={{background:"none",border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,padding:"4px 10px",cursor:"pointer",fontSize:15,color:t.text}}>◀</button>
+            <span style={{fontSize:15,fontWeight:700,color:t.accent}}>{new Date(weekDates[0]).toLocaleDateString("en-GB",{day:"numeric",month:"short"})} — {new Date(weekDates[6]).toLocaleDateString("en-GB",{day:"numeric",month:"short"})}</span>
+            <button onClick={()=>shiftW(1)} style={{background:"none",border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,padding:"4px 10px",cursor:"pointer",fontSize:15,color:t.text}}>▶</button>
           </div>
 
           {/* Single unified table like the Google Sheet */}
           <div style={{overflowX:"auto",border:`0.5px solid ${t.cardBorder}`,borderRadius:t.radiusSm,background:t.card,marginBottom:20}}>
             <table style={{borderCollapse:"collapse",width:"100%",minWidth:7*70+130}}>
               <thead><tr style={{background:t.sidebarBg}}>
-                <th style={{position:"sticky",left:0,background:t.sidebarBg,zIndex:2,padding:"7px 8px",fontSize:11,color:t.textMuted,textAlign:"left",borderBottom:`1px solid ${t.cardBorder}`,borderRight:`0.5px solid ${t.cardBorder}`,minWidth:130}}></th>
-                {weekDates.map((d,i)=>(<th key={d} style={{padding:"7px 3px",fontSize:11,color:t.accent,textAlign:"center",borderBottom:`1px solid ${t.cardBorder}`,borderRight:i<6?`0.5px solid ${t.cardBorder}22`:"none",minWidth:62,fontWeight:700}}><div>{dn[i]}</div><div style={{fontWeight:400,color:t.textLight,fontSize:10}}>{new Date(d).toLocaleDateString("en-GB",{day:"numeric",month:"short"})}</div></th>))}
+                <th style={{position:"sticky",left:0,background:t.sidebarBg,zIndex:2,padding:"7px 8px",fontSize:12,color:t.textMuted,textAlign:"left",borderBottom:`1px solid ${t.cardBorder}`,borderRight:`0.5px solid ${t.cardBorder}`,minWidth:130}}></th>
+                {weekDates.map((d,i)=>(<th key={d} style={{padding:"7px 3px",fontSize:12,color:t.accent,textAlign:"center",borderBottom:`1px solid ${t.cardBorder}`,borderRight:i<6?`0.5px solid ${t.cardBorder}22`:"none",minWidth:62,fontWeight:700}}><div>{dn[i]}</div><div style={{fontWeight:400,color:t.textLight,fontSize:11}}>{new Date(d).toLocaleDateString("en-GB",{day:"numeric",month:"short"})}</div></th>))}
               </tr></thead>
               <tbody>
                 {trackerRows.map((row,ri)=>{
@@ -1119,7 +1119,7 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
                   return(<React.Fragment key={row.field}>
                     {showDivider && <tr><td colSpan={8} style={{height:1.5,background:t.accent+"33",padding:0}}></td></tr>}
                     <tr style={{background:rowBg}}>
-                      <td style={{position:"sticky",left:0,background:rowBg,zIndex:1,padding:"5px 8px",fontSize:11,color:t.text,fontWeight:600,borderRight:`0.5px solid ${t.cardBorder}`,borderBottom:`0.5px solid ${t.cardBorder}`,whiteSpace:"nowrap"}}>{row.label}</td>
+                      <td style={{position:"sticky",left:0,background:rowBg,zIndex:1,padding:"5px 8px",fontSize:12,color:t.text,fontWeight:600,borderRight:`0.5px solid ${t.cardBorder}`,borderBottom:`0.5px solid ${t.cardBorder}`,whiteSpace:"nowrap"}}>{row.label}</td>
                       {weekDates.map((d,di)=>{
                         const val = wd(d)[row.field]||"";
                         const cellBorder = {borderBottom:`0.5px solid ${t.cardBorder}`,borderRight:di<6?`0.5px solid ${t.cardBorder}22`:"none"};
@@ -1138,12 +1138,12 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
                               ifColor=fasting>=16?"#2d5016":fasting>=14?t.ok:fasting>=12?"#d4850f":t.danger;
                             }
                           }
-                          return(<td key={d} style={{padding:"5px 4px",textAlign:"center",fontSize:11,color:ifColor,...cellBorder}}>{display}</td>);
+                          return(<td key={d} style={{padding:"5px 4px",textAlign:"center",fontSize:12,color:ifColor,...cellBorder}}>{display}</td>);
                         }
                         if(row.type==="check"){
                           const on = !!wd(d)[row.field];
                           return(<td key={d} onClick={()=>upWD(d,row.field,!on)} style={{padding:"3px",textAlign:"center",cursor:"pointer",...cellBorder}}>
-                            <div style={{width:26,height:26,borderRadius:"50%",margin:"0 auto",background:on?"#5c7a44":t.sidebarBg,display:"flex",alignItems:"center",justifyContent:"center",transition:"background 0.15s"}}><span style={{fontSize:11,color:on?"#fff":t.textLight,fontWeight:on?700:400}}>{on?"✓":"·"}</span></div>
+                            <div style={{width:26,height:26,borderRadius:"50%",margin:"0 auto",background:on?"#5c7a44":t.sidebarBg,display:"flex",alignItems:"center",justifyContent:"center",transition:"background 0.15s"}}><span style={{fontSize:12,color:on?"#fff":t.textLight,fontWeight:on?700:400}}>{on?"✓":"·"}</span></div>
                           </td>);
                         }
                         if(row.type==="chips"){
@@ -1151,18 +1151,18 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
                           const chipColors={weights:"#2d5016",cardio:"#1a6b3c",swimming:"#1a6b3c",dance:"#1a6b3c",walk:"#6b7c5a",yoga:"#6b7c5a",stretch:"#6b7c5a",housework:"#6b7c5a",rest:"#9a8a6e",none:"#a0937d"};
                           return(<td key={d} style={{padding:"3px 2px",textAlign:"center",...cellBorder}}>
                             {items.length?<div style={{display:"flex",flexWrap:"wrap",gap:2,justifyContent:"center"}}>{items.map((item,ii)=>(
-                              <span key={ii} style={{fontSize:9,padding:"2px 5px",borderRadius:10,background:(chipColors[item.toLowerCase()]||"#6b7c5a")+"22",color:chipColors[item.toLowerCase()]||"#6b7c5a",fontWeight:600,whiteSpace:"nowrap"}}>{item}</span>
-                            ))}</div>:<span style={{fontSize:10,color:t.textLight}}>—</span>}
+                              <span key={ii} style={{fontSize:10,padding:"2px 5px",borderRadius:10,background:(chipColors[item.toLowerCase()]||"#6b7c5a")+"22",color:chipColors[item.toLowerCase()]||"#6b7c5a",fontWeight:600,whiteSpace:"nowrap"}}>{item}</span>
+                            ))}</div>:<span style={{fontSize:11,color:t.textLight}}>—</span>}
                           </td>);
                         }
                         if(row.type==="select"){
-                          return(<td key={d} style={{padding:0,...cellBorder}}><select value={val} onChange={e=>upWD(d,row.field,e.target.value)} style={{padding:"5px 2px",border:"none",fontSize:10,width:"100%",minWidth:50,background:"transparent",color:val?t.text:t.textLight,fontFamily:t.font,outline:"none",cursor:"pointer",textAlign:"center"}}><option value="">—</option>{(row.opts||[]).map(o=><option key={o} value={o}>{o}</option>)}</select></td>);
+                          return(<td key={d} style={{padding:0,...cellBorder}}><select value={val} onChange={e=>upWD(d,row.field,e.target.value)} style={{padding:"5px 2px",border:"none",fontSize:11,width:"100%",minWidth:50,background:"transparent",color:val?t.text:t.textLight,fontFamily:t.font,outline:"none",cursor:"pointer",textAlign:"center"}}><option value="">—</option>{(row.opts||[]).map(o=><option key={o} value={o}>{o}</option>)}</select></td>);
                         }
                         const isGluc = row.section==="glucose" && val;
                         const glucColor = isGluc ? (Number(val)<=99?t.ok:Number(val)<=140?"#d4850f":t.danger) : t.text;
                         const inputType = row.type==="time"?"text":row.type==="number"?"text":row.type;
                         const ph = row.type==="time"?"HH:MM":(row.ph||"—");
-                        return(<td key={d} style={{padding:0,...cellBorder}}><input type={inputType} inputMode={row.type==="number"?"numeric":undefined} placeholder={ph} value={val} onChange={e=>upWD(d,row.field,e.target.value)} style={{padding:"5px 4px",border:"none",fontSize:11,width:"100%",minWidth:50,background:"transparent",color:isGluc?glucColor:t.text,fontWeight:isGluc?700:400,fontFamily:t.font,outline:"none",textAlign:"center",boxSizing:"border-box"}}/></td>);
+                        return(<td key={d} style={{padding:0,...cellBorder}}><input type={inputType} inputMode={row.type==="number"?"numeric":undefined} placeholder={ph} value={val} onChange={e=>upWD(d,row.field,e.target.value)} style={{padding:"5px 4px",border:"none",fontSize:12,width:"100%",minWidth:50,background:"transparent",color:isGluc?glucColor:t.text,fontWeight:isGluc?700:400,fontFamily:t.font,outline:"none",textAlign:"center",boxSizing:"border-box"}}/></td>);
                       })}
                     </tr>
                   </React.Fragment>);})}
@@ -1170,12 +1170,12 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
                 {/* Habit Score row */}
                 <tr><td colSpan={8} style={{height:1.5,background:t.accent+"33",padding:0}}></td></tr>
                 <tr style={{background:t.accentBg}}>
-                  <td style={{position:"sticky",left:0,background:t.accentBg,zIndex:1,padding:"6px 8px",fontSize:12,color:t.accent,fontWeight:800,borderRight:`0.5px solid ${t.cardBorder}`}}>Score</td>
+                  <td style={{position:"sticky",left:0,background:t.accentBg,zIndex:1,padding:"6px 8px",fontSize:13,color:t.accent,fontWeight:800,borderRight:`0.5px solid ${t.cardBorder}`}}>Score</td>
                   {weekDates.map(d=>{
                     const wd2=weekData[d]||{};
                     const ds=getDayScore(wd2);
                     const sc=ds===null?t.textLight:ds.base>=80?t.ok:ds.base>=50?"#d4850f":t.danger;
-                    return(<td key={d} style={{padding:"6px 4px",textAlign:"center",fontSize:13,fontWeight:800,color:sc}}>{ds!==null?`${ds.base}${ds.bonus?"+"+ds.bonus:""}`:"—"}</td>);
+                    return(<td key={d} style={{padding:"6px 4px",textAlign:"center",fontSize:14,fontWeight:800,color:sc}}>{ds!==null?`${ds.base}${ds.bonus?"+"+ds.bonus:""}`:"—"}</td>);
                   })}
                 </tr>
               </tbody>
@@ -1184,11 +1184,11 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
 
           {/* Score Explanation Toggle */}
           <div onClick={()=>setScoreInfoOpen(!scoreInfoOpen)} style={{cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center",margin:"8px 0",padding:"8px 12px"}}>
-            <span style={{fontSize:12,fontWeight:700,color:t.accent}}>📊 How is the score calculated?</span>
-            <span style={{fontSize:12,color:t.textMuted}}>{scoreInfoOpen?"▼":"▶"}</span>
+            <span style={{fontSize:13,fontWeight:700,color:t.accent}}>📊 How is the score calculated?</span>
+            <span style={{fontSize:13,color:t.textMuted}}>{scoreInfoOpen?"▼":"▶"}</span>
           </div>
-          {scoreInfoOpen&&<div style={{padding:"10px 12px",marginBottom:12,fontSize:11,lineHeight:1.8}}>
-            <div style={{fontWeight:800,fontSize:12,color:t.text,marginBottom:6}}>Base Score /100</div>
+          {scoreInfoOpen&&<div style={{padding:"10px 12px",marginBottom:12,fontSize:12,lineHeight:1.8}}>
+            <div style={{fontWeight:800,fontSize:13,color:t.text,marginBottom:6}}>Base Score /100</div>
             {[
               ["🚫 No sugar","18"],
               ["🌿 Berberine","15"],
@@ -1207,7 +1207,7 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
                 <span style={{color:t.accent,fontWeight:700}}>{pts}</span>
               </div>
             ))}
-            <div style={{fontWeight:800,fontSize:12,color:t.text,marginTop:10,marginBottom:6}}>Bonus Points</div>
+            <div style={{fontWeight:800,fontSize:13,color:t.text,marginTop:10,marginBottom:6}}>Bonus Points</div>
             {[
               ["🏋️ Weights","+10"],
               ["🏊 Cardio / swim / dance","+5"],
@@ -1222,23 +1222,23 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
                 <span style={{color:t.ok,fontWeight:700}}>{pts}</span>
               </div>
             ))}
-            <div style={{marginTop:8,color:t.textMuted,fontSize:10}}>
+            <div style={{marginTop:8,color:t.textMuted,fontSize:11}}>
               Daily score = <strong style={{color:t.text}}>base+bonus</strong> · Weekly avg skips empty days · Max 121
             </div>
           </div>}
 
           {/* Body Measurements — weekly date format matching tracker */}
-          <h2 style={{fontSize:20,fontWeight:700,margin:"0 0 8px"}}>Body Measurements</h2>
+          <h2 style={{fontSize:22,fontWeight:700,margin:"0 0 8px"}}>Body Measurements</h2>
           <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:10}}>
-            <button onClick={()=>shiftW(-1)} style={{background:"none",border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,padding:"4px 10px",cursor:"pointer",fontSize:14,color:t.text}}>◀</button>
-            <span style={{fontSize:14,fontWeight:700,color:t.accent}}>{new Date(weekDates[0]).toLocaleDateString("en-GB",{day:"numeric",month:"short"})} — {new Date(weekDates[6]).toLocaleDateString("en-GB",{day:"numeric",month:"short"})}</span>
-            <button onClick={()=>shiftW(1)} style={{background:"none",border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,padding:"4px 10px",cursor:"pointer",fontSize:14,color:t.text}}>▶</button>
+            <button onClick={()=>shiftW(-1)} style={{background:"none",border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,padding:"4px 10px",cursor:"pointer",fontSize:15,color:t.text}}>◀</button>
+            <span style={{fontSize:15,fontWeight:700,color:t.accent}}>{new Date(weekDates[0]).toLocaleDateString("en-GB",{day:"numeric",month:"short"})} — {new Date(weekDates[6]).toLocaleDateString("en-GB",{day:"numeric",month:"short"})}</span>
+            <button onClick={()=>shiftW(1)} style={{background:"none",border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,padding:"4px 10px",cursor:"pointer",fontSize:15,color:t.text}}>▶</button>
           </div>
           <div style={{overflowX:"auto",border:`0.5px solid ${t.cardBorder}`,borderRadius:t.radiusSm,background:t.card,marginBottom:10}}>
             <table style={{borderCollapse:"collapse",width:"100%",tableLayout:"fixed"}}>
               <thead><tr style={{background:t.sidebarBg}}>
-                <th style={{position:"sticky",left:0,background:t.sidebarBg,zIndex:2,padding:"7px 8px",fontSize:11,color:t.textMuted,textAlign:"left",borderBottom:`1px solid ${t.cardBorder}`,borderRight:`0.5px solid ${t.cardBorder}`,width:120}}></th>
-                {weekDates.map((d,i)=>(<th key={d} style={{padding:"7px 3px",fontSize:11,color:t.accent,textAlign:"center",borderBottom:`1px solid ${t.cardBorder}`,borderRight:i<6?`0.5px solid ${t.cardBorder}22`:"none",fontWeight:700}}><div>{dn[i]}</div><div style={{fontWeight:400,color:t.textLight,fontSize:10}}>{new Date(d).toLocaleDateString("en-GB",{day:"numeric",month:"short"})}</div></th>))}
+                <th style={{position:"sticky",left:0,background:t.sidebarBg,zIndex:2,padding:"7px 8px",fontSize:12,color:t.textMuted,textAlign:"left",borderBottom:`1px solid ${t.cardBorder}`,borderRight:`0.5px solid ${t.cardBorder}`,width:120}}></th>
+                {weekDates.map((d,i)=>(<th key={d} style={{padding:"7px 3px",fontSize:12,color:t.accent,textAlign:"center",borderBottom:`1px solid ${t.cardBorder}`,borderRight:i<6?`0.5px solid ${t.cardBorder}22`:"none",fontWeight:700}}><div>{dn[i]}</div><div style={{fontWeight:400,color:t.textLight,fontSize:11}}>{new Date(d).toLocaleDateString("en-GB",{day:"numeric",month:"short"})}</div></th>))}
               </tr></thead>
               <tbody>{[
                 {label:"⚖️ Weight",field:"weight",ph:"kg"},
@@ -1256,10 +1256,10 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
                 const rowBg = i%2===0?t.card:t.bg;
                 return(
                 <tr key={row.field} style={{background:rowBg}}>
-                  <td style={{position:"sticky",left:0,background:rowBg,zIndex:1,padding:"5px 8px",fontSize:11,color:t.text,fontWeight:600,borderRight:`0.5px solid ${t.cardBorder}`,borderBottom:`0.5px solid ${t.cardBorder}`,whiteSpace:"nowrap"}}>{row.label}</td>
+                  <td style={{position:"sticky",left:0,background:rowBg,zIndex:1,padding:"5px 8px",fontSize:12,color:t.text,fontWeight:600,borderRight:`0.5px solid ${t.cardBorder}`,borderBottom:`0.5px solid ${t.cardBorder}`,whiteSpace:"nowrap"}}>{row.label}</td>
                   {weekDates.map((d,di)=>(
                     <td key={d} style={{padding:0,borderBottom:`0.5px solid ${t.cardBorder}`,borderRight:di<6?`0.5px solid ${t.cardBorder}22`:"none"}}>
-                      <input type="text" placeholder={row.ph} value={(bodyMeas[`${row.field}-${d}`])||""} onChange={e=>{const val=e.target.value;bodyCleared.current=false;try{localStorage.removeItem("ge_bodyMeas_cleared");}catch{};setBodyMeas(p=>{const n={...p,[`${row.field}-${d}`]:val};try{localStorage.setItem("ge_bodyMeas",JSON.stringify(n))}catch{};const bodyForDate={};Object.keys(n).forEach(k=>{if(k.endsWith("-"+d)){const field=k.split("-")[0];bodyForDate[field]=n[k];}});queueSave(d,bodyForDate,"body");return n;});}} style={{padding:"5px 4px",border:"none",fontSize:11,width:"100%",background:"transparent",color:t.text,fontFamily:t.font,outline:"none",textAlign:"center",boxSizing:"border-box"}}/>
+                      <input type="text" placeholder={row.ph} value={(bodyMeas[`${row.field}-${d}`])||""} onChange={e=>{const val=e.target.value;bodyCleared.current=false;try{localStorage.removeItem("ge_bodyMeas_cleared");}catch{};setBodyMeas(p=>{const n={...p,[`${row.field}-${d}`]:val};try{localStorage.setItem("ge_bodyMeas",JSON.stringify(n))}catch{};const bodyForDate={};Object.keys(n).forEach(k=>{if(k.endsWith("-"+d)){const field=k.split("-")[0];bodyForDate[field]=n[k];}});queueSave(d,bodyForDate,"body");return n;});}} style={{padding:"5px 4px",border:"none",fontSize:12,width:"100%",background:"transparent",color:t.text,fontFamily:t.font,outline:"none",textAlign:"center",boxSizing:"border-box"}}/>
                     </td>
                   ))}
                 </tr>);
@@ -1268,7 +1268,7 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
           </div>
 
           {/* ══ INSIGHT ══ */}
-          <h2 style={{fontSize:20,fontWeight:700,margin:"0 0 8px"}}>Insight</h2>
+          <h2 style={{fontSize:22,fontWeight:700,margin:"0 0 8px"}}>Insight</h2>
           {(()=>{
             // Build weeks: W0 = pre-protocol baseline, W1+ = protocol weeks
             const allWeeks = [];
@@ -1383,9 +1383,9 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
             return(<div>
               {/* Week navigation — date bar matching tracker */}
               <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:14}}>
-                <button onClick={()=>setInsightWeek(Math.max(0,(insightWeek!==null?insightWeek:allWeeks.length-1)-1))} style={{background:"none",border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,padding:"4px 10px",cursor:"pointer",fontSize:14,color:t.text}}>◀</button>
-                <span style={{fontSize:14,fontWeight:700,color:t.accent}}>{w.num===0?"Baseline":`W${w.num}`} · {wStart} – {wEnd}</span>
-                <button onClick={()=>setInsightWeek(Math.min(allWeeks.length-1,(insightWeek!==null?insightWeek:allWeeks.length-1)+1))} style={{background:"none",border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,padding:"4px 10px",cursor:"pointer",fontSize:14,color:t.text}}>▶</button>
+                <button onClick={()=>setInsightWeek(Math.max(0,(insightWeek!==null?insightWeek:allWeeks.length-1)-1))} style={{background:"none",border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,padding:"4px 10px",cursor:"pointer",fontSize:15,color:t.text}}>◀</button>
+                <span style={{fontSize:15,fontWeight:700,color:t.accent}}>{w.num===0?"Baseline":`W${w.num}`} · {wStart} – {wEnd}</span>
+                <button onClick={()=>setInsightWeek(Math.min(allWeeks.length-1,(insightWeek!==null?insightWeek:allWeeks.length-1)+1))} style={{background:"none",border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,padding:"4px 10px",cursor:"pointer",fontSize:15,color:t.text}}>▶</button>
               </div>
 
               {/* Week content */}
@@ -1441,11 +1441,11 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
                         <circle cx={36} cy={36} r={30} fill="none" stroke={t.cardBorder} strokeWidth={4.5}/>
                         <circle cx={36} cy={36} r={30} fill="none" stroke={ringColor} strokeWidth={4.5} strokeDasharray={circumference} strokeDashoffset={offset} strokeLinecap="round" transform="rotate(-90 36 36)"/>
                         <text x={36} y={33} textAnchor="middle" dominantBaseline="central" style={{fontSize:18,fontWeight:800,fill:t.text}}>{weekScore}</text>
-                        <text x={36} y={48} textAnchor="middle" style={{fontSize:9,fill:t.textMuted}}>{weekBonus>0?`/100 +${weekBonus}`:"/100"}</text>
+                        <text x={36} y={48} textAnchor="middle" style={{fontSize:10,fill:t.textMuted}}>{weekBonus>0?`/100 +${weekBonus}`:"/100"}</text>
                       </svg>
-                      <div style={{fontSize:9,color:t.textMuted,textTransform:"uppercase",letterSpacing:"0.3px",marginTop:2}}>Week score</div>
+                      <div style={{fontSize:10,color:t.textMuted,textTransform:"uppercase",letterSpacing:"0.3px",marginTop:2}}>Week score</div>
                     </div>
-                    <div style={{flex:1,fontSize:12,color:t.text,lineHeight:1.7}}>
+                    <div style={{flex:1,fontSize:13,color:t.text,lineHeight:1.7}}>
                       {parts.map((p,pi)=><span key={pi}>{pi>0?" ":""}{p}</span>)}
                     </div>
                   </div>);
@@ -1473,15 +1473,15 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
                   return(
                   <div style={{display:"flex",gap:10,marginBottom:14}}>
                     {learnings.length>0&&<div style={{flex:1,padding:"10px 14px",background:t.okBg,borderRadius:t.radiusSm}}>
-                      <div style={{fontSize:10,fontWeight:700,color:t.ok,textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:6}}>Key Learnings</div>
+                      <div style={{fontSize:11,fontWeight:700,color:t.ok,textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:6}}>Key Learnings</div>
                       {learnings.map((l,li)=>(
-                        <div key={li} style={{fontSize:12,color:l.color,fontWeight:600,lineHeight:1.7}}>{l.color===t.ok?"✓":"⚠"} {l.text}</div>
+                        <div key={li} style={{fontSize:13,color:l.color,fontWeight:600,lineHeight:1.7}}>{l.color===t.ok?"✓":"⚠"} {l.text}</div>
                       ))}
                     </div>}
                     {focus.length>0&&<div style={{flex:1,padding:"10px 14px",background:"#dde8f5",borderRadius:t.radiusSm}}>
-                      <div style={{fontSize:10,fontWeight:700,color:"#185fa5",textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:6}}>Next Week Focus</div>
+                      <div style={{fontSize:11,fontWeight:700,color:"#185fa5",textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:6}}>Next Week Focus</div>
                       {focus.slice(0,3).map((f,fi)=>(
-                        <div key={fi} style={{fontSize:12,color:t.text,fontWeight:600,lineHeight:1.7}}>{f.icon} {f.text}</div>
+                        <div key={fi} style={{fontSize:13,color:t.text,fontWeight:600,lineHeight:1.7}}>{f.icon} {f.text}</div>
                       ))}
                     </div>}
                   </div>);
@@ -1525,11 +1525,11 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
                     {metrics.map((m,mi)=>(
                       <React.Fragment key={mi}>
                         <div style={{textAlign:"center",padding:"0 8px",flex:1}}>
-                          <div style={{fontSize:10,color:t.textMuted,textTransform:"uppercase",letterSpacing:"0.5px"}}>{m.label}</div>
+                          <div style={{fontSize:11,color:t.textMuted,textTransform:"uppercase",letterSpacing:"0.5px"}}>{m.label}</div>
                           <div style={{fontSize:22,fontWeight:800,color:m.color}}>{m.val}</div>
-                          {m.range&&<div style={{fontSize:10,color:t.textMuted}}>{m.range}</div>}
-                          {m.delta!=null&&<div style={{fontSize:9,color:m.deltaGood?t.ok:t.danger,fontWeight:700}}>{m.delta>0?"↑":"↓"}{Math.abs(m.delta)}{m.deltaUnit||""}</div>}
-                          {m.pred&&<div style={{fontSize:9,color:m.predAhead?t.ok:"#d4850f",fontWeight:600}}>{m.pred}</div>}
+                          {m.range&&<div style={{fontSize:11,color:t.textMuted}}>{m.range}</div>}
+                          {m.delta!=null&&<div style={{fontSize:10,color:m.deltaGood?t.ok:t.danger,fontWeight:700}}>{m.delta>0?"↑":"↓"}{Math.abs(m.delta)}{m.deltaUnit||""}</div>}
+                          {m.pred&&<div style={{fontSize:10,color:m.predAhead?t.ok:"#d4850f",fontWeight:600}}>{m.pred}</div>}
                         </div>
                         <div style={{width:1,background:t.cardBorder,flexShrink:0}}/>
                       </React.Fragment>
@@ -1538,10 +1538,10 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
                     {Object.keys(bm).length>0&&(
                       <React.Fragment>
                         <div style={{textAlign:"center",padding:"0 8px",flex:1}}>
-                          <div style={{fontSize:10,color:t.textMuted,textTransform:"uppercase",letterSpacing:"0.5px"}}>Body</div>
-                          <div style={{fontSize:22,fontWeight:800,color:t.text}}>{bm.weight?`${bm.weight}`:""}<span style={{fontSize:13,fontWeight:400,color:t.textMuted}}>kg</span></div>
-                          <div style={{fontSize:10,color:t.textMuted}}>{[`BMI ${BMI}`,bm.waist&&`W${bm.waist}`,bm.belly&&`B${bm.belly}`].filter(Boolean).join(" · ")}</div>
-                          {(()=>{const baseW=73.6;if(!bm.weight)return null;const d=Math.round((Number(bm.weight)-baseW)*10)/10;return d!==0?<div style={{fontSize:9,color:d<0?t.ok:t.danger,fontWeight:700}}>{d>0?"↑":"↓"}{Math.abs(d)}kg</div>:null;})()}
+                          <div style={{fontSize:11,color:t.textMuted,textTransform:"uppercase",letterSpacing:"0.5px"}}>Body</div>
+                          <div style={{fontSize:22,fontWeight:800,color:t.text}}>{bm.weight?`${bm.weight}`:""}<span style={{fontSize:14,fontWeight:400,color:t.textMuted}}>kg</span></div>
+                          <div style={{fontSize:11,color:t.textMuted}}>{[`BMI ${BMI}`,bm.waist&&`W${bm.waist}`,bm.belly&&`B${bm.belly}`].filter(Boolean).join(" · ")}</div>
+                          {(()=>{const baseW=73.6;if(!bm.weight)return null;const d=Math.round((Number(bm.weight)-baseW)*10)/10;return d!==0?<div style={{fontSize:10,color:d<0?t.ok:t.danger,fontWeight:700}}>{d>0?"↑":"↓"}{Math.abs(d)}kg</div>:null;})()}
                         </div>
                       </React.Fragment>
                     )}
@@ -1555,9 +1555,9 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
                   const grow = wNotes.filter(n=>n.sev==="grow");
                   const renderCol = (items, label, borderColor, textColor, key) => (
                     <div key={key} style={{flex:1,minWidth:0}}>
-                      <div style={{fontSize:10,fontWeight:700,color:textColor,textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:8}}>{label} ({items.length})</div>
+                      <div style={{fontSize:11,fontWeight:700,color:textColor,textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:8}}>{label} ({items.length})</div>
                       {items.map((n,ni)=>(
-                        <div key={ni} style={{borderLeft:`3px solid ${borderColor}`,paddingLeft:10,fontSize:12,fontWeight:600,color:t.text,lineHeight:1.4,marginBottom:6,borderRadius:0}}>
+                        <div key={ni} style={{borderLeft:`3px solid ${borderColor}`,paddingLeft:10,fontSize:13,fontWeight:600,color:t.text,lineHeight:1.4,marginBottom:6,borderRadius:0}}>
                           {n.title}
                         </div>
                       ))}
@@ -1576,7 +1576,7 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
 
                 {/* Empty state */}
                 {glucVals.length===0&&Object.keys(bm).length===0&&wNotes.length===0&&(
-                  <div style={{fontSize:12,color:t.textMuted,fontStyle:"italic",padding:"8px 0"}}>No data recorded this week yet.</div>
+                  <div style={{fontSize:13,color:t.textMuted,fontStyle:"italic",padding:"8px 0"}}>No data recorded this week yet.</div>
                 )}
 
                 {/* ── Daily Clinical Notes with day tabs ── */}
@@ -1592,23 +1592,23 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
                   const sevBorder={excellent:t.ok,ontrack:"#d4850f",grow:t.danger};
                   return(
                   <div style={{marginTop:18}}>
-                    <div style={{fontSize:13,fontWeight:800,color:t.text,marginBottom:10}}>Daily Notes</div>
+                    <div style={{fontSize:14,fontWeight:800,color:t.text,marginBottom:10}}>Daily Notes</div>
                     <div style={{display:"flex",gap:0,marginBottom:12,borderBottom:`1.5px solid ${t.cardBorder}`}}>
                       {sortedKeys.map(k=>{
                         const isActive=k===activeNoteTab;
                         const shortLabel=k.replace(/\s*\(Day\s*\d+\)/,"").replace(/\s*(Mar|Feb)/," $1");
-                        return(<button key={k} onClick={()=>setNoteTab(k)} style={{padding:"6px 12px",fontSize:11,fontWeight:isActive?700:500,color:isActive?t.accent:t.textMuted,background:"none",border:"none",borderBottom:isActive?`2.5px solid ${t.accent}`:"2.5px solid transparent",cursor:"pointer",fontFamily:t.font,marginBottom:-1.5}}>{shortLabel}</button>);
+                        return(<button key={k} onClick={()=>setNoteTab(k)} style={{padding:"6px 12px",fontSize:12,fontWeight:isActive?700:500,color:isActive?t.accent:t.textMuted,background:"none",border:"none",borderBottom:isActive?`2.5px solid ${t.accent}`:"2.5px solid transparent",cursor:"pointer",fontFamily:t.font,marginBottom:-1.5}}>{shortLabel}</button>);
                       })}
                     </div>
                     {activeNotes.length>0?activeNotes.map((n,ni)=>(
                       <div key={ni} style={{display:"flex",gap:8,marginBottom:8,paddingLeft:4}}>
-                        <span style={{fontSize:14,flexShrink:0}}>{n.icon}</span>
+                        <span style={{fontSize:15,flexShrink:0}}>{n.icon}</span>
                         <div style={{flex:1}}>
-                          <div style={{fontSize:12,fontWeight:700,color:sevBorder[n.sev]||t.text,marginBottom:2}}>{n.title}</div>
-                          <div style={{fontSize:11,color:t.textMuted,lineHeight:1.5}}>{n.text}</div>
+                          <div style={{fontSize:13,fontWeight:700,color:sevBorder[n.sev]||t.text,marginBottom:2}}>{n.title}</div>
+                          <div style={{fontSize:12,color:t.textMuted,lineHeight:1.5}}>{n.text}</div>
                         </div>
                       </div>
-                    )):<div style={{fontSize:11,color:t.textMuted,fontStyle:"italic"}}>No notes for this day.</div>}
+                    )):<div style={{fontSize:12,color:t.textMuted,fontStyle:"italic"}}>No notes for this day.</div>}
                   </div>);
                 })()}
               </div>
