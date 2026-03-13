@@ -276,11 +276,11 @@ const trackerRows = [
   {label:"⏰ First meal",field:"m1t",type:"time",ph:"",section:"meals"},
   {label:"⏰ Last meal",field:"mLast",type:"time",ph:"",section:"meals"},
   {label:"🚶 After meal move",field:"moveAfter",type:"select",ph:"",opts:["x1","x2","x3"],section:"activity"},
-  {label:"🏃 Activity",field:"act",type:"select",ph:"",opts:["walk","yoga","weights","swim","bike","clean","dance"],section:"activity"},
+  {label:"🏃 Activity",field:"act",type:"text",ph:"walk, yoga...",section:"activity"},
   {label:"🌿 Berberine",field:"berb",type:"select",ph:"",opts:["0","x1","x2"],section:"supps"},
   {label:"🐟 Fish Oil",field:"fish",type:"select",ph:"",opts:["0","x1","x2","x3"],section:"supps"},
-  {label:"💊 Magnesium",field:"mag",type:"check",section:"supps"},
-  {label:"☀️ D3 + K2",field:"d3k2",type:"check",section:"supps"},
+  {label:"💊 Magnesium",field:"mag",type:"select",ph:"",opts:["0","x1","x2","x3"],section:"supps"},
+  {label:"☀️ D3 + K2",field:"d3k2",type:"select",ph:"",opts:["0","x1","x2"],section:"supps"},
   {label:"🌱 Basil seeds",field:"basil",type:"check",section:"supps"},
   {label:"🥜 Brazil nuts x3",field:"brazil",type:"check",section:"supps"},
   {label:"🦠 Probiotics",field:"probio",type:"check",section:"habits"},
@@ -293,7 +293,7 @@ const trackerRows = [
 ];
 const keyHabitsForScore = ["berb","fish","mag","d3k2","basil","brazil","probio","noSweet","fiberFirst","if14","water","moveAfter","act"];
 const bodyMeasRows = ["Waist (cm)","Hips (cm)","Chest (cm)","Upper Arm (cm)","Thigh (cm)","Neck (cm)","Waist-to-Hip Ratio","Body Fat % (est.)"];
-const tabDefs = [{icon:"🩸",label:"LABS"},{icon:"📋",label:"LIFESTYLE"},{icon:"🍽️",label:"FOOD & SUPPS"},{icon:"🍱",label:"MEAL PLAN"},{icon:"📝",label:"TRACKER"}];
+const tabDefs = [{icon:"📊",label:"PROGRESS"},{icon:"🩸",label:"LABS"},{icon:"📋",label:"LIFESTYLE"},{icon:"🍽️",label:"FOOD & SUPPS"}];
 
 const t = {
   bg:"#faf8f5", card:"#fffefa", cardBorder:"#e8e0d4",
@@ -313,12 +313,10 @@ export default function GoldenEra() {
   const [sheetStatus, setSheetStatus] = useState("idle"); // idle | loading | synced | error
   const [expandedSupp, setExpandedSupp] = useState(null);
   const [joyOpen, setJoyOpen] = useState(false);
-  const [expandedDay, setExpandedDay] = useState(null);
   // scenario removed - using real data
   const [labChart, setLabChart] = useState("hb");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [noteTab, setNoteTab] = useState("10 Mar (Day 9)");
-  const [habitView, setHabitView] = useState("table");
   
   const seedBodyMeas={
   "weight-2026-02-26":"73.6","waist-2026-02-26":"89","hip-2026-02-26":"103",
@@ -448,7 +446,7 @@ const [weekData,setWeekData]=useState(()=>{try{const s=localStorage.getItem("ge_
       <div style={{flex:1,padding:"24px 28px",overflowY:"auto"}}>
 
         {/* ══ LABS ══ */}
-        {tab===0&&(<div>
+        {tab===1&&(<div>
           <h2 style={{fontSize:20,fontWeight:700,margin:"0 0 4px"}}>Lab Results & Prediction</h2>
           <p style={{color:t.textMuted,fontSize:13,marginBottom:14}}>Confirmed data vs predicted trajectory (Full Send protocol)</p>
 
@@ -525,60 +523,27 @@ const [weekData,setWeekData]=useState(()=>{try{const s=localStorage.getItem("ge_
               </Card>
           </div>
 
-          {/* Clinical Notes — tabbed */}
-          <div style={{marginTop:20}}>
-            <h3 style={{fontSize:15,fontWeight:700,margin:"0 0 8px"}}>Notes & Insights</h3>
-            <div style={{display:"flex",gap:4,marginBottom:10}}>{Object.keys(clinicalNotes).map(d=>(<Pill key={d} active={noteTab===d} onClick={()=>setNoteTab(d)}>{d}</Pill>))}</div>
-            {(clinicalNotes[noteTab]||[]).map((w,i)=>{const bg2=w.sev==="critical"?t.dangerBg:w.sev==="warning"?t.warnBg:t.okBg;const bd2=w.sev==="critical"?t.dangerBorder:w.sev==="warning"?t.warnBorder:t.okBorder;const tx2=w.sev==="critical"?t.danger:w.sev==="warning"?t.warn:t.ok;return(
-              <div key={i} style={{background:bg2,border:`1px solid ${bd2}`,borderRadius:t.radiusSm,padding:"12px 14px",marginBottom:6,display:"flex",gap:10,alignItems:"flex-start"}}><span style={{fontSize:20,flexShrink:0}}>{w.icon}</span><div><div style={{fontSize:13,fontWeight:700,color:tx2,marginBottom:2}}>{w.title}</div><div style={{fontSize:13,color:t.text,lineHeight:1.5}}>{w.text}</div></div></div>
-            );})}
-          </div>
-
 
         </div>)}
 
         {/* ══ LIFESTYLE ══ */}
-        {tab===1&&(<div>
-          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
-            <div>
-              <h2 style={{fontSize:20,fontWeight:700,margin:"0 0 4px"}}>Daily Habits</h2>
-              <p style={{color:t.textMuted,fontSize:13,margin:0}}>3 meals in 10-hr window (7:00-17:00) · Fiber first · Move after · Sleep 7+</p>
-            </div>
-            <div style={{display:"flex",gap:4}}>
-              <Pill active={habitView==="table"} onClick={()=>setHabitView("table")}>Table</Pill>
-              <Pill active={habitView==="cards"} onClick={()=>setHabitView("cards")}>Cards</Pill>
-            </div>
+        {tab===2&&(<div>
+          <div style={{marginBottom:12}}>
+            <h2 style={{fontSize:20,fontWeight:700,margin:"0 0 4px"}}>Daily Habits</h2>
+            <p style={{color:t.textMuted,fontSize:13,margin:0}}>3 meals in 10-hr window (7:00-17:00) · Fiber first · Move after · Sleep 7+</p>
           </div>
 
-          {/* Daily Habits - TABLE view */}
-          {habitView==="table"&&(
-            <div style={{border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,background:t.card,marginBottom:24,overflow:"hidden"}}>
-              {dailyHabits.map((h,i)=>(
-                <div key={i} style={{padding:"10px 14px",display:"flex",gap:10,alignItems:"flex-start",borderBottom:i<dailyHabits.length-1?`1px solid ${t.cardBorder}`:"none",background:i%2===0?t.card:t.bg}}>
-                  <span style={{fontSize:18,flexShrink:0,marginTop:1}}>{h.icon}</span>
-                  <div style={{flex:1}}>
-                    <div style={{fontSize:13,color:t.text,fontWeight:600,lineHeight:1.3}}>{h.step}</div>
-                    <div style={{fontSize:11,color:t.textMuted,marginTop:2,fontStyle:"italic"}}>{h.impact}</div>
-                  </div>
+          <div style={{display:"flex",flexDirection:"column",gap:6,marginBottom:24}}>
+            {dailyHabits.map((h,i)=>(
+              <div key={i} style={{background:t.card,border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,padding:"10px 14px",display:"flex",gap:10,alignItems:"flex-start"}}>
+                <span style={{fontSize:18,flexShrink:0,marginTop:1}}>{h.icon}</span>
+                <div style={{flex:1}}>
+                  <div style={{fontSize:13,color:t.text,fontWeight:600,lineHeight:1.3}}>{h.step}</div>
+                  <div style={{fontSize:11,color:t.textMuted,marginTop:2,fontStyle:"italic"}}>{h.impact}</div>
                 </div>
-              ))}
-            </div>
-          )}
-
-          {/* Daily Habits - CARDS view */}
-          {habitView==="cards"&&(
-            <div style={{display:"flex",flexDirection:"column",gap:6,marginBottom:24}}>
-              {dailyHabits.map((h,i)=>(
-                <div key={i} style={{background:t.card,border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,padding:"10px 14px",display:"flex",gap:10,alignItems:"flex-start"}}>
-                  <span style={{fontSize:18,flexShrink:0,marginTop:1}}>{h.icon}</span>
-                  <div style={{flex:1}}>
-                    <div style={{fontSize:13,color:t.text,fontWeight:600,lineHeight:1.3}}>{h.step}</div>
-                    <div style={{fontSize:11,color:t.textMuted,marginTop:2,fontStyle:"italic"}}>{h.impact}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+              </div>
+            ))}
+          </div>
 
           {/* Hunger Toolkit - single table, two columns */}
           <h3 style={{fontSize:16,fontWeight:700,margin:"0 0 4px"}}>If Hungry</h3>
@@ -653,13 +618,13 @@ const [weekData,setWeekData]=useState(()=>{try{const s=localStorage.getItem("ge_
         </div>)}
 
         {/* ══ FOOD & SUPPS ══ */}
-        {tab===2&&(<div>
+        {tab===3&&(<div>
           <h2 style={{fontSize:20,fontWeight:700,margin:"0 0 4px"}}>Food & Supplements</h2>
           <p style={{color:t.textMuted,fontSize:13,marginBottom:14}}>What to eat, what to skip, and the supplement stack</p>
 
           {/* Nutrition Needs */}
           <h3 style={{fontSize:15,fontWeight:700,margin:"0 0 4px"}}>What Your Body Needs</h3>
-          <p style={{color:t.textMuted,fontSize:12,marginBottom:10}}>Based on 73.6kg, BMI {BMI}, HbA1C 9.4%, Trig 702, fatty liver</p>
+          <p style={{color:t.textMuted,fontSize:12,marginBottom:10}}>Updated Day 12: Weight ~71kg, fasting glucose 116, low-carb protocol</p>
 
           <div style={{border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,background:t.card,marginBottom:8,overflow:"hidden"}}>
             <table style={{width:"100%",borderCollapse:"collapse"}}>
@@ -671,11 +636,11 @@ const [weekData,setWeekData]=useState(()=>{try{const s=localStorage.getItem("ge_
               </tr></thead>
               <tbody>
                 {[
-                  ["🥩 Protein","90-110g","30-37g","1.2-1.5g/kg. Builds muscle, controls hunger 4-6 hrs, stabilizes glucose",t.ok],
-                  ["🥑 Healthy Fat","50-70g","17-23g","Slows digestion, helps absorb D3/K2. Omega-3 priority for trig",t.ok],
-                  ["🍚 Carbs","80-100g","25-33g","Low-carb phase. Fiber-rich only. Always eat LAST",t.warn],
+                  ["🥩 Protein","80-100g","27-33g","35-40% of calories. Preserves muscle, controls hunger. Don't overdo — excess converts to glucose (gluconeogenesis) and raises uric acid.",t.ok],
+                  ["🥑 Healthy Fat","70-90g","23-30g","35-40% of calories. PRIMARY fuel source on low-carb. Slows digestion, absorbs D3/K2. Eat MORE fat not less — chicken skin, salmon, nuts, avocado, olive oil.",t.ok],
+                  ["🍚 Carbs","40-60g","13-20g","20-25% of calories. From vegetables, berries, small sweet potato only. Always eat LAST.",t.warn],
                   ["🌾 Fiber","25-35g","8-12g","Slows sugar absorption, feeds gut bacteria, lowers trig",t.ok],
-                  ["💧 Water","2-2.5L","8-10 glasses","Flushes toxins, prevents false hunger, helps kidneys",t.ok],
+                  ["💧 Water","2-2.5L","8-10 glasses","Flushes toxins, prevents false hunger, helps kidneys. Extra important on low-carb.",t.ok],
                 ].map(([n,daily,meal,why,color],i)=>(
                   <tr key={i} style={{background:i%2===0?t.card:t.bg}}>
                     <td style={{padding:"8px 12px",fontSize:13,fontWeight:700}}>{n}</td>
@@ -692,9 +657,9 @@ const [weekData,setWeekData]=useState(()=>{try{const s=localStorage.getItem("ge_
           <div style={{border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,background:t.card,padding:"10px 14px",marginBottom:12}}>
             <div style={{fontSize:12,fontWeight:700,color:t.text,marginBottom:6}}>Quick portion guide (per meal)</div>
             {[
-              ["🥩","30g protein","4 eggs, or 120g chicken breast, or 150g fish, or 200g tofu"],
-              ["🍚","25g carbs","1/4 cup cooked rice, or 1 small sweet potato, or 1/2 cup oats"],
-              ["🥑","20g fat","1 tbsp olive oil + 10 almonds, or 1/2 avocado"],
+              ["🥩","30g protein","4 eggs, or 120g chicken thigh (with skin!), or 150g salmon, or 200g tofu"],
+              ["🥑","25g fat","1 tbsp olive/coconut oil + 10 almonds, or 1/2 avocado, or handful macadamia"],
+              ["🍚","15g carbs","1 cup vegetables, or 1/4 small sweet potato, or 1/2 cup berries"],
               ["🌾","10g fiber","1 cup broccoli + 1 tbsp basil seeds (เม็ดแมงลัก)"],
             ].map(([icon,label,detail],i)=>(
               <div key={i} style={{display:"flex",gap:8,padding:"4px 0",borderBottom:i<3?`1px solid ${t.cardBorder}33`:"none"}}>
@@ -710,8 +675,8 @@ const [weekData,setWeekData]=useState(()=>{try{const s=localStorage.getItem("ge_
           <div style={{border:`1px solid ${t.dangerBorder}`,borderRadius:t.radiusSm,background:t.dangerBg,marginBottom:20,overflow:"hidden"}}>
             {[
               ["Day 1-30","0g","Zero added sugar. Reset phase. Trig and glucose drop fastest here."],
-              ["Day 31-60","max 10g","Only if labs improve. That's 2 tsp or 2 squares dark chocolate."],
-              ["Day 61-90","max 15g","Only if trig < 300 and glucose < 140. Still use stevia for drinks."],
+              ["Day 31-60","max 10g","Only if fasting glucose < 100 and trig < 300. That's 2 tsp or 2 squares dark chocolate."],
+              ["Day 61-90","max 15g","Only if trig < 200 and glucose < 95. Use stevia for drinks."],
             ].map(([phase,amt,note],i)=>(
               <div key={i} style={{padding:"10px 14px",display:"flex",gap:12,alignItems:"center",borderBottom:i<2?`1px solid ${t.dangerBorder}`:"none"}}>
                 <div style={{fontSize:12,fontWeight:700,color:t.danger,minWidth:75}}>{phase}</div>
@@ -991,76 +956,9 @@ const [weekData,setWeekData]=useState(()=>{try{const s=localStorage.getItem("ge_
         </div>)}
 
         {/* ══ MEAL PLAN ══ */}
-        {tab===3&&(<div>
-          <h2 style={{fontSize:20,fontWeight:700,margin:"0 0 4px"}}>9F Canteen Meal Plan</h2>
-          <p style={{color:t.textMuted,fontSize:12,marginBottom:4}}>Week of {canteenWeek.week} · Berberine 600mg with first and last meal</p>
-          <p style={{color:t.ok,fontSize:11,fontWeight:600,marginBottom:14}}>Strategy: Salad first → Soup → Protein main → Small brown rice LAST (if needed)</p>
 
-          {canteenWeek.days.map((day,di)=>{
-            const greats=day.dishes.filter(d=>d.verdict==="GREAT");
-            const totalP=greats.reduce((s,d)=>s+d.protein,0);
-            const totalC=greats.reduce((s,d)=>s+d.carb,0);
-            const totalF=greats.reduce((s,d)=>s+d.fat,0);
-            const totalFi=greats.reduce((s,d)=>s+d.fiber,0);
-            const isOpen=expandedDay===di;
-            return(
-            <div key={di} style={{marginBottom:8}}>
-              <div onClick={()=>setExpandedDay(isOpen?null:di)} style={{fontSize:15,fontWeight:700,color:t.accent,marginBottom:isOpen?6:0,padding:"10px 14px",background:t.card,border:`1px solid ${isOpen?t.accent+"44":t.cardBorder}`,borderRadius:t.radiusSm,cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                <span>{day.day}</span>
-                <span style={{fontSize:12,color:t.textMuted}}>{isOpen?"▼":"▶"} {greats.length} picks</span>
-              </div>
-              {isOpen&&<div style={{marginTop:6}}>
-
-              {/* Best combo */}
-              <div style={{border:`1px solid ${t.okBorder}`,borderRadius:t.radiusSm,background:t.okBg,padding:"10px 14px",marginBottom:8}}>
-                <div style={{fontSize:12,fontWeight:700,color:t.ok,marginBottom:4}}>Best combo</div>
-                <div style={{fontSize:12,color:t.text,lineHeight:1.6}}>
-                  {greats.map((d,i)=><span key={i}>{i>0?" → ":" "}{d.name.split(/[ก-๙]/)[0].trim()}</span>)}
-                </div>
-                <div style={{fontSize:11,color:t.ok,marginTop:4,fontWeight:600}}>~P:{totalP}g · C:{totalC}g · F:{totalF}g · Fiber:{totalFi}g</div>
-              </div>
-
-              {/* All dishes */}
-              <div style={{border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,background:t.card,overflow:"hidden"}}>
-                {day.dishes.map((d,i)=>{const vc=verdictColors[d.verdict]||t.textMuted;return(
-                  <div key={i} style={{padding:"8px 12px",borderBottom:i<day.dishes.length-1?`1px solid ${t.cardBorder}`:"none",background:i%2===0?t.card:t.bg}}>
-                    <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
-                      <span style={{fontSize:11,color:t.textMuted,minWidth:45}}>{d.cat}</span>
-                      <span style={{fontSize:13,fontWeight:700,color:t.text,flex:1}}>{d.name}</span>
-                      <span style={{fontSize:16,fontWeight:800,color:vc,minWidth:20,textAlign:"right"}}>{d.score}</span>
-                      <span style={{fontSize:10,padding:"2px 6px",borderRadius:t.radiusSm,background:vc+"18",color:vc,fontWeight:700,border:`1px solid ${vc}33`,minWidth:55,textAlign:"center"}}>{d.verdict}</span>
-                    </div>
-                    <div style={{display:"flex",gap:12,marginTop:4,marginLeft:53}}>
-                      <span style={{fontSize:10,color:t.ok}}>P:{d.protein}g</span>
-                      <span style={{fontSize:10,color:t.warn}}>C:{d.carb}g</span>
-                      <span style={{fontSize:10,color:t.accent}}>F:{d.fat}g</span>
-                      <span style={{fontSize:10,color:t.textMuted}}>Fiber:{d.fiber}g</span>
-                    </div>
-                    <div style={{fontSize:11,fontWeight:600,color:vc,marginTop:3,marginLeft:53}}>{d.portion}</div>
-                    <div style={{fontSize:11,color:t.textMuted,fontStyle:"italic",marginTop:2,marginLeft:53}}>{d.notes}</div>
-                  </div>
-                );})}
-              </div>
-            </div>}
-          </div>
-          );})}
-
-          <div style={{border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,background:t.accentBg,padding:"12px 14px"}}>
-            <div style={{fontSize:13,fontWeight:700,color:t.accent,marginBottom:6}}>Daily Reminders</div>
-            <div style={{fontSize:12,color:t.text,lineHeight:1.8}}>
-              • Take Berberine 600mg + fish oil with your first plate<br/>
-              • Salad and soup FIRST, always<br/>
-              • Protein main = unlimited, load up<br/>
-              • Rice = LAST and MAX 4 tbsp (or skip entirely)<br/>
-              • Skip ALL desserts during Day 1-30<br/>
-              • Walk 10-15 min after eating before going back to desk<br/>
-              • Take second Berberine 600mg + fish oil with dinner at home
-            </div>
-          </div>
-        </div>)}
-
-        {/* ══ TRACKER ══ */}
-        {tab===4&&(<div>
+        {/* ══ PROGRESS ══ */}
+        {tab===0&&(<div>
           <h2 style={{fontSize:20,fontWeight:700,margin:"0 0 4px"}}>Weekly Tracker</h2>
           <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:14}}>
             <button onClick={()=>shiftW(-1)} style={{background:"none",border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,padding:"4px 10px",cursor:"pointer",fontSize:14,color:t.text}}>◀</button>
@@ -1109,8 +1007,8 @@ const [weekData,setWeekData]=useState(()=>{try{const s=localStorage.getItem("ge_
                   {weekDates.map(d=>{
                     const wd2=weekData[d]||{};
                     let day_t=0,day_p=0;
-                    ["berb","fish"].forEach(f=>{day_p++;if(wd2[f]&&wd2[f]!=="0")day_t++;});
-                    ["mag","d3k2","basil","brazil","probio","noSweet","fiberFirst","if14","water"].forEach(f=>{day_p++;if(wd2[f])day_t++;});
+                    ["berb","fish","mag","d3k2"].forEach(f=>{day_p++;if(wd2[f]&&wd2[f]!=="0")day_t++;});
+                    ["basil","brazil","probio","noSweet","fiberFirst","if14","water"].forEach(f=>{day_p++;if(wd2[f])day_t++;});
                     day_p++;if(wd2.moveAfter)day_t++;
                     day_p++;if(wd2.act)day_t++;
                     day_p++;if(wd2.sleep==="7+"||wd2.sleep==="8+")day_t++;
@@ -1157,101 +1055,112 @@ const [weekData,setWeekData]=useState(()=>{try{const s=localStorage.getItem("ge_
             </table>
           </div>
 
-          {/* Body Silhouette Visualization */}
+          {/* ══ WEEKLY INSIGHT ══ */}
+          <h3 style={{fontSize:15,fontWeight:700,margin:"0 0 8px"}}>Weekly Insight</h3>
           {(()=>{
-            const latest={};
-            const bmFields=["weight","waist","belly","hip","whr","arm","thigh","calve","chest","neck","shoulder"];
-            bmFields.forEach(f=>{
-              for(let i=weekDates.length-1;i>=0;i--){
-                const v=bodyMeas[`${f}-${weekDates[i]}`];
-                if(v){latest[f]=parseFloat(v)||v;break;}
-              }
-              if(!latest[f]){
-                const allKeys=Object.keys(bodyMeas).filter(k=>k.startsWith(f+"-")&&bodyMeas[k]);
-                if(allKeys.length>0){
-                  const sorted=allKeys.sort();
-                  latest[f]=parseFloat(bodyMeas[sorted[sorted.length-1]])||bodyMeas[sorted[sorted.length-1]];
+            // Build week-by-week data from protocol start
+            const startDate = new Date("2026-03-02"); // Day 1
+            const today = new Date();
+            const weeks = [];
+            let ws = new Date(startDate);
+            let wNum = 1;
+            while(ws <= today) {
+              const we = new Date(ws); we.setDate(we.getDate()+6);
+              const wDates = [];
+              for(let i=0;i<7;i++){const dd=new Date(ws);dd.setDate(dd.getDate()+i);wDates.push(dd.toISOString().split("T")[0]);}
+              weeks.push({num:wNum,start:new Date(ws),end:we>today?today:we,dates:wDates});
+              ws.setDate(ws.getDate()+7);
+              wNum++;
+            }
+            // Current week = last in list
+            return weeks.reverse().map(w=>{
+              const wStart=w.start.toLocaleDateString("en-GB",{day:"numeric",month:"short"});
+              const wEnd=w.end.toLocaleDateString("en-GB",{day:"numeric",month:"short"});
+              // Gather glucose data for this week
+              const glucVals=w.dates.map(d=>{const v=weekData[d]?.glucFast;return v?Number(v):null;}).filter(v=>v);
+              const glucMin=glucVals.length?Math.min(...glucVals):null;
+              const glucMax=glucVals.length?Math.max(...glucVals):null;
+              const glucAvg=glucVals.length?Math.round(glucVals.reduce((a,b)=>a+b,0)/glucVals.length):null;
+              // Count habits
+              let habDone=0,habTotal=0;
+              w.dates.forEach(d=>{const wd=weekData[d]||{};
+                ["berb","fish","mag","d3k2"].forEach(f=>{habTotal++;if(wd[f]&&wd[f]!=="0")habDone++;});
+                ["basil","brazil","probio","noSweet","fiberFirst","if14","water"].forEach(f=>{habTotal++;if(wd[f])habDone++;});
+                habTotal++;if(wd.moveAfter)habDone++;
+                habTotal++;if(wd.act)habDone++;
+                habTotal++;if(wd.sleep==="7+"||wd.sleep==="8+")habDone++;
+              });
+              const habPct=habTotal>0?Math.round(habDone/habTotal*100):0;
+              // Get body measurements for this week
+              const bmFields=["weight","waist","hip","whr","belly","neck","chest"];
+              const bm={};
+              bmFields.forEach(f=>{
+                for(let i=w.dates.length-1;i>=0;i--){
+                  const v=bodyMeas[`${f}-${w.dates[i]}`];
+                  if(v){bm[f]=v;break;}
                 }
-              }
-            });
-            const hasData=Object.keys(latest).length>2;
-            if(!hasData)return null;
-            const W=220,H=340;
-            const waist=latest.waist||88,hip=latest.hip||99,chest=latest.chest||101,shoulder=latest.shoulder||47;
-            const neck=latest.neck||39,arm=latest.arm||34,thigh=latest.thigh||55,calve=latest.calve||37;
-            const whrVal=latest.whr||((waist/(hip||1)).toFixed(2));
-            const whrColor=parseFloat(whrVal)>0.85?"#b44234":parseFloat(whrVal)>0.80?"#d4850f":"#16a34a";
-            const whrLabel=parseFloat(whrVal)>0.85?"High risk":parseFloat(whrVal)>0.80?"Moderate":"Healthy";
-            // Scale body parts proportionally
-            const sc=(v,min,max,outMin,outMax)=>outMin+((v-min)/(max-min))*(outMax-outMin);
-            const chestW=sc(chest,85,115,50,80);
-            const waistW=sc(waist,65,100,35,70);
-            const hipW=sc(hip,85,110,45,75);
-            const shoulderW=sc(shoulder*2,80,110,55,85);
-            const neckW=sc(neck,30,45,12,22);
-            const armW=sc(arm,25,40,8,16);
-            const thighW=sc(thigh,40,65,14,24);
-            const calveW=sc(calve,28,42,10,16);
-            return(
-            <Card style={{marginBottom:20}}>
-              <div style={{display:"flex",gap:20,alignItems:"flex-start"}}>
-                <svg viewBox={`0 0 ${W} ${H}`} style={{width:180,height:280,flexShrink:0}}>
-                  {/* Head */}
-                  <ellipse cx={W/2} cy={28} rx={16} ry={20} fill="#e8ddd0" stroke="#b8a890" strokeWidth={1.5}/>
-                  {/* Neck */}
-                  <rect x={W/2-neckW/2} y={46} width={neckW} height={16} rx={4} fill="#e8ddd0" stroke="#b8a890" strokeWidth={1}/>
-                  <text x={W-15} y={56} fontSize={8} fill="#b8a890" textAnchor="end">{latest.neck||"—"}</text>
-                  {/* Shoulders */}
-                  <path d={`M${W/2-shoulderW/2},62 Q${W/2-shoulderW/2-5},68 ${W/2-shoulderW/2},80 L${W/2+shoulderW/2},80 Q${W/2+shoulderW/2+5},68 ${W/2+shoulderW/2},62`} fill="#e8ddd0" stroke="#b8a890" strokeWidth={1.5}/>
-                  <text x={W-15} y={74} fontSize={8} fill="#b8a890" textAnchor="end">{latest.shoulder||"—"}</text>
-                  {/* Chest/Torso */}
-                  <path d={`M${W/2-chestW/2},80 L${W/2-waistW/2},145 L${W/2+waistW/2},145 L${W/2+chestW/2},80 Z`} fill="#e8ddd0" stroke="#b8a890" strokeWidth={1.5}/>
-                  <text x={W-15} y={105} fontSize={8} fill="#b8a890" textAnchor="end">{latest.chest||"—"}</text>
-                  {/* Waist line */}
-                  <line x1={W/2-waistW/2-5} y1={135} x2={W/2+waistW/2+5} y2={135} stroke={whrColor} strokeWidth={2} strokeDasharray="4,2"/>
-                  <text x={15} y={140} fontSize={8} fill={whrColor} fontWeight={700}>{latest.waist||"—"}</text>
-                  {/* Hip area */}
-                  <path d={`M${W/2-waistW/2},145 Q${W/2-hipW/2-5},165 ${W/2-hipW/2},180 L${W/2+hipW/2},180 Q${W/2+hipW/2+5},165 ${W/2+waistW/2},145`} fill="#e8ddd0" stroke="#b8a890" strokeWidth={1.5}/>
-                  <text x={W-15} y={168} fontSize={8} fill="#b8a890" textAnchor="end">{latest.hip||"—"}</text>
-                  {/* Arms */}
-                  <rect x={W/2-shoulderW/2-armW} y={80} width={armW} height={65} rx={armW/2} fill="#e8ddd0" stroke="#b8a890" strokeWidth={1}/>
-                  <rect x={W/2+shoulderW/2} y={80} width={armW} height={65} rx={armW/2} fill="#e8ddd0" stroke="#b8a890" strokeWidth={1}/>
-                  <text x={W/2-shoulderW/2-armW-3} y={115} fontSize={7} fill="#b8a890" textAnchor="end">{latest.arm||"—"}</text>
-                  {/* Thighs */}
-                  <rect x={W/2-hipW/2+2} y={180} width={thighW} height={75} rx={thighW/2} fill="#e8ddd0" stroke="#b8a890" strokeWidth={1}/>
-                  <rect x={W/2+hipW/2-thighW-2} y={180} width={thighW} height={75} rx={thighW/2} fill="#e8ddd0" stroke="#b8a890" strokeWidth={1}/>
-                  <text x={15} y={220} fontSize={8} fill="#b8a890">{latest.thigh||"—"}</text>
-                  {/* Calves */}
-                  <rect x={W/2-hipW/2+2+(thighW-calveW)/2} y={255} width={calveW} height={55} rx={calveW/2} fill="#e8ddd0" stroke="#b8a890" strokeWidth={1}/>
-                  <rect x={W/2+hipW/2-thighW-2+(thighW-calveW)/2} y={255} width={calveW} height={55} rx={calveW/2} fill="#e8ddd0" stroke="#b8a890" strokeWidth={1}/>
-                  <text x={15} y={280} fontSize={8} fill="#b8a890">{latest.calve||"—"}</text>
-                  {/* Belly marker */}
-                  {latest.belly&&<>
-                    <line x1={W/2-waistW/2-8} y1={150} x2={W/2+waistW/2+8} y2={150} stroke="#d4850f" strokeWidth={1} strokeDasharray="3,2" opacity={0.6}/>
-                    <text x={15} y={155} fontSize={7} fill="#d4850f">belly {latest.belly}</text>
-                  </>}
-                </svg>
-                <div style={{flex:1,fontSize:11}}>
-                  <div style={{fontWeight:700,color:t.accent,marginBottom:8,fontSize:13}}>Body Status</div>
-                  {latest.weight&&<div style={{marginBottom:6}}><span style={{fontWeight:700}}>⚖️ Weight:</span> {latest.weight} kg (BMI {(latest.weight/((167/100)**2)).toFixed(1)})</div>}
-                  <div style={{marginBottom:6,padding:"6px 8px",background:whrColor+"15",borderRadius:6,border:`1px solid ${whrColor}33`}}>
-                    <span style={{fontWeight:700}}>📐 Waist:Hip:</span> <span style={{color:whrColor,fontWeight:700}}>{whrVal} ({whrLabel})</span>
-                    <div style={{fontSize:10,color:t.textMuted,marginTop:2}}>Target: {"<"}0.80 for women. Tracks visceral fat and metabolic risk.</div>
-                  </div>
-                  {latest.waist&&<div style={{marginBottom:4}}><span style={{fontWeight:700}}>📏 Waist:</span> {latest.waist} cm {latest.waist>80?<span style={{color:"#d4850f"}}>(target: {"<"}80)</span>:<span style={{color:t.ok}}>(healthy)</span>}</div>}
-                  {latest.neck&&<div style={{marginBottom:4}}><span style={{fontWeight:700}}>📏 Neck:</span> {latest.neck} cm {latest.neck>36?<span style={{color:"#d4850f"}}>(elevated, tracks insulin resistance)</span>:<span style={{color:t.ok}}>(normal)</span>}</div>}
-                  {latest.chest&&<div style={{marginBottom:4}}><span style={{fontWeight:700}}>📏 Chest:</span> {latest.chest} cm</div>}
-                  {latest.belly&&<div style={{marginBottom:4}}><span style={{fontWeight:700}}>📏 Belly:</span> {latest.belly} cm (widest circumference)</div>}
+              });
+              // Get clinical notes for this week
+              const weekNoteKeys=Object.keys(clinicalNotes).filter(k=>{
+                // Match note keys that fall in this week's date range
+                const dateMatch=k.match(/(\d+)\s+(Mar|Feb)/i);
+                if(dateMatch){
+                  const day=parseInt(dateMatch[1]);
+                  const startDay=w.start.getDate();
+                  const endDay=w.end.getDate();
+                  return day>=startDay&&day<=endDay;
+                }
+                return false;
+              });
+              const wNotes=weekNoteKeys.flatMap(k=>clinicalNotes[k]||[]);
+              
+              return(
+              <Card key={w.num} style={{marginBottom:10}}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+                  <div style={{fontSize:14,fontWeight:700,color:t.accent}}>W{w.num} <span style={{fontWeight:400,fontSize:12,color:t.textMuted}}>{wStart} – {wEnd}</span></div>
+                  <div style={{fontSize:11,padding:"2px 8px",borderRadius:4,background:habPct>=80?t.okBg:habPct>=50?t.warnBg:t.dangerBg,color:habPct>=80?t.ok:habPct>=50?t.warn:t.danger,fontWeight:700}}>{habPct>0?`${habPct}% habits`:"—"}</div>
                 </div>
-              </div>
-            </Card>
-            );
-          })()}
+                
+                {/* Glucose summary */}
+                {glucVals.length>0&&(
+                  <div style={{display:"flex",gap:12,marginBottom:8,flexWrap:"wrap"}}>
+                    <div style={{fontSize:11}}><span style={{color:t.textMuted}}>Fasting avg:</span> <span style={{fontWeight:700,color:glucAvg<=99?t.ok:glucAvg<=140?"#d4850f":t.danger}}>{glucAvg}</span></div>
+                    <div style={{fontSize:11}}><span style={{color:t.textMuted}}>Range:</span> <span style={{fontWeight:600}}>{glucMin}–{glucMax}</span></div>
+                    <div style={{fontSize:11}}><span style={{color:t.textMuted}}>Days tracked:</span> <span style={{fontWeight:600}}>{glucVals.length}/7</span></div>
+                  </div>
+                )}
 
-          <h3 style={{fontSize:15,fontWeight:700,margin:"0 0 8px"}}>Weekly Insights</h3>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill, minmax(280px, 1fr))",gap:8,marginBottom:20}}>
-            {getInsights().map((tip,i)=>(<Card key={i} style={{background:t.accentBg,borderColor:t.accent+"33"}}><div style={{display:"flex",gap:8,alignItems:"flex-start"}}><span style={{fontSize:20}}>{tip.icon}</span><div><div style={{fontSize:13,fontWeight:700,color:t.accent,marginBottom:3}}>{tip.title}</div><div style={{fontSize:13,color:t.text,lineHeight:1.5}}>{tip.text}</div></div></div></Card>))}
-          </div>
+                {/* Body measurements if available */}
+                {Object.keys(bm).length>0&&(
+                  <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:8}}>
+                    {bm.weight&&<span style={{fontSize:11,padding:"2px 6px",background:t.bg,borderRadius:4,border:`1px solid ${t.cardBorder}`}}>⚖️ {bm.weight}kg (BMI {(bm.weight/((167/100)**2)).toFixed(1)})</span>}
+                    {bm.waist&&<span style={{fontSize:11,padding:"2px 6px",background:t.bg,borderRadius:4,border:`1px solid ${t.cardBorder}`}}>📏 Waist {bm.waist}</span>}
+                    {bm.hip&&<span style={{fontSize:11,padding:"2px 6px",background:t.bg,borderRadius:4,border:`1px solid ${t.cardBorder}`}}>📏 Hip {bm.hip}</span>}
+                    {bm.whr&&<span style={{fontSize:11,padding:"2px 6px",background:(parseFloat(bm.whr)>0.85?"#b4423415":parseFloat(bm.whr)>0.80?"#d4850f15":"#16a34a15"),borderRadius:4,border:`1px solid ${parseFloat(bm.whr)>0.85?"#b4423433":parseFloat(bm.whr)>0.80?"#d4850f33":"#16a34a33"}`}}>📐 WHR {bm.whr}</span>}
+                    {bm.neck&&<span style={{fontSize:11,padding:"2px 6px",background:t.bg,borderRadius:4,border:`1px solid ${t.cardBorder}`}}>Neck {bm.neck}</span>}
+                  </div>
+                )}
+
+                {/* Notes from clinical notes */}
+                {wNotes.length>0&&(
+                  <div style={{display:"flex",flexDirection:"column",gap:4}}>
+                    {wNotes.slice(0,4).map((n,ni)=>{const tx2=n.sev==="critical"?t.danger:n.sev==="warning"?t.warn:t.ok;return(
+                      <div key={ni} style={{fontSize:11,color:t.text,lineHeight:1.4,display:"flex",gap:6,alignItems:"flex-start"}}>
+                        <span style={{fontSize:13,flexShrink:0}}>{n.icon}</span>
+                        <div><span style={{fontWeight:700,color:tx2}}>{n.title}:</span> {n.text}</div>
+                      </div>
+                    );})}
+                  </div>
+                )}
+
+                {/* Insights for this week */}
+                {glucVals.length===0&&Object.keys(bm).length===0&&wNotes.length===0&&(
+                  <div style={{fontSize:11,color:t.textMuted,fontStyle:"italic"}}>No data recorded this week yet.</div>
+                )}
+              </Card>
+              );
+            });
+          })()}
 
 
         </div>)}
