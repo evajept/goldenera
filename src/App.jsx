@@ -284,9 +284,9 @@ const trackerRows = [
   {label:"🩸 Fasting Glucose",field:"glucFast",type:"number",ph:"mg/dL",section:"glucose"},
   {label:"🍽️ Post-meal Glucose",field:"glucPost",type:"number",ph:"mg/dL",section:"glucose"},
   {label:"🌙 Night Glucose",field:"glucNight",type:"number",ph:"mg/dL",section:"glucose"},
-  {label:"⏰ First meal",field:"m1t",type:"time",ph:"",section:"meals"},
-  {label:"⏰ Last meal",field:"mLast",type:"time",ph:"",section:"meals"},
-  {label:"⏳ IF ratio",field:"_ifRatio",type:"computed",section:"meals"},
+  {label:"First meal",field:"m1t",type:"time",ph:"",section:"meals"},
+  {label:"Last meal",field:"mLast",type:"time",ph:"",section:"meals"},
+  {label:"IF ratio",field:"_ifRatio",type:"computed",section:"meals"},
   {label:"🚶 After meal move",field:"moveAfter",type:"select",ph:"",opts:["x1","x2","x3"],section:"activity"},
   {label:"🏋️ Exercise",field:"act",type:"select",ph:"",opts:actOpts,section:"activity"},
   {label:"🌿 Berberine",field:"berb",type:"select",ph:"",opts:["0","x1","x2"],section:"supps"},
@@ -1112,17 +1112,19 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
                         if(row.type==="computed"){
                           // IF ratio: auto-calc from first/last meal
                           const m1=wd(d).m1t||"";const mL=wd(d).mLast||"";
-                          let display="—";
+                          let display="—";let ifColor=t.textMuted;
                           if(m1&&mL){
                             const [h1,mn1]=m1.split(":").map(Number);
                             const [h2,mn2]=mL.split(":").map(Number);
                             if(!isNaN(h1)&&!isNaN(h2)){
-                              const eating=Math.round((h2*60+(mn2||0))-(h1*60+(mn1||0)))/60;
-                              const fasting=Math.round(24-eating);
-                              display=`${fasting}:${Math.round(eating)}`;
+                              const eatMins=(h2*60+(mn2||0))-(h1*60+(mn1||0));
+                              const eating=Math.round(eatMins/60);
+                              const fasting=24-eating;
+                              display=`${fasting}:${eating}`;
+                              ifColor=fasting>=16?"#2d5016":fasting>=14?t.ok:fasting>=12?"#d4850f":t.danger;
                             }
                           }
-                          return(<td key={d} style={{padding:"5px 4px",textAlign:"center",fontSize:11,color:t.textMuted,fontWeight:600,...cellBorder}}>{display}</td>);
+                          return(<td key={d} style={{padding:"5px 4px",textAlign:"center",fontSize:11,color:ifColor,...cellBorder}}>{display}</td>);
                         }
                         if(row.type==="check"){
                           const on = !!wd(d)[row.field];
