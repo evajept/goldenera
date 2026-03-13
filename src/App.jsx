@@ -366,11 +366,21 @@ const [weekData,setWeekData]=useState(()=>{try{const s=localStorage.getItem("ge_
     fetch(SHEET_API+"?action=load")
       .then(r=>r.json())
       .then(d=>{
+        console.log("Sheet data:", JSON.stringify(d));
         if(d.tracker&&Object.keys(d.tracker).length>0){
-          setWeekData(p=>({...seedData,...d.tracker,...p}));
+          // Sheet wins over localStorage for tracker data
+          setWeekData(p=>{
+            const merged={...seedData,...p,...d.tracker};
+            try{localStorage.setItem("ge_weekData",JSON.stringify(merged));}catch{}
+            return merged;
+          });
         }
         if(d.body&&Object.keys(d.body).length>0){
-          setBodyMeas(p=>({...seedBodyMeas,...d.body,...p}));
+          setBodyMeas(p=>{
+            const merged={...seedBodyMeas,...p,...d.body};
+            try{localStorage.setItem("ge_bodyMeas",JSON.stringify(merged));}catch{}
+            return merged;
+          });
         }
         setSheetStatus("synced");
       })
