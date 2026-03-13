@@ -72,21 +72,35 @@ const clinicalNotes = {
     { icon:"🩸", sev:"grow", title:"Uncontrolled Diabetes", text:"HbA1C 9.4% + Glucose 211. Without intervention, nerve/kidney/vision damage risk increases within 1-2 years." },
     { icon:"✅", sev:"excellent", title:"Kidneys Normal", text:"Creatinine 0.52, eGFR 130. Kidneys healthy. Safe for all supplements." },
   ],
-  "7 Mar (Day 5)": [
-    { icon:"🎉", sev:"excellent", title:"Glucose 211 to 142 (Day 5)", text:"Dropped 69 points (-33%) in 5 days. Ahead of predictions. Protocol is working." },
-    { icon:"🚶", sev:"excellent", title:"Walking daily + berberine started", text:"Berberine ramped from x1 to x2 by Day 5. Walking after meals every day. These two are the biggest drivers." },
-    { icon:"🍚", sev:"grow", title:"Post-meal spike 208", text:"4 spoons rice berry + potato + pumpkin = too many carbs. Target <30g carbs/meal. Drop potato." },
-    { icon:"😴", sev:"grow", title:"Sleep <7 every night so far", text:"Consistent <7h sleep. This alone costs 15-30 pts on fasting glucose. Sleep is the missing lever." },
-    { icon:"💊", sev:"grow", title:"Mg + D3/K2 still zero", text:"5 days without these supplements. Magnesium improves sleep AND fasting glucose." },
+  "2 Mar (Day 1)": [
+    { icon:"🚀", sev:"ontrack", title:"Protocol Day 1", text:"First tracked day. Fasting glucose 180 (down from 211 baseline). Walking started, berberine not yet. No sugar, fiber first, water all checked." },
+  ],
+  "3 Mar (Day 2)": [
+    { icon:"📊", sev:"ontrack", title:"Fasting 170, dropping", text:"Day 2: 170 (-41 from baseline). Eating window 7:00-19:00 = 12:12. Need to tighten to 14:10." },
+  ],
+  "4 Mar (Day 3)": [
+    { icon:"📊", sev:"ontrack", title:"Fasting 160, steady decline", text:"Day 3: 160. Berberine x1 started. Fiber first started. Walking daily. Core habits forming." },
+  ],
+  "5 Mar (Day 4)": [
+    { icon:"📉", sev:"excellent", title:"Fasting 142, biggest single drop", text:"Day 4: 142 (-18 in one day). Berberine x1 + walking + no sugar + fiber first all kicking in together." },
+    { icon:"⏰", sev:"excellent", title:"IF window tightened to 15:9", text:"Eating 7:00-16:00 = 9 hours. IF working well at 15:9." },
+  ],
+  "6 Mar (Day 5)": [
+    { icon:"📊", sev:"ontrack", title:"Fasting 140, holding", text:"Day 5: 140. Consolidating gains. Berberine ramped to x2." },
   ],
   "7 Mar (Day 6)": [
-    { icon:"🐟", sev:"excellent", title:"No spike at lunch, no carbs", text:"Mar 7: Salmon + broccoli = no glucose spike. Confirms protein + fat meals are safe and effective." },
+    { icon:"🐟", sev:"excellent", title:"No spike at lunch, no carbs", text:"Salmon + broccoli = no glucose spike. Confirms protein + fat meals are safe and effective." },
+    { icon:"📊", sev:"ontrack", title:"Fasting 147, slight bounce", text:"Day 6: 147. Minor bounce after consistent drops. Normal fluctuation." },
   ],
   "8 Mar (Day 7)": [
     { icon:"⚖️", sev:"excellent", title:"Weight 73.6 to 71.8 kg (-1.8)", text:"Lost 1.8 kg in first week. First 1-2 kg is water/inflammation. Sustainable pace." },
     { icon:"📐", sev:"excellent", title:"Hip 103 to 99 cm (-4 cm)", text:"Biggest single measurement drop. Fat is mobilizing." },
     { icon:"📏", sev:"excellent", title:"Neck 42 to 39 cm (-3 cm)", text:"Neck circumference tracks insulin resistance. 3 cm drop is a strong signal." },
     { icon:"🍚", sev:"grow", title:"White rice spike to 217", text:"Mar 8: Tom yum with white boiled rice + spicy glass noodle salad spiked to 217. Had to walk and do chores to bring it down to 150. White rice confirmed off-limits." },
+  ],
+  "9 Mar (Day 8)": [
+    { icon:"📊", sev:"ontrack", title:"Fasting 150, weekend bounce", text:"Day 8: 150. Slight increase over weekend. Sleep <6 hours (worst so far) likely contributed." },
+    { icon:"😴", sev:"grow", title:"Sleep <6 hours", text:"Worst sleep night of the protocol. Sleep deprivation directly raises morning glucose." },
   ],
   "10 Mar (Day 9)": [
     { icon:"🎉", sev:"excellent", title:"Glucose 211 to 123 (Day 9)", text:"Dropped 88 points (-42%) in 9 days. Now only 24 points above normal range (70-99)." },
@@ -103,10 +117,13 @@ const clinicalNotes = {
     { icon:"😴", sev:"ontrack", title:"Spike when exhausted", text:"Mar 12: Glucose spiked when feeling exhausted. Fatigue and stress raise cortisol which raises glucose." },
   ],
   "13 Mar (Day 12)": [
-    { icon:"📉", sev:"excellent", title:"Fasting glucose 117, new low", text:"Day 12: 117 is the lowest fasting reading yet. Down 94 points from baseline 211." },
-    { icon:"🍚", sev:"grow", title:"Low GI rice still spikes", text:"Mar 13: 2 spoons of low GI rice spiked post-meal to 163. After days of no rice at all, even small amounts cause a spike. Body still not ready for rice." },
-    { icon:"☀️", sev:"excellent", title:"D3/K2 started", text:"Day 12: First dose of D3/K2. Now all 4 core supplements are active." },
-    { icon:"😴", sev:"excellent", title:"Sleep improving, two 7+ nights", text:"Day 10 and Day 12 both logged 7+ hours. Sleep is starting to shift." },
+    { icon:"📉", sev:"excellent", title:"Fasting glucose 115, new low", text:"Day 12: 115 is the lowest fasting reading yet. Down 96 points from baseline 211 (-45%). Approaching pre-diabetic range (<126)." },
+    { icon:"🍚", sev:"grow", title:"3 spoons low GI rice: 117→163", text:"Morning test: 3 spoons of low GI rice spiked from 117 to 163 (+46). After days of no rice, even small amounts still trigger a spike. Pancreas isn't ready." },
+    { icon:"🥔", sev:"ontrack", title:"Potatoes: 120→140 (controlled)", text:"Lunch: handful of potatoes spiked 120→140 (+20). More moderate than rice. Potatoes with fiber/protein may be tolerable in small amounts." },
+    { icon:"🍗", sev:"excellent", title:"Chicken + veggies: no spike", text:"Dinner (3:30pm): 148 before, chicken and veggies, no spike, dropped to 134. Protein + veg meals continue to be safe." },
+    { icon:"🏊", sev:"excellent", title:"Swimming dropped glucose 131→101", text:"Evening swim brought glucose from 131 down to 101. First reading in normal range (<100 is target). Exercise is a powerful tool." },
+    { icon:"💊", sev:"excellent", title:"All 4 supps active + berberine 2x", text:"Berberine at morning and lunch. All core supplements now running. Score 98+7 — near-perfect protocol day." },
+    { icon:"😴", sev:"ontrack", title:"Sleep still inconsistent", text:"Alternating <7 and 7+ nights. Sleep remains the biggest opportunity for further glucose reduction." },
   ],
 };
 
@@ -114,7 +131,7 @@ const clinicalNotes = {
 // Timeline: 26 Feb = Day 0, 2 Mar = Day 1, 10 Mar = Day 9
 const chartData = {
   strict: {
-    gluc:[{m:"26 Feb",v:211,confirmed:true},{m:"2 Mar",v:180,confirmed:true},{m:"5 Mar",v:142,confirmed:true},{m:"8 Mar",v:150,confirmed:true},{m:"10 Mar",v:123,confirmed:true},{m:"D30",v:100,confirmed:false},{m:"D60",v:88,confirmed:false},{m:"D90",v:82,confirmed:false}],
+    gluc:[{m:"26 Feb",v:211,confirmed:true},{m:"2 Mar",v:180,confirmed:true},{m:"3 Mar",v:170,confirmed:true},{m:"4 Mar",v:160,confirmed:true},{m:"5 Mar",v:142,confirmed:true},{m:"6 Mar",v:140,confirmed:true},{m:"7 Mar",v:147,confirmed:true},{m:"8 Mar",v:150,confirmed:true},{m:"9 Mar",v:150,confirmed:true},{m:"10 Mar",v:123,confirmed:true},{m:"11 Mar",v:120,confirmed:true},{m:"12 Mar",v:123,confirmed:true},{m:"13 Mar",v:115,confirmed:true},{m:"D30",v:100,confirmed:false},{m:"D60",v:88,confirmed:false},{m:"D90",v:82,confirmed:false}],
     hb:[{m:"26 Feb",v:9.4,confirmed:true},{m:"D30",v:7.8,confirmed:false},{m:"D60",v:6.5,confirmed:false},{m:"D90",v:5.7,confirmed:false}],
     trig:[{m:"26 Feb",v:702,confirmed:true},{m:"D30",v:350,confirmed:false},{m:"D60",v:200,confirmed:false},{m:"D90",v:135,confirmed:false}],
     wt:[{m:"26 Feb",v:73.6,confirmed:true},{m:"8 Mar",v:71.8,confirmed:true},{m:"D30",v:68,confirmed:false},{m:"D60",v:64,confirmed:false},{m:"D90",v:61,confirmed:false}],
@@ -1561,6 +1578,39 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
                 {glucVals.length===0&&Object.keys(bm).length===0&&wNotes.length===0&&(
                   <div style={{fontSize:12,color:t.textMuted,fontStyle:"italic",padding:"8px 0"}}>No data recorded this week yet.</div>
                 )}
+
+                {/* ── Daily Clinical Notes with day tabs ── */}
+                {weekNoteKeys.length>0&&(()=>{
+                  const sortedKeys=weekNoteKeys.sort((a,b)=>{
+                    const dA=parseInt((a.match(/(\d+)/)||[])[1])||0;
+                    const dB=parseInt((b.match(/(\d+)/)||[])[1])||0;
+                    return dA-dB;
+                  });
+                  // Auto-select first tab if noteTab not in this week's keys
+                  const activeNoteTab=sortedKeys.includes(noteTab)?noteTab:sortedKeys[sortedKeys.length-1];
+                  const activeNotes=clinicalNotes[activeNoteTab]||[];
+                  const sevBorder={excellent:t.ok,ontrack:"#d4850f",grow:t.danger};
+                  return(
+                  <div style={{marginTop:18}}>
+                    <div style={{fontSize:13,fontWeight:800,color:t.text,marginBottom:10}}>Daily Notes</div>
+                    <div style={{display:"flex",gap:0,marginBottom:12,borderBottom:`1.5px solid ${t.cardBorder}`}}>
+                      {sortedKeys.map(k=>{
+                        const isActive=k===activeNoteTab;
+                        const shortLabel=k.replace(/\s*\(Day\s*\d+\)/,"").replace(/\s*(Mar|Feb)/," $1");
+                        return(<button key={k} onClick={()=>setNoteTab(k)} style={{padding:"6px 12px",fontSize:11,fontWeight:isActive?700:500,color:isActive?t.accent:t.textMuted,background:"none",border:"none",borderBottom:isActive?`2.5px solid ${t.accent}`:"2.5px solid transparent",cursor:"pointer",fontFamily:t.font,marginBottom:-1.5}}>{shortLabel}</button>);
+                      })}
+                    </div>
+                    {activeNotes.length>0?activeNotes.map((n,ni)=>(
+                      <div key={ni} style={{display:"flex",gap:8,marginBottom:8,paddingLeft:4}}>
+                        <span style={{fontSize:14,flexShrink:0}}>{n.icon}</span>
+                        <div style={{flex:1}}>
+                          <div style={{fontSize:12,fontWeight:700,color:sevBorder[n.sev]||t.text,marginBottom:2}}>{n.title}</div>
+                          <div style={{fontSize:11,color:t.textMuted,lineHeight:1.5}}>{n.text}</div>
+                        </div>
+                      </div>
+                    )):<div style={{fontSize:11,color:t.textMuted,fontStyle:"italic"}}>No notes for this day.</div>}
+                  </div>);
+                })()}
               </div>
             </div>);
           })()}
