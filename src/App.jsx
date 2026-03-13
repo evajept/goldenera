@@ -288,7 +288,7 @@ const trackerRows = [
   {label:"Last meal",field:"mLast",type:"time",ph:"",section:"meals"},
   {label:"IF ratio",field:"_ifRatio",type:"computed",section:"meals"},
   {label:"🚶 After meal move",field:"moveAfter",type:"select",ph:"",opts:["x1","x2","x3"],section:"activity"},
-  {label:"🏋️ Exercise",field:"act",type:"text",ph:"walk, cardio...",section:"activity"},
+  {label:"🏋️ Exercise",field:"act",type:"chips",ph:"",section:"activity"},
   {label:"🌿 Berberine",field:"berb",type:"select",ph:"",opts:["0","x1","x2"],section:"supps"},
   {label:"🐟 Fish Oil",field:"fish",type:"select",ph:"",opts:["0","x1","x2","x3"],section:"supps"},
   {label:"💊 Magnesium",field:"mag",type:"select",ph:"",opts:["0","x1","x2","x3"],section:"supps"},
@@ -1130,6 +1130,15 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
                           const on = !!wd(d)[row.field];
                           return(<td key={d} onClick={()=>upWD(d,row.field,!on)} style={{padding:"3px",textAlign:"center",cursor:"pointer",...cellBorder}}>
                             <div style={{width:26,height:26,borderRadius:"50%",margin:"0 auto",background:on?"#5c7a44":t.sidebarBg,display:"flex",alignItems:"center",justifyContent:"center",transition:"background 0.15s"}}><span style={{fontSize:11,color:on?"#fff":t.textLight,fontWeight:on?700:400}}>{on?"✓":"·"}</span></div>
+                          </td>);
+                        }
+                        if(row.type==="chips"){
+                          const items=val?val.split(",").map(s=>s.trim()).filter(Boolean):[];
+                          const chipColors={weights:"#2d5016",cardio:"#1a6b3c",swimming:"#1a6b3c",dance:"#1a6b3c",walk:"#6b7c5a",yoga:"#6b7c5a",stretch:"#6b7c5a",housework:"#6b7c5a",rest:"#9a8a6e",none:"#a0937d"};
+                          return(<td key={d} style={{padding:"3px 2px",textAlign:"center",...cellBorder}}>
+                            {items.length?<div style={{display:"flex",flexWrap:"wrap",gap:2,justifyContent:"center"}}>{items.map((item,ii)=>(
+                              <span key={ii} style={{fontSize:9,padding:"2px 5px",borderRadius:10,background:(chipColors[item.toLowerCase()]||"#6b7c5a")+"22",color:chipColors[item.toLowerCase()]||"#6b7c5a",fontWeight:600,whiteSpace:"nowrap"}}>{item}</span>
+                            ))}</div>:<span style={{fontSize:10,color:t.textLight}}>—</span>}
                           </td>);
                         }
                         if(row.type==="select"){
