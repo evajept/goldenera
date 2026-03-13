@@ -288,7 +288,7 @@ const trackerRows = [
   {label:"Last meal",field:"mLast",type:"time",ph:"",section:"meals"},
   {label:"IF ratio",field:"_ifRatio",type:"computed",section:"meals"},
   {label:"🚶 After meal move",field:"moveAfter",type:"select",ph:"",opts:["x1","x2","x3"],section:"activity"},
-  {label:"🏋️ Exercise",field:"act",type:"chips",ph:"",section:"activity"},
+  {label:"🏋️ Exercise",field:"act",type:"select",ph:"",opts:["none","rest","walk","housework","stretch","cardio","weights"],section:"activity"},
   {label:"🌿 Berberine",field:"berb",type:"select",ph:"",opts:["0","x1","x2"],section:"supps"},
   {label:"🐟 Fish Oil",field:"fish",type:"select",ph:"",opts:["0","x1","x2","x3"],section:"supps"},
   {label:"💊 Magnesium",field:"mag",type:"select",ph:"",opts:["0","x1","x2","x3"],section:"supps"},
@@ -403,16 +403,11 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
     if(wd.sleep==="7+"||wd.sleep==="8+")base+=14;else if(wd.sleep==="<7")base+=7;
     // Fish Oil (10): x1=3, x2=6, x3=10
     if(wd.fish==="x3")base+=10;else if(wd.fish==="x2")base+=6;else if(wd.fish==="x1")base+=3;
-    // Exercise (5 base): any non-none activity = 5. Multi-select supported (comma-separated)
-    // Bonus: weights +10, cardio +5 per occurrence
+    // Exercise (5 base): any non-none activity = 5. Bonus: weights +10, cardio +5
     if(wd.act&&wd.act!=="none"&&wd.act!=="0"){
-      const acts=wd.act.split(",").map(a=>a.trim().toLowerCase());
-      const hasActivity=acts.some(a=>a&&a!=="none");
-      if(hasActivity)base+=5;
-      acts.forEach(a=>{
-        if(a==="weights")bonus+=10;
-        else if(a==="cardio")bonus+=5;
-      });
+      base+=5;
+      if(wd.act==="weights")bonus+=10;
+      else if(wd.act==="cardio")bonus+=5;
     }
     // After meal move (8): x1=3, x2=6, x3=8
     if(wd.moveAfter==="x3")base+=8;else if(wd.moveAfter==="x2")base+=6;else if(wd.moveAfter==="x1")base+=3;
