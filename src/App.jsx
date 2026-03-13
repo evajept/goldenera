@@ -411,16 +411,18 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
     }
     // After meal move (8): x1=3, x2=6, x3=8
     if(wd.moveAfter==="x3")base+=8;else if(wd.moveAfter==="x2")base+=6;else if(wd.moveAfter==="x1")base+=3;
-    // Meal window (8 base): ≤10h=8, ≤11h=5, >11h=0. Bonus: ≤8h +5, ≤9h +2
+    // Meal window (8 base): based on IF ratio. 14:10+=8, 13:11=4, 12:12=0. Bonus: 16:8+ =+5, 15:9=+2
     if(wd.m1t&&wd.mLast){
       const [h1,mn1]=(wd.m1t||"").split(":").map(Number);
       const [h2,mn2]=(wd.mLast||"").split(":").map(Number);
       if(!isNaN(h1)&&!isNaN(h2)){
-        const mins=(h2*60+(mn2||0))-(h1*60+(mn1||0));
-        if(mins>0&&mins<=480){base+=8;bonus+=5;}
-        else if(mins<=540){base+=8;bonus+=2;}
-        else if(mins<=600)base+=8;
-        else if(mins<=660)base+=5;
+        const eatMins=(h2*60+(mn2||0))-(h1*60+(mn1||0));
+        const fasting=24-(eatMins/60);
+        if(fasting>=16){base+=8;bonus+=5;}
+        else if(fasting>=15){base+=8;bonus+=2;}
+        else if(fasting>=14)base+=8;
+        else if(fasting>=13)base+=4;
+        // 12:12 or worse = 0
       }
     }
     // Fiber first (7)
