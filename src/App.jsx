@@ -1,5 +1,8 @@
 import React, { useState } from "react";
 
+const FONT_LINK = "https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap";
+if(!document.querySelector(`link[href="${FONT_LINK}"]`)){const l=document.createElement("link");l.rel="stylesheet";l.href=FONT_LINK;document.head.appendChild(l);}
+
 const SHEET_API = "https://script.google.com/macros/s/AKfycbxWHehS2Drs5gXKPuNv1u173pLu7Mr8ZOJ7KX5pEOS4L5K-X7HOeHBN1Cw9pUt5Byf2Hw/exec";
 
 // Debounced save to Google Sheets
@@ -56,45 +59,54 @@ const labMarkers = [
     s30:"130",s60:"130",s90:"128", m30:"130",m60:"130",m90:"129", n30:"130",n60:"130",n90:"130" },
   { marker:"Weight", confirmed:"73.6", normal:"BMI<23", status:"warning",
     s30:"69–70",s60:"65–67",s90:"60–63", m30:"71–72",m60:"68–70",m90:"65–67", n30:"72–73",n60:"71–72",n90:"69–71" },
+  { marker:"BMI", confirmed:"26.4", normal:"18.5–22.9", status:"warning",
+    s30:"24.7–25.1",s60:"23.3–24.0",s90:"21.5–22.6", m30:"25.4–25.8",m60:"24.4–25.1",m90:"23.3–24.0", n30:"25.8–26.2",n60:"25.4–25.8",n90:"24.7–25.4" },
 ];
 
 // Clinical notes per checkup date
 const clinicalNotes = {
   "26 Feb": [
-    { icon:"🚨", sev:"critical", title:"Pancreatitis Risk", text:"Trig 702 (4x limit). Above 500 = acute pancreatitis risk. If severe stomach pain radiating to back, nausea, vomiting → ER immediately." },
-    { icon:"🫁", sev:"critical", title:"Fatty Liver (NAFLD)", text:"GGT 184 + ALT 50 confirms fatty liver. Reversible. Liver regenerates in 6-8 weeks once triggers removed." },
-    { icon:"🩸", sev:"critical", title:"Uncontrolled Diabetes", text:"HbA1C 9.4% + Glucose 211. Without intervention, nerve/kidney/vision damage risk increases within 1-2 years." },
-    { icon:"💊", sev:"warning", title:"Lipemic Blood (3+)", text:"Blood visibly fatty. Fat in blood = triglycerides so high they're visible. Fish oil + zero sweet drinks = fastest fix." },
-    { icon:"⚡", sev:"warning", title:"Metabolic Syndrome", text:"High glucose + high trig + uric acid + fatty liver = full metabolic syndrome. All respond to same interventions." },
-    { icon:"✅", sev:"ok", title:"Kidneys Normal", text:"Creatinine 0.52, eGFR 130. Kidneys healthy. Safe for all supplements." },
+    { icon:"🔄", sev:"ontrack", title:"Recalibration week", text:"Processing lab results, preparing for Angkhana's move-in and new job transition. Using this time to plan the protocol, set up tracking systems, and establish baseline measurements." },
+    { icon:"🚨", sev:"grow", title:"Pancreatitis Risk", text:"Trig 702 (4x limit). Above 500 = acute pancreatitis risk. If severe stomach pain radiating to back, nausea, vomiting, go to ER immediately." },
+    { icon:"🫁", sev:"grow", title:"Fatty Liver (NAFLD)", text:"GGT 184 + ALT 50 confirms fatty liver. Reversible. Liver regenerates in 6-8 weeks once triggers removed." },
+    { icon:"🩸", sev:"grow", title:"Uncontrolled Diabetes", text:"HbA1C 9.4% + Glucose 211. Without intervention, nerve/kidney/vision damage risk increases within 1-2 years." },
+    { icon:"✅", sev:"excellent", title:"Kidneys Normal", text:"Creatinine 0.52, eGFR 130. Kidneys healthy. Safe for all supplements." },
   ],
   "7 Mar (Day 5)": [
-    { icon:"🎉", sev:"ok", title:"Fasting glucose 211 → 142 (Day 5)", text:"Dropped 69 points (-33%) in 5 days of protocol. Ahead of predictions. Protocol is working." },
-    { icon:"⚖️", sev:"ok", title:"Weight 73.6 → 71.2 kg", text:"Lost 2.4 kg by Day 5. First 1-2 kg is water/inflammation. Real fat loss starting." },
-    { icon:"🌅", sev:"warning", title:"Dawn effect present", text:"Evening 128 → morning 142 (+14). Normal for insulin resistance. Last thing to normalize. Berberine + Mg at night helping." },
-    { icon:"🍚", sev:"warning", title:"Post-meal spike 208", text:"4 spoons rice berry + potato + pumpkin = ~50g carbs. Too much for current insulin resistance. Target <30g carbs/meal. Drop potato, try konjac rice." },
-    { icon:"📊", sev:"ok", title:"Tracking faster than predicted", text:"At this pace, fasting glucose could hit 120s soon and sub-100 by Day 60. Keep going." },
+    { icon:"🎉", sev:"excellent", title:"Glucose 211 to 142 (Day 5)", text:"Dropped 69 points (-33%) in 5 days. Ahead of predictions. Protocol is working." },
+    { icon:"🚶", sev:"excellent", title:"Walking daily + berberine started", text:"Berberine ramped from x1 to x2 by Day 5. Walking after meals every day. These two are the biggest drivers." },
+    { icon:"🍚", sev:"grow", title:"Post-meal spike 208", text:"4 spoons rice berry + potato + pumpkin = too many carbs. Target <30g carbs/meal. Drop potato." },
+    { icon:"😴", sev:"grow", title:"Sleep <7 every night so far", text:"Consistent <7h sleep. This alone costs 15-30 pts on fasting glucose. Sleep is the missing lever." },
+    { icon:"💊", sev:"grow", title:"Mg + D3/K2 still zero", text:"5 days without these supplements. Magnesium improves sleep AND fasting glucose." },
   ],
-  "10 Mar (Day 9)": [
-    { icon:"🎉", sev:"ok", title:"Fasting glucose 211 → 123 (Day 9)", text:"Dropped 88 points (-42%) in 9 days of protocol. Now only 24 points above normal range (70-99). Beating Full Send predictions again." },
-    { icon:"🍚", sev:"ok", title:"Low GI rice test passed", text:"Post-meal 160 after low GI rice (spike +37). Compare: jasmine rice spike was +97 (to 217). Low GI rice works for her." },
-    { icon:"📉", sev:"ok", title:"Post-meal 150 (no carb meal)", text:"Salmon-style meals still producing drops, not spikes. Her metabolism is recovering." },
-    { icon:"😴", sev:"critical", title:"Sleep still <7 every night", text:"Every single day shows <7 hours. This alone costs 15-30 pts on fasting glucose. 123 could be 100-110 with proper sleep." },
-    { icon:"💊", sev:"warning", title:"Magnesium + D3/K2 still zero", text:"9 days without these supplements. Magnesium improves sleep AND lowers fasting glucose. Start tonight." },
-    { icon:"⚖️", sev:"ok", title:"Weight 73.6 → 71.8 kg", text:"Lost 1.8 kg by Day 7 of tracking. Real fat loss now starting. Predicted 67-69 kg by end of month." },
-    { icon:"🏃", sev:"ok", title:"Walking daily + berberine x2", text:"Perfect compliance on the two highest-impact habits. This is why numbers are dropping so fast." },
-    { icon:"🔮", sev:"ok", title:"Day 30 prediction updated", text:"Fasting glucose 95-110. Could hit normal range by end of month. Retest trig + glucose at Day 30." },
-    { icon:"📐", sev:"ok", title:"Body: Hip 103 → 99 cm (-4)", text:"Fat mobilizing from hip area. Waist 89→88 (-1). Neck 42→39 (-3) signals insulin resistance improving. Chest 105→101 (-4)." },
-    { icon:"📏", sev:"warning", title:"Waist:Hip ratio 0.89", text:"Target <0.80 for healthy range. Currently elevated = metabolic risk zone. Will improve as visceral fat drops with trig reduction." },
+  "7 Mar (Day 6)": [
+    { icon:"🐟", sev:"excellent", title:"No spike at lunch, no carbs", text:"Mar 7: Salmon + broccoli = no glucose spike. Confirms protein + fat meals are safe and effective." },
   ],
   "8 Mar (Day 7)": [
-    { icon:"⚖️", sev:"ok", title:"Weight 73.6 → 71.8 kg (-1.8)", text:"Lost 1.8 kg in first week of tracking. First 1-2 kg is water/inflammation. Sustainable pace." },
-    { icon:"📐", sev:"ok", title:"Hip 103 → 99 cm (-4 cm)", text:"Biggest single measurement drop. Fat is mobilizing. Great response to protocol." },
-    { icon:"📏", sev:"ok", title:"Neck 42 → 39 cm (-3 cm)", text:"Neck circumference tracks insulin resistance closely. 3 cm drop is a strong signal the body is responding." },
-    { icon:"📏", sev:"ok", title:"Chest 105 → 101 cm (-4 cm)", text:"Inflammation and fluid retention reducing. Upper body responding well." },
-    { icon:"📏", sev:"warning", title:"Waist only -1 cm (89→88)", text:"Waist is often last to shrink (visceral fat is stubborn). Will accelerate as liver fat clears and trig drops." },
-    { icon:"📐", sev:"warning", title:"Waist:Hip 0.89 (elevated)", text:"Target <0.80. This ratio is the #1 predictor of metabolic disease risk. It will track down with trig reduction." },
-    { icon:"💪", sev:"ok", title:"New baselines recorded", text:"Belly 96, Thigh 55, Calve 37, Shoulder 47. Now we can track changes going forward." },
+    { icon:"⚖️", sev:"excellent", title:"Weight 73.6 to 71.8 kg (-1.8)", text:"Lost 1.8 kg in first week. First 1-2 kg is water/inflammation. Sustainable pace." },
+    { icon:"📐", sev:"excellent", title:"Hip 103 to 99 cm (-4 cm)", text:"Biggest single measurement drop. Fat is mobilizing." },
+    { icon:"📏", sev:"excellent", title:"Neck 42 to 39 cm (-3 cm)", text:"Neck circumference tracks insulin resistance. 3 cm drop is a strong signal." },
+    { icon:"🍚", sev:"grow", title:"White rice spike to 217", text:"Mar 8: Tom yum with white boiled rice + spicy glass noodle salad spiked to 217. Had to walk and do chores to bring it down to 150. White rice confirmed off-limits." },
+  ],
+  "10 Mar (Day 9)": [
+    { icon:"🎉", sev:"excellent", title:"Glucose 211 to 123 (Day 9)", text:"Dropped 88 points (-42%) in 9 days. Now only 24 points above normal range (70-99)." },
+    { icon:"🍚", sev:"ontrack", title:"Low GI rice test passed", text:"Post-meal 160 after low GI rice (spike +37). Compare: white rice spike was +97 (to 217). Low GI works." },
+    { icon:"📉", sev:"excellent", title:"No-carb meals = no spike", text:"Salmon-style meals still producing drops, not spikes. Metabolism is recovering." },
+  ],
+  "11 Mar (Day 10)": [
+    { icon:"📊", sev:"ontrack", title:"Fasting glucose 120, steady", text:"Day 10: consolidating in low 120s. Body is finding a new set point." },
+    { icon:"🧠", sev:"ontrack", title:"Brain work spikes glucose", text:"Mar 11: After lunch spike 120 to 137. Peak 143 during meeting, not stress but focused attention. Bottom 116, probably after berberine kicked in." },
+  ],
+  "12 Mar (Day 11)": [
+    { icon:"📊", sev:"ontrack", title:"Fasting glucose 123, holding", text:"Day 11: stable in 120s range. Consistent." },
+    { icon:"💊", sev:"excellent", title:"Magnesium finally started", text:"Day 11: Mg x2 started. Should help sleep quality and fasting glucose." },
+    { icon:"😴", sev:"ontrack", title:"Spike when exhausted", text:"Mar 12: Glucose spiked when feeling exhausted. Fatigue and stress raise cortisol which raises glucose." },
+  ],
+  "13 Mar (Day 12)": [
+    { icon:"📉", sev:"excellent", title:"Fasting glucose 117, new low", text:"Day 12: 117 is the lowest fasting reading yet. Down 94 points from baseline 211." },
+    { icon:"🍚", sev:"grow", title:"Low GI rice still spikes", text:"Mar 13: 2 spoons of low GI rice spiked post-meal to 163. After days of no rice at all, even small amounts cause a spike. Body still not ready for rice." },
+    { icon:"☀️", sev:"excellent", title:"D3/K2 started", text:"Day 12: First dose of D3/K2. Now all 4 core supplements are active." },
+    { icon:"😴", sev:"excellent", title:"Sleep improving, two 7+ nights", text:"Day 10 and Day 12 both logged 7+ hours. Sleep is starting to shift." },
   ],
 };
 
@@ -108,6 +120,7 @@ const chartData = {
     wt:[{m:"26 Feb",v:73.6,confirmed:true},{m:"8 Mar",v:71.8,confirmed:true},{m:"D30",v:68,confirmed:false},{m:"D60",v:64,confirmed:false},{m:"D90",v:61,confirmed:false}],
     ggt:[{m:"26 Feb",v:184,confirmed:true},{m:"D30",v:110,confirmed:false},{m:"D60",v:55,confirmed:false},{m:"D90",v:30,confirmed:false}],
     chol:[{m:"26 Feb",v:220,confirmed:true},{m:"D30",v:205,confirmed:false},{m:"D60",v:195,confirmed:false},{m:"D90",v:187,confirmed:false}],
+    bmi:[{m:"26 Feb",v:26.4,confirmed:true},{m:"8 Mar",v:25.7,confirmed:true},{m:"D30",v:24.4,confirmed:false},{m:"D60",v:23.0,confirmed:false},{m:"D90",v:21.9,confirmed:false}],
   },
 };
 
@@ -259,12 +272,10 @@ const foodCats = {
 };
 
 const supps = [
-  { name:"Berberine", dose:"600mg × 2 w/ meals", trig:"-20–35%", hb:"-0.9–2%", notes:"Wk1: 1×. Wk2+: 2×. Always WITH food. Never empty stomach.", icon:"🌿", p:"HIGHEST" },
-  { name:"Fish Oil", dose:"3–4g EPA+DHA split", trig:"-20–50%", hb:"Min", notes:"With fattiest meal. Split across meals. Freeze caps to prevent burps.", icon:"🐟", p:"HIGHEST" },
-  { name:"Magnesium", dose:"200mg+ bedtime", trig:"-5–15%", hb:"-0.3–0.5%", notes:"Glycinate or citrate form. Glycine = liver protective. Calms nerves, improves sleep.", icon:"💎", p:"HIGHEST" },
-  { name:"D3 + K2", dose:"2000–5000 IU + 100mcg MK-7 bedtime", trig:"Indirect", hb:"-0.3–0.5%", notes:"Take WITH magnesium (Mg activates D3). Most Thais deficient. K2 directs calcium to bones not arteries.", icon:"☀️", p:"HIGHEST" },
-  { name:"Basil Seeds", dose:"1 tbsp soaked 15 min before meals", trig:"-10–20%", hb:"-0.3–0.8%", notes:"เม็ดแมงลัก. Soak in water until gel forms. Same fiber barrier as psyllium. NOT with fish oil.", icon:"🌾", p:"HIGH" },
-  { name:"ACV", dose:"1 tsp in water before meals", trig:"Indirect", hb:"-0.2–0.3%", notes:"Dilute always. Use straw to protect teeth. Optional. Start when ready.", icon:"🍎", p:"OPT" },
+  { name:"Berberine", dose:"600mg × 2 w/ meals", trig:"-20–35%", hb:"-0.9–2%", icon:"🌿", p:"HIGHEST" },
+  { name:"Fish Oil", dose:"3–4g EPA+DHA split", trig:"-20–50%", hb:"Min", icon:"🐟", p:"HIGHEST" },
+  { name:"Magnesium", dose:"200mg+ bedtime", trig:"-5–15%", hb:"-0.3–0.5%", icon:"💎", p:"HIGHEST" },
+  { name:"D3 + K2", dose:"2000–5000 IU + 100mcg MK-7 bedtime", trig:"Indirect", hb:"-0.3–0.5%", icon:"☀️", p:"HIGHEST" },
 ];
 
 const actOpts = ["Walk","Heel raises","Weight training","Long walk 30+","Swimming","Yoga","Sauna/steam","Stretching","Rest day","Housework","Other"];
@@ -281,14 +292,14 @@ const trackerRows = [
   {label:"🐟 Fish Oil",field:"fish",type:"select",ph:"",opts:["0","x1","x2","x3"],section:"supps"},
   {label:"💊 Magnesium",field:"mag",type:"select",ph:"",opts:["0","x1","x2","x3"],section:"supps"},
   {label:"☀️ D3 + K2",field:"d3k2",type:"select",ph:"",opts:["0","x1","x2"],section:"supps"},
-  {label:"🌱 Basil seeds",field:"basil",type:"check",section:"supps"},
-  {label:"🥜 Brazil nuts x3",field:"brazil",type:"check",section:"supps"},
-  {label:"🦠 Probiotics",field:"probio",type:"check",section:"habits"},
-  {label:"🚫 No sweet drink",field:"noSweet",type:"check",section:"habits"},
-  {label:"🥗 Fiber first",field:"fiberFirst",type:"check",section:"habits"},
   {label:"⏳ IF 14:10",field:"if14",type:"check",section:"habits"},
+  {label:"🥗 Fiber first, carb last",field:"fiberFirst",type:"check",section:"habits"},
+  {label:"🚫 No sugar",field:"noSweet",type:"check",section:"habits"},
   {label:"💧 Water 2L",field:"water",type:"check",section:"habits"},
-  {label:"😴 Sleep (>7h)",field:"sleep",type:"select",ph:"",opts:["<6","<7","7+","8+"],section:"habits"},
+  {label:"🦠 Probiotics",field:"probio",type:"check",section:"habits"},
+  {label:"🌱 Basil seeds",field:"basil",type:"check",section:"habits"},
+  {label:"🥜 Brazil nuts x3",field:"brazil",type:"check",section:"habits"},
+  {label:"😴 Sleep (>7h)",field:"sleep",type:"select",ph:"",opts:["<6","<7","7+","8+"],section:"sleep"},
   {label:"📝 Notes",field:"notes",type:"text",ph:"...",section:"notes"},
 ];
 const keyHabitsForScore = ["berb","fish","mag","d3k2","basil","brazil","probio","noSweet","fiberFirst","if14","water","moveAfter","act"];
@@ -302,7 +313,7 @@ const t = {
   warn:"#a07830", warnBg:"#fefaf0", warnBorder:"#e8d8b0",
   okBg:"#f2f5ee", okBorder:"#d0d8c4", ok:"#5c7a44",
   text:"#3d3228", textMuted:"#8a7d70", textLight:"#b0a698",
-  radius:10, radiusSm:6, font:"'Source Serif 4', Georgia, serif", sidebarBg:"#f3efe8",
+  radius:10, radiusSm:6, font:"'Roboto', sans-serif", sidebarBg:"#f3efe8",
 };
 const stC = { critical:{bg:t.dangerBg,bd:t.dangerBorder,tx:t.danger}, warning:{bg:t.warnBg,bd:t.warnBorder,tx:t.warn}, ok:{bg:t.okBg,bd:t.okBorder,tx:t.ok} };
 const sc="#5c7a44";
@@ -314,18 +325,17 @@ export default function GoldenEra() {
   const [expandedSupp, setExpandedSupp] = useState(null);
   const [joyOpen, setJoyOpen] = useState(false);
   // scenario removed - using real data
+  const trackerCleared = React.useRef(false);
+  const bodyCleared = React.useRef(false);
   const [labChart, setLabChart] = useState("hb");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [noteTab, setNoteTab] = useState("10 Mar (Day 9)");
+  const [insightWeek, setInsightWeek] = useState(null); // null = auto-select latest
+  const [labMeanTab, setLabMeanTab] = useState(null); // null = auto-select latest (26 Feb)
+  const [expandedLab, setExpandedLab] = useState(null); // accordion for lab meanings
   
-  const seedBodyMeas={
-  "weight-2026-02-26":"73.6","waist-2026-02-26":"89","hip-2026-02-26":"103",
-  "arm-2026-02-26":"31","chest-2026-02-26":"105","neck-2026-02-26":"42","shoulder-2026-02-26":"49",
-  "weight-2026-03-08":"71.8","waist-2026-03-08":"88","belly-2026-03-08":"96","hip-2026-03-08":"99",
-  "whr-2026-03-08":"0.89","arm-2026-03-08":"34","thigh-2026-03-08":"55","calve-2026-03-08":"37",
-  "chest-2026-03-08":"101","neck-2026-03-08":"39","shoulder-2026-03-08":"47",
-};
-const [bodyMeas, setBodyMeas] = useState(()=>{try{const s=localStorage.getItem("ge_bodyMeas");if(s){const parsed=JSON.parse(s);return {...seedBodyMeas,...parsed};}return {...seedBodyMeas};}catch{return {...seedBodyMeas};}});
+  const seedBodyMeas={};
+const [bodyMeas, setBodyMeas] = useState(()=>{try{if(localStorage.getItem("ge_bodyMeas_cleared")==="1")return {};const s=localStorage.getItem("ge_bodyMeas");if(s){const parsed=JSON.parse(s);return {...seedBodyMeas,...parsed};}return {...seedBodyMeas};}catch{return {...seedBodyMeas};}});
 
   const [weekStart, setWeekStart] = useState(()=>{const d=new Date();const dy=d.getDay();const df=d.getDate()-dy+(dy===0?-6:1);return new Date(d.setDate(df)).toISOString().split("T")[0];});
   const getWD=(s)=>{const r=[];for(let i=0;i<7;i++){const d=new Date(s);d.setDate(d.getDate()+i);r.push(d.toISOString().split("T")[0]);}return r;};
@@ -333,23 +343,11 @@ const [bodyMeas, setBodyMeas] = useState(()=>{try{const s=localStorage.getItem("
   const dn=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
   const shiftW=(dir)=>{const d=new Date(weekStart);d.setDate(d.getDate()+dir*7);setWeekStart(d.toISOString().split("T")[0]);};
   const emptyDay={glucFast:"",glucPost:"",m1t:"",m1f:"",m2t:"",m2f:"",m3t:"",m3f:"",act:""};
-  const seedData={
-  "2026-02-26":{glucFast:"211",sleep:"<7"},
-  "2026-02-27":{sleep:"<7"},
-  "2026-02-28":{sleep:"<7"},
-  "2026-03-01":{sleep:"<7"},
-  "2026-03-02":{glucFast:"180",mLast:"17:00",moveAfter:"x2",act:"walk",berb:"0",fish:"0",mag:false,d3k2:false,probio:true,fiberFirst:true,noSweet:true,if14:true,water:true,sleep:"<7"},
-  "2026-03-03":{glucFast:"170",mLast:"19:00",moveAfter:"x1",act:"walk",berb:"0",fish:"0",mag:false,d3k2:false,probio:true,sleep:"<7"},
-  "2026-03-04":{glucFast:"160",mLast:"17:00",moveAfter:"x1",act:"walk",berb:"x1",fish:"x1",mag:false,d3k2:false,probio:true,fiberFirst:true,noSweet:true,if14:true,sleep:"<7"},
-  "2026-03-05":{glucFast:"142",mLast:"16:00",moveAfter:"x1",act:"walk",berb:"x1",fish:"x1",mag:false,d3k2:false,probio:true,fiberFirst:true,noSweet:true,sleep:"<7"},
-  "2026-03-06":{glucFast:"140",mLast:"16:00",moveAfter:"x1",act:"walk",berb:"x2",fish:"x2",mag:false,d3k2:false,probio:true,fiberFirst:true,noSweet:true,if14:true,water:true,sleep:"<7"},
-  "2026-03-07":{glucFast:"147",mLast:"16:00",moveAfter:"x1",act:"walk",berb:"x1",fish:"x1",mag:false,d3k2:false,probio:true,fiberFirst:true,noSweet:true,if14:true,water:true,sleep:"<7"},
-  "2026-03-08":{glucFast:"150",glucNight:"140",mLast:"18:30",moveAfter:"x2",act:"walk",berb:"x2",fish:"x1",mag:false,d3k2:false,probio:true,fiberFirst:true,noSweet:true,water:true,sleep:"<6",notes:"No spike at lunch cos no carbs. Salmon + Broccoli"},
-  "2026-03-09":{glucFast:"150",glucPost:"150",glucNight:"137",mLast:"16:00",moveAfter:"x2",act:"walk",berb:"x2",fish:"x3",mag:false,d3k2:false,probio:true,fiberFirst:true,noSweet:true,sleep:"<7"},
-  "2026-03-10":{glucFast:"123",glucPost:"160",glucNight:"131",mLast:"16:00",moveAfter:"x1",act:"walk",berb:"x2",fish:"x3",probio:true,fiberFirst:true,noSweet:true,sleep:"7+",notes:"Sugar spikes to 217 after eating white boiled rice with Tom yum, spicy noodle glass salad"},
-};
-const [weekData,setWeekData]=useState(()=>{try{const s=localStorage.getItem("ge_weekData");if(s){const parsed=JSON.parse(s);return {...seedData,...parsed};}return {...seedData};}catch{return {...seedData};}});
+  const seedData={};
+const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekData_cleared")==="1")return {};const s=localStorage.getItem("ge_weekData");if(s){const parsed=JSON.parse(s);return {...seedData,...parsed};}return {...seedData};}catch{return {...seedData};}});
   const upWD=(date,f,v)=>setWeekData(p=>{
+    trackerCleared.current=false;
+    try{localStorage.removeItem("ge_weekData_cleared");}catch{};
     const updated={...p,[date]:{...(p[date]||{...emptyDay}),[f]:v}};
     // Queue save to Sheet
     queueSave(date, updated[date], "tracker");
@@ -365,7 +363,7 @@ const [weekData,setWeekData]=useState(()=>{try{const s=localStorage.getItem("ge_
       .then(r=>r.json())
       .then(d=>{
         console.log("Sheet data:", JSON.stringify(d));
-        if(d.tracker&&Object.keys(d.tracker).length>0){
+        if(d.tracker&&Object.keys(d.tracker).length>0&&!trackerCleared.current){
           // Sheet wins over localStorage for tracker data
           setWeekData(p=>{
             const merged={...seedData,...p,...d.tracker};
@@ -373,7 +371,7 @@ const [weekData,setWeekData]=useState(()=>{try{const s=localStorage.getItem("ge_
             return merged;
           });
         }
-        if(d.body&&Object.keys(d.body).length>0){
+        if(d.body&&Object.keys(d.body).length>0&&!bodyCleared.current){
           setBodyMeas(p=>{
             const merged={...seedBodyMeas,...p,...d.body};
             try{localStorage.setItem("ge_bodyMeas",JSON.stringify(merged));}catch{}
@@ -399,7 +397,7 @@ const [weekData,setWeekData]=useState(()=>{try{const s=localStorage.getItem("ge_
     possible+=1;if(wd.sleep==="7+"||wd.sleep==="8+")total++;
   });let gluc=0;weekDates.forEach(d=>{if((weekData[d]||{}).glucFast)gluc++;});return{score:possible>0?Math.round((total/possible)*100):0,total,possible,gluc};};
   const ts=getTrackerScore();
-  const getTP=(marker)=>{const s=ts.score;if(s===0)return"—";const lk={"HbA1C":[8.4,6],"Fasting Glucose":[185,92],"Triglycerides":[485,135],"GGT":[125,32],"SGPT (ALT)":[40,22],"SGOT (AST)":[30,20],"Cholesterol":[215,187],"Uric Acid":[6.8,5.2],"HDL-C":[45,55],"LDL-C":[110,100],"Creatinine":[.52,.52],"eGFR":[130,128],"Weight":[70,62]};const[w,b]=lk[marker]||[0,0];if(w===b)return String(w);const p=w+((b-w)*s/100);return marker==="HbA1C"?`~${p.toFixed(1)}%`:marker==="Creatinine"?p.toFixed(2):`~${Math.round(p)}`;};
+  const getTP=(marker)=>{const s=ts.score;if(s===0)return"—";const lk={"HbA1C":[8.4,6],"Fasting Glucose":[185,92],"Triglycerides":[485,135],"GGT":[125,32],"SGPT (ALT)":[40,22],"SGOT (AST)":[30,20],"Cholesterol":[215,187],"Uric Acid":[6.8,5.2],"HDL-C":[45,55],"LDL-C":[110,100],"Creatinine":[.52,.52],"eGFR":[130,128],"Weight":[70,62],"BMI":[25.1,21.9]};const[w,b]=lk[marker]||[0,0];if(w===b)return String(w);const p=w+((b-w)*s/100);return marker==="HbA1C"?`~${p.toFixed(1)}%`:marker==="Creatinine"?p.toFixed(2):`~${Math.round(p)}`;};
 
   const getInsights=()=>{const tips=[];let berb=0,move=0,sweet=0,sleep=0,fiber=0,ifW=0,mag=0,water=0;weekDates.forEach(d=>{const wd=weekData[d]||{};if(wd.berb&&wd.berb!=="0")berb++;if(wd.moveAfter||wd.act)move++;if(wd.noSweet)sweet++;if(wd.sleep==="7+"||wd.sleep==="8+")sleep++;if(wd.fiberFirst)fiber++;if(wd.if14)ifW++;if(wd.mag)mag++;if(wd.water)water++;});if(ts.score>0)tips.push({icon:"📊",title:`Score: ${ts.score}%`,text:`${ts.total}/${ts.possible} habits. ${ts.score>=80?"Full Send pace.":ts.score>=50?"70% effort pace.":"Needs more consistency."}`});if(berb>0&&berb<5)tips.push({icon:"🌿",title:"Berberine",text:`${berb}/7 days. Aim for daily.`});if(berb>=5)tips.push({icon:"🌿",title:"Berberine strong",text:`${berb}/7 — excellent.`});if(move<5&&move>0)tips.push({icon:"🚶",title:"Move more",text:`${move}/7 days active. Even 10 min walks count.`});if(sweet>=5)tips.push({icon:"🚫",title:"Sugar-free",text:`${sweet}/7 days — biggest trig driver.`});if(sweet<5&&sweet>0)tips.push({icon:"⚠️",title:"Drinks",text:`${sweet}/7 sugar-free. Each ชาเย็น = +30-50 trig.`});if(sleep<5&&sleep>0)tips.push({icon:"😴",title:"Sleep",text:`${sleep}/7 nights 7+hrs. Poor sleep → glucose +15-30.`});if(mag===0)tips.push({icon:"💊",title:"Magnesium missing",text:"Start tonight. Helps sleep + lowers fasting glucose 5-15 pts."});if(tips.length===0){tips.push({icon:"📊",title:"Start tracking",text:"Fill in the table above to get personalized insights."});tips.push({icon:"💡",title:"Priorities",text:"Zero sweet drinks, berberine, movement, sleep 7+."});tips.push({icon:"🎯",title:"Glucose",text:"Track fasting glucose daily — best predictor of A1C."});}return tips;};
 
@@ -408,7 +406,7 @@ const [weekData,setWeekData]=useState(()=>{try{const s=localStorage.getItem("ge_
   const inp={padding:"6px 8px",borderRadius:8,border:`1px solid ${t.cardBorder}`,fontSize:12,fontFamily:t.font,boxSizing:"border-box",color:t.text,background:t.card,width:"100%"};
 
   const chD=chartData.strict;
-  const cSets={hb:{data:chD.hb,label:"HbA1C",ref:5.7,refL:"<5.7%",dom:[4,10]},trig:{data:chD.trig,label:"Trig",ref:150,refL:"<150",dom:[0,750]},wt:{data:chD.wt,label:"Weight",ref:60,refL:"60kg",dom:[55,75]},ggt:{data:chD.ggt,label:"GGT",ref:39,refL:"<39",dom:[0,200]},chol:{data:chD.chol,label:"Chol",ref:200,refL:"<200",dom:[150,240]},gluc:{data:chD.gluc,label:"Glucose",ref:99,refL:"<99",dom:[50,230]}};
+  const cSets={hb:{data:chD.hb,label:"HbA1C",ref:5.7,refL:"<5.7%",dom:[4,10]},trig:{data:chD.trig,label:"Trig",ref:150,refL:"<150",dom:[0,750]},wt:{data:chD.wt,label:"Weight",ref:60,refL:"60kg",dom:[55,75]},ggt:{data:chD.ggt,label:"GGT",ref:39,refL:"<39",dom:[0,200]},chol:{data:chD.chol,label:"Chol",ref:200,refL:"<200",dom:[150,240]},gluc:{data:chD.gluc,label:"Glucose",ref:99,refL:"<99",dom:[50,230]},bmi:{data:chD.bmi,label:"BMI",ref:23,refL:"<23",dom:[18,28]}};
   const ch=cSets[labChart];
   
 
@@ -416,30 +414,22 @@ const [weekData,setWeekData]=useState(()=>{try{const s=localStorage.getItem("ge_
     <div style={{minHeight:"100vh",background:t.bg,fontFamily:t.font,color:t.text,display:"flex"}}>
       <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
 
-      {/* SIDEBAR */}
-      <div style={{width:sidebarOpen?200:52,minHeight:"100vh",background:t.sidebarBg,borderRight:`1px solid ${t.cardBorder}`,padding:sidebarOpen?"20px 16px":"20px 6px",display:"flex",flexDirection:"column",flexShrink:0,transition:"width 0.2s",overflow:"hidden"}}>
-        <button onClick={()=>setSidebarOpen(!sidebarOpen)} style={{background:"none",border:"none",color:t.textLight,fontSize:14,cursor:"pointer",alignSelf:sidebarOpen?"flex-end":"center",marginBottom:10}}>{sidebarOpen?"◁":"▷"}</button>
+      {/* SIDEBAR — responsive: top bar on mobile, side on desktop */}
+      <div style={{width:sidebarOpen?180:48,minHeight:"100vh",background:t.sidebarBg,borderRight:`1px solid ${t.cardBorder}`,padding:sidebarOpen?"16px 12px":"16px 4px",display:"flex",flexDirection:"column",flexShrink:0,transition:"width 0.2s",overflow:"hidden"}}>
+        <button onClick={()=>setSidebarOpen(!sidebarOpen)} style={{background:"none",border:"none",color:t.textLight,fontSize:14,cursor:"pointer",alignSelf:sidebarOpen?"flex-end":"center",marginBottom:8}}>{sidebarOpen?"◁":"▷"}</button>
         {sidebarOpen&&<>
-          <div style={{marginBottom:16}}>
+          <div style={{marginBottom:14}}>
             <div style={{display:"flex",alignItems:"center",gap:6}}>
-              <div style={{fontSize:9,letterSpacing:3,color:t.accent,textTransform:"uppercase",fontWeight:600}}>Road to Golden Era</div>
-              <span style={{fontSize:8,padding:"2px 5px",borderRadius:4,background:sheetStatus==="synced"?"#16a34a18":sheetStatus==="loading"?"#d4850f18":sheetStatus==="error"?"#b4423418":"transparent",color:sheetStatus==="synced"?"#16a34a":sheetStatus==="loading"?"#d4850f":sheetStatus==="error"?"#b44234":t.textMuted}}>{sheetStatus==="synced"?"☁️ Synced":sheetStatus==="loading"?"⏳":"📱"}</span>
+              <div style={{fontSize:14,fontWeight:700,color:t.text,lineHeight:1.2}}>Golden Era</div>
+              {sheetStatus==="synced"&&<span style={{fontSize:8,padding:"2px 5px",borderRadius:4,background:"#16a34a18",color:"#16a34a"}}>☁️</span>}
+              {sheetStatus==="loading"&&<span style={{fontSize:8,padding:"2px 5px",borderRadius:4,background:"#d4850f18",color:"#d4850f"}}>⏳</span>}
             </div>
-            <div style={{fontSize:16,fontWeight:700,color:t.text,lineHeight:1.2,marginTop:2}}>From Moodeng<br/>to Model</div>
-          </div>
-          <div style={{marginBottom:20}}>
-            {[["Weight",`${WEIGHT} kg`],["Height",`${HEIGHT_CM} cm`],["BMI",BMI],["HbA1C","9.4%"],["Trig","702"],["Glucose","211"],["GGT","184"]].map(([l,v])=>(
-              <div key={l} style={{display:"flex",justifyContent:"space-between",padding:"5px 0",borderBottom:`1px solid ${t.cardBorder}`}}>
-                <span style={{fontSize:11,color:t.textLight}}>{l}</span>
-                <span style={{fontSize:11,color:t.textMuted,fontWeight:600}}>{v}</span>
-              </div>
-            ))}
           </div>
           <div style={{display:"flex",flexDirection:"column",gap:2,flex:1}}>
-            {tabDefs.map((td,i)=>(<button key={td.label} onClick={()=>setTab(i)} style={{display:"flex",alignItems:"center",gap:8,padding:"9px 10px",borderRadius:t.radiusSm,border:"none",background:tab===i?t.accent:"transparent",color:tab===i?"#fff":t.textMuted,fontSize:12,fontWeight:tab===i?700:400,cursor:"pointer",fontFamily:t.font,textAlign:"left",letterSpacing:tab===i?1:0.5}}><span style={{fontSize:15}}>{td.icon}</span><span>{td.label}</span></button>))}
+            {tabDefs.map((td,i)=>(<button key={td.label} onClick={()=>setTab(i)} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 10px",borderRadius:t.radiusSm,border:"none",background:tab===i?t.accent:"transparent",color:tab===i?"#fff":t.textMuted,fontSize:12,fontWeight:tab===i?700:400,cursor:"pointer",fontFamily:t.font,textAlign:"left",letterSpacing:tab===i?1:0.5}}><span style={{fontSize:14}}>{td.icon}</span><span>{td.label}</span></button>))}
           </div>
         </>}
-        {!sidebarOpen&&<div style={{display:"flex",flexDirection:"column",gap:3,alignItems:"center"}}>{tabDefs.map((td,i)=>(<button key={td.label} onClick={()=>setTab(i)} style={{width:34,height:34,borderRadius:t.radiusSm,border:"none",background:tab===i?t.accent:"transparent",color:tab===i?"#fff":t.textMuted,fontSize:15,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>{td.icon}</button>))}</div>}
+        {!sidebarOpen&&<div style={{display:"flex",flexDirection:"column",gap:3,alignItems:"center"}}>{tabDefs.map((td,i)=>(<button key={td.label} onClick={()=>setTab(i)} style={{width:34,height:34,borderRadius:t.radiusSm,border:"none",background:tab===i?t.accent:"transparent",color:tab===i?"#fff":t.textMuted,fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>{td.icon}</button>))}</div>}
       </div>
 
       {/* CONTENT */}
@@ -522,6 +512,105 @@ const [weekData,setWeekData]=useState(()=>{try{const s=localStorage.getItem("ge_
                 })()}
               </Card>
           </div>
+
+          {/* ══ LAB MEANINGS ══ */}
+          <h2 style={{fontSize:20,fontWeight:700,margin:"24px 0 4px"}}>Lab Insights</h2>
+          <p style={{color:t.textMuted,fontSize:12,marginBottom:12}}>Tap any marker to see what it means</p>
+          {(()=>{
+            const labTabs = [
+              {key:"baseline",label:"26 Feb",sublabel:"Confirmed",type:"baseline"},
+              {key:"d30",label:"Day 30",sublabel:"Predicted",type:"predict",pKey:"s30"},
+              {key:"d60",label:"Day 60",sublabel:"Predicted",type:"predict",pKey:"s60"},
+              {key:"d90",label:"Day 90",sublabel:"Predicted",type:"predict",pKey:"s90"},
+            ];
+            const activeLabIdx = labMeanTab !== null ? labMeanTab : 0;
+            const activeTab = labTabs[activeLabIdx];
+
+            const labMeanings = {
+              "HbA1C":{what:"Average blood sugar over 3 months",why:"9.4% = uncontrolled diabetes. Above 6.5% = diabetic. Below 5.7% = normal.",risk:"Nerve damage, kidney disease, vision loss within 1-2 years if sustained above 8%.",fix:"Berberine, low-carb, walking after meals, sleep 7+"},
+              "Fasting Glucose":{what:"Blood sugar after 8+ hours fasting",why:"211 = severely elevated. Normal is 70-99. Pre-diabetic 100-125.",risk:"Damages blood vessels, nerves. Dawn effect makes morning readings higher.",fix:"Berberine before meals, fiber first, zero sweet drinks, IF 14:10"},
+              "Triglycerides":{what:"Fat in the blood from food and liver",why:"702 = 4x the upper limit (160). Above 500 = acute pancreatitis risk.",risk:"Pancreatitis (severe stomach pain, ER visit). Also causes fatty liver.",fix:"Fish oil 3-4g/day, zero sweet drinks (#1 driver), walking, low carbs"},
+              "GGT":{what:"Liver enzyme, marker for liver damage and inflammation",why:"184 = 4.7x upper limit (39). Signals fatty liver disease (NAFLD).",risk:"Liver inflammation, scarring, cirrhosis if untreated.",fix:"Liver regenerates in 6-8 weeks. Remove sugar, alcohol, seed oils"},
+              "SGPT (ALT)":{what:"Liver enzyme, more specific to liver cell damage",why:"50 = slightly above limit (35). Confirms liver stress alongside GGT.",risk:"Mild elevation. Will normalize as fatty liver resolves.",fix:"Same as GGT. ALT drops faster than GGT"},
+              "SGOT (AST)":{what:"Enzyme found in liver, heart, and muscles",why:"31 = within normal (<32). Less liver-specific than ALT.",risk:"Currently OK. Monitor alongside ALT.",fix:"No action needed. Will improve with protocol"},
+              "Cholesterol":{what:"Total cholesterol, sum of LDL + HDL + VLDL",why:"220 = mildly elevated (target <200). Driven mainly by high trig.",risk:"Moderate. Will drop as triglycerides normalize.",fix:"Fish oil, fiber, walking. Trig reduction = cholesterol reduction"},
+              "Uric Acid":{what:"Waste product from breaking down purines",why:"7.2 = above limit (6.1). Linked to metabolic syndrome and gout risk.",risk:"Gout flares (joint pain). Kidney stones at sustained high levels.",fix:"Hydration 2L+, reduce organ meats, limit fructose"},
+              "HDL-C":{what:"Good cholesterol, removes fat from arteries",why:"45 = just above minimum (44). Higher is better. Target 50+.",risk:"Low HDL = higher cardiovascular risk. Currently borderline.",fix:"Exercise, olive oil, nuts, weight training"},
+              "LDL-C":{what:"Bad cholesterol, deposits fat in arteries",why:"109 = within normal (<130). Not a concern right now.",risk:"OK. Monitor if cholesterol stays elevated after trig drops.",fix:"No action needed. Focus on trig and glucose first"},
+              "Creatinine":{what:"Waste product filtered by kidneys",why:"0.52 = perfect (0.5-0.9). Kidneys are healthy.",risk:"None. Kidneys working great.",fix:"Stay hydrated"},
+              "eGFR":{what:"Estimated kidney filtration rate",why:"130 = excellent (>90 is normal). Kidneys filtering well.",risk:"None. Strong kidney function.",fix:"Maintain hydration"},
+              "Weight":{what:"Body weight, tracks overall metabolic health",why:"73.6 kg = BMI 26.4 (overweight). Target 60-63 kg (BMI <23).",risk:"Visceral fat drives insulin resistance, fatty liver, and high trig.",fix:"Low-carb + walking + IF 14:10. 1-2 kg/month loss"},
+              "BMI":{what:"Body Mass Index = weight / height². Asian cutoff for overweight is 23, not 25",why:"26.4 = overweight by Asian standards. Correlates with insulin resistance and fatty liver.",risk:"Every 1 point drop in BMI improves insulin sensitivity measurably.",fix:"Target 21-22. Will track down with weight loss from protocol"},
+            };
+
+            const tabSummaries = {
+              baseline: "Triglycerides at 702 (4x the safe limit) and HbA1C 9.4% are the biggest concerns. Liver enzymes are elevated from fatty liver. The good news: kidneys and LDL are healthy, and every one of these markers can improve significantly with diet and lifestyle changes alone.",
+              d30: "Trig predicted to drop to 350-400, still high but pancreatitis risk clearing. Glucose should hit 140-160 range (down from 211). Liver GGT starting recovery.",
+              d60: "Trig should approach 200, near safe zone. Glucose 110-125 entering pre-diabetic range (out of diabetic). GGT 50-70 means liver healing well. HbA1C 7.0-7.5%, real progress but still diabetic.",
+              d90: "Target: Trig 100-150 (safe), glucose 85-100 (normal), GGT 25-40 (normal), HbA1C 5.8-6.3% (near-normal). Full metabolic reset. Liver clean. Weight 60-63 kg.",
+            };
+
+            return(<div>
+              {/* Tabs */}
+              <div style={{display:"flex",gap:4,flexWrap:"wrap",marginBottom:14}}>
+                {labTabs.map((lt,li)=>{
+                  const isActive = li===activeLabIdx;
+                  return(<button key={lt.key} onClick={()=>setLabMeanTab(li)} style={{padding:"7px 14px",borderRadius:t.radius,fontSize:12,border:`1px solid ${isActive?t.accent:t.cardBorder}`,cursor:"pointer",background:isActive?t.accent:t.card,color:isActive?"#fff":t.textMuted,fontWeight:isActive?700:500,fontFamily:t.font,display:"flex",flexDirection:"column",alignItems:"center",gap:1,minWidth:70}}>
+                    <span>{lt.label}</span>
+                    <span style={{fontSize:9,opacity:0.8,fontWeight:400}}>{lt.sublabel}</span>
+                  </button>);
+                })}
+              </div>
+
+              {/* Summary strip */}
+              <div style={{padding:"12px 16px",background:t.bg,borderRadius:t.radius,marginBottom:12,fontSize:13,color:t.text,lineHeight:1.7}}>
+                {tabSummaries[activeTab.key]}
+              </div>
+
+              {/* Accordion list */}
+              <div style={{border:`0.5px solid ${t.cardBorder}`,borderRadius:t.radius,overflow:"hidden"}}>
+                {labMarkers.map((r,ri)=>{
+                  const meaning = labMeanings[r.marker];
+                  if(!meaning) return null;
+                  const sc2=stC[r.status];
+                  const isOpen = expandedLab===ri;
+
+                  // Values per tab
+                  let leftLabel,leftVal,rightLabel,rightVal;
+                  if(activeTab.type==="baseline"){
+                    leftLabel="Confirmed"; leftVal=r.confirmed;
+                    rightLabel="Normal"; rightVal=r.normal;
+                  } else {
+                    leftLabel="Predicted"; leftVal=r[activeTab.pKey]||"—";
+                    rightLabel="Confirmed"; rightVal=null;
+                  }
+
+                  return(<div key={r.marker} style={{borderBottom:ri<labMarkers.length-1?`0.5px solid ${t.cardBorder}`:"none",background:isOpen?t.bg:t.card}}>
+                    {/* Row header — always visible */}
+                    <div onClick={()=>setExpandedLab(isOpen?null:ri)} style={{display:"flex",alignItems:"center",gap:8,padding:"10px 14px",cursor:"pointer"}}>
+                      <div style={{display:"flex",alignItems:"center",gap:8,flex:1}}>
+                        <div style={{width:7,height:7,borderRadius:"50%",background:sc2.tx,flexShrink:0}}/>
+                        <span style={{fontSize:13,fontWeight:600}}>{r.marker}</span>
+                        <span style={{fontSize:10,padding:"2px 7px",borderRadius:t.radiusSm,background:sc2.bg,color:sc2.tx,fontWeight:600}}>{r.status}</span>
+                      </div>
+                      <div style={{display:"flex",gap:14}}>
+                        <div style={{textAlign:"center"}}><div style={{fontSize:9,color:t.textLight,textTransform:"uppercase",letterSpacing:.5}}>{leftLabel}</div><div style={{fontSize:16,fontWeight:700,color:activeTab.type==="baseline"?sc2.tx:t.accent}}>{leftVal}</div></div>
+                        <div style={{textAlign:"center"}}><div style={{fontSize:9,color:t.textLight,textTransform:"uppercase",letterSpacing:.5}}>{rightLabel}</div><div style={{fontSize:rightVal?14:12,fontWeight:rightVal?700:400,color:rightVal?t.ok:t.textLight,fontStyle:rightVal?"normal":"italic"}}>{rightVal||"Not yet"}</div></div>
+                      </div>
+                      <span style={{fontSize:11,color:t.textLight,marginLeft:4}}>{isOpen?"▲":"▼"}</span>
+                    </div>
+                    {/* Expanded meaning — stacked lines */}
+                    {isOpen&&<div style={{padding:"0 14px 10px 29px",fontSize:12,lineHeight:1.7,color:t.text}}>
+                      <div>{meaning.what}</div>
+                      <div>{meaning.why}</div>
+                      <div style={{color:t.danger}}>{meaning.risk}</div>
+                      <div style={{color:t.ok}}>→ {meaning.fix}</div>
+                    </div>}
+                  </div>);
+                })}
+              </div>
+            </div>);
+          })()}
 
 
         </div>)}
@@ -622,30 +711,32 @@ const [weekData,setWeekData]=useState(()=>{try{const s=localStorage.getItem("ge_
           <h2 style={{fontSize:20,fontWeight:700,margin:"0 0 4px"}}>Food & Supplements</h2>
           <p style={{color:t.textMuted,fontSize:13,marginBottom:14}}>What to eat, what to skip, and the supplement stack</p>
 
-          {/* Nutrition Needs */}
+          {/* Nutrition Needs + Portion Guide merged */}
           <h3 style={{fontSize:15,fontWeight:700,margin:"0 0 4px"}}>What Your Body Needs</h3>
           <p style={{color:t.textMuted,fontSize:12,marginBottom:10}}>Updated Day 12: Weight ~71kg, fasting glucose 116, low-carb protocol</p>
 
-          <div style={{border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,background:t.card,marginBottom:8,overflow:"hidden"}}>
+          <div style={{border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,background:t.card,marginBottom:12,overflow:"hidden"}}>
             <table style={{width:"100%",borderCollapse:"collapse"}}>
               <thead><tr style={{background:t.sidebarBg}}>
                 <th style={{padding:"8px 12px",textAlign:"left",fontSize:12,color:t.textMuted,borderBottom:`1px solid ${t.cardBorder}`,fontWeight:600}}>Nutrient</th>
-                <th style={{padding:"8px 12px",textAlign:"center",fontSize:12,color:t.textMuted,borderBottom:`1px solid ${t.cardBorder}`,fontWeight:600}}>Daily Target</th>
-                <th style={{padding:"8px 12px",textAlign:"center",fontSize:12,color:t.textMuted,borderBottom:`1px solid ${t.cardBorder}`,fontWeight:600}}>Per Meal (~3)</th>
+                <th style={{padding:"8px 12px",textAlign:"center",fontSize:12,color:t.textMuted,borderBottom:`1px solid ${t.cardBorder}`,fontWeight:600}}>Daily</th>
+                <th style={{padding:"8px 12px",textAlign:"center",fontSize:12,color:t.textMuted,borderBottom:`1px solid ${t.cardBorder}`,fontWeight:600}}>Per Meal</th>
+                <th style={{padding:"8px 12px",textAlign:"left",fontSize:12,color:t.textMuted,borderBottom:`1px solid ${t.cardBorder}`,fontWeight:600}}>Portion Guide</th>
                 <th style={{padding:"8px 12px",textAlign:"left",fontSize:12,color:t.textMuted,borderBottom:`1px solid ${t.cardBorder}`,fontWeight:600}}>Why</th>
               </tr></thead>
               <tbody>
                 {[
-                  ["🥩 Protein","80-100g","27-33g","35-40% of calories. Preserves muscle, controls hunger. Don't overdo — excess converts to glucose (gluconeogenesis) and raises uric acid.",t.ok],
-                  ["🥑 Healthy Fat","70-90g","23-30g","35-40% of calories. PRIMARY fuel source on low-carb. Slows digestion, absorbs D3/K2. Eat MORE fat not less — chicken skin, salmon, nuts, avocado, olive oil.",t.ok],
-                  ["🍚 Carbs","40-60g","13-20g","20-25% of calories. From vegetables, berries, small sweet potato only. Always eat LAST.",t.warn],
-                  ["🌾 Fiber","25-35g","8-12g","Slows sugar absorption, feeds gut bacteria, lowers trig",t.ok],
-                  ["💧 Water","2-2.5L","8-10 glasses","Flushes toxins, prevents false hunger, helps kidneys. Extra important on low-carb.",t.ok],
-                ].map(([n,daily,meal,why,color],i)=>(
+                  ["🌾 Fiber","25-35g","8-12g","1 cup broccoli + 1 tbsp basil seeds (เม็ดแมงลัก)","Eat FIRST. Slows sugar absorption, feeds gut bacteria, lowers trig",t.ok],
+                  ["🥑 Healthy Fat","70-90g","23-30g","1 tbsp olive oil + 10 almonds, or ½ avocado, or handful macadamia","35-40% of calories. PRIMARY fuel source. Slows digestion, absorbs D3/K2",t.ok],
+                  ["🥩 Protein","80-100g","27-33g","4 eggs, or 120g chicken thigh (with skin!), or 150g salmon","35-40% of calories. Preserves muscle, controls hunger. Don't overdo",t.ok],
+                  ["🍚 Carbs","40-60g","13-20g","1 cup vegetables, or ¼ small sweet potato, or ½ cup berries","20-25% of calories. Always eat LAST. From veggies, berries only",t.warn],
+                  ["💧 Water","2-2.5L","8-10 glasses","","Flushes toxins, prevents false hunger, helps kidneys",t.ok],
+                ].map(([n,daily,meal,portion,why,color],i)=>(
                   <tr key={i} style={{background:i%2===0?t.card:t.bg}}>
                     <td style={{padding:"8px 12px",fontSize:13,fontWeight:700}}>{n}</td>
                     <td style={{padding:"8px 12px",textAlign:"center",fontSize:14,fontWeight:800,color}}>{daily}</td>
                     <td style={{padding:"8px 12px",textAlign:"center",fontSize:13,color:t.textMuted}}>{meal}</td>
+                    <td style={{padding:"8px 12px",fontSize:11,color:t.text,lineHeight:1.4}}>{portion}</td>
                     <td style={{padding:"8px 12px",fontSize:11,color:t.textMuted,lineHeight:1.4}}>{why}</td>
                   </tr>
                 ))}
@@ -653,52 +744,47 @@ const [weekData,setWeekData]=useState(()=>{try{const s=localStorage.getItem("ge_
             </table>
           </div>
 
-          {/* Quick portion guide - separated by nutrient */}
-          <div style={{border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,background:t.card,padding:"10px 14px",marginBottom:12}}>
-            <div style={{fontSize:12,fontWeight:700,color:t.text,marginBottom:6}}>Quick portion guide (per meal)</div>
-            {[
-              ["🥩","30g protein","4 eggs, or 120g chicken thigh (with skin!), or 150g salmon, or 200g tofu"],
-              ["🥑","25g fat","1 tbsp olive/coconut oil + 10 almonds, or 1/2 avocado, or handful macadamia"],
-              ["🍚","15g carbs","1 cup vegetables, or 1/4 small sweet potato, or 1/2 cup berries"],
-              ["🌾","10g fiber","1 cup broccoli + 1 tbsp basil seeds (เม็ดแมงลัก)"],
-            ].map(([icon,label,detail],i)=>(
-              <div key={i} style={{display:"flex",gap:8,padding:"4px 0",borderBottom:i<3?`1px solid ${t.cardBorder}33`:"none"}}>
-                <span style={{fontSize:13}}>{icon}</span>
-                <span style={{fontSize:12,fontWeight:700,color:t.accent,minWidth:85}}>{label}</span>
-                <span style={{fontSize:12,color:t.textMuted}}>{detail}</span>
-              </div>
-            ))}
-          </div>
-
-          {/* Sugar journey - title outside, rows */}
-          <div style={{fontSize:13,fontWeight:700,color:t.danger,marginBottom:6}}>🚫 Added Sugar Limit</div>
-          <div style={{border:`1px solid ${t.dangerBorder}`,borderRadius:t.radiusSm,background:t.dangerBg,marginBottom:20,overflow:"hidden"}}>
-            {[
-              ["Day 1-30","0g","Zero added sugar. Reset phase. Trig and glucose drop fastest here."],
-              ["Day 31-60","max 10g","Only if fasting glucose < 100 and trig < 300. That's 2 tsp or 2 squares dark chocolate."],
-              ["Day 61-90","max 15g","Only if trig < 200 and glucose < 95. Use stevia for drinks."],
-            ].map(([phase,amt,note],i)=>(
-              <div key={i} style={{padding:"10px 14px",display:"flex",gap:12,alignItems:"center",borderBottom:i<2?`1px solid ${t.dangerBorder}`:"none"}}>
-                <div style={{fontSize:12,fontWeight:700,color:t.danger,minWidth:75}}>{phase}</div>
-                <div style={{fontSize:18,fontWeight:800,color:t.danger,minWidth:55}}>{amt}</div>
-                <div style={{fontSize:12,color:t.text,lineHeight:1.4,flex:1}}>{note}</div>
-              </div>
-            ))}
-          </div>
-
-          {/* Food Hacks */}
-          <div style={{fontSize:13,fontWeight:700,color:t.accent,marginBottom:6,marginTop:14}}>💡 Food Hacks</div>
+          {/* Supplements — table format */}
+          <h3 style={{fontSize:15,fontWeight:700,margin:"0 0 4px"}}>Supplements</h3>
+          <p style={{color:t.textMuted,fontSize:12,marginBottom:10}}>Berberine + fish oil WITH meals · Mg + D3/K2 BEDTIME</p>
           <div style={{border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,background:t.card,marginBottom:20,overflow:"hidden"}}>
-            {[
-              {tip:"🥗 Eating order matters", detail:"Fiber/veggies first → protein → fat → carbs LAST. This alone can reduce glucose spike up to 40%. The same food in different order = different spike."},
-              {tip:"🍫 Snack plate for cravings", detail:"85% dark chocolate squares + almonds + berries + cucumber slices. Looks beautiful, feels like a treat, low spike."},
-              {tip:"🍲 Soup = secret weapon", detail:"ต้มจืด, แกงจืด, bone broth with veggies. Warm soup fills the stomach, very low calorie, and triggers fullness hormones fast."},
-            ].map((h,i)=>(
-              <div key={i} style={{padding:"10px 14px",borderBottom:i<2?`1px solid ${t.cardBorder}`:"none",background:i%2===0?t.card:t.bg}}>
-                <div style={{fontSize:13,fontWeight:700,color:t.text}}>{h.tip}</div>
-                <div style={{fontSize:12,color:t.textMuted,marginTop:3,lineHeight:1.5}}>{h.detail}</div>
-              </div>
-            ))}
+            <table style={{width:"100%",borderCollapse:"collapse"}}>
+              <thead><tr style={{background:t.sidebarBg}}>
+                <th style={{padding:"8px 12px",textAlign:"left",fontSize:12,color:t.textMuted,borderBottom:`1px solid ${t.cardBorder}`,fontWeight:600}}>Supplement</th>
+                <th style={{padding:"8px 12px",textAlign:"left",fontSize:12,color:t.textMuted,borderBottom:`1px solid ${t.cardBorder}`,fontWeight:600}}>Dose</th>
+                <th style={{padding:"8px 12px",textAlign:"center",fontSize:12,color:t.textMuted,borderBottom:`1px solid ${t.cardBorder}`,fontWeight:600}}>Trig</th>
+                <th style={{padding:"8px 12px",textAlign:"center",fontSize:12,color:t.textMuted,borderBottom:`1px solid ${t.cardBorder}`,fontWeight:600}}>A1C</th>
+              </tr></thead>
+              <tbody>
+                {supps.map((s,i)=>(
+                  <tr key={s.name} style={{background:i%2===0?t.card:t.bg}}>
+                    <td style={{padding:"8px 12px",fontSize:13,fontWeight:700}}>{s.icon} {s.name}</td>
+                    <td style={{padding:"8px 12px",fontSize:12,color:t.textMuted}}>{s.dose}</td>
+                    <td style={{padding:"8px 12px",textAlign:"center",fontSize:12,fontWeight:600,color:t.danger}}>{s.trig}</td>
+                    <td style={{padding:"8px 12px",textAlign:"center",fontSize:12,fontWeight:600,color:t.ok}}>{s.hb}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Quick Rules — 2 column table */}
+          <div style={{fontSize:13,fontWeight:700,color:t.accent,marginBottom:6,marginTop:14}}>📌 Quick Rules</div>
+          <div style={{border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,background:t.card,marginBottom:20,overflow:"hidden"}}>
+            <table style={{width:"100%",borderCollapse:"collapse"}}>
+              <tbody>
+                {[
+                  {tip:"🥗 Eating order matters", detail:"Fiber/veggies first, then protein, then fat, carbs LAST. Same food in different order = different spike."},
+                  {tip:"🍲 Soup = secret weapon", detail:"ต้มจืด, แกงจืด, bone broth. Fills the stomach, very low calorie, triggers fullness fast."},
+                  {tip:"🚫 Added sugar limit", detail:"Day 1-30: 0g · Day 31-60: max 10g (if glucose <100) · Day 61-90: max 15g (if trig <200)", isDanger:true},
+                ].map((h,i)=>(
+                  <tr key={i} style={{background:i%2===0?t.card:t.bg}}>
+                    <td style={{padding:"10px 14px",fontSize:13,fontWeight:700,color:h.isDanger?t.danger:t.text,borderBottom:i<2?`1px solid ${t.cardBorder}`:"none",whiteSpace:"nowrap",verticalAlign:"top"}}>{h.tip}</td>
+                    <td style={{padding:"10px 14px",fontSize:12,color:t.textMuted,lineHeight:1.5,borderBottom:i<2?`1px solid ${t.cardBorder}`:"none",verticalAlign:"top"}}>{h.detail}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
 
           {/* Carb Guide — 3 columns like fruit */}
@@ -711,11 +797,11 @@ const [weekData,setWeekData]=useState(()=>{try{const s=localStorage.getItem("ge_
                 ["Konjac rice บุก","0"],
                 ["Shirataki noodle","0"],
                 ["Cauliflower rice","5"],
-                ["Sweet potato มันหวาน","44"],
-                ["Oats ข้าวโอ๊ต","40"],
-                ["Low GI rice","54"],
-                ["Basmati rice","50"],
                 ["Glass noodle วุ้นเส้น","39"],
+                ["Oats ข้าวโอ๊ต","40"],
+                ["Sweet potato มันหวาน","44"],
+                ["Basmati rice","50"],
+                ["Low GI rice","54"],
               ].map(([name,gi],i)=>(<div key={i} style={{display:"flex",justifyContent:"space-between",padding:"3px 0",borderBottom:i<7?`1px solid ${t.okBorder}33`:"none"}}>
                 <span style={{fontSize:11,color:t.text,fontWeight:600}}>{name}</span>
                 <span style={{fontSize:10,color:t.ok,fontWeight:700}}>GI {gi}</span>
@@ -724,13 +810,13 @@ const [weekData,setWeekData]=useState(()=>{try{const s=localStorage.getItem("ge_
             <div style={{border:`1px solid ${t.warnBorder}`,borderRadius:t.radiusSm,background:t.warnBg,padding:"10px 12px"}}>
               <div style={{fontSize:12,fontWeight:800,color:t.warn,marginBottom:8,textAlign:"center"}}>⚠️ LIMIT</div>
               {[
-                ["Rice berry ข้าวไรซ์เบอร์รี่","62"],
-                ["Brown rice ข้าวกล้อง","68"],
                 ["Corn ข้าวโพด","52"],
-                ["Pumpkin ฟักทอง","64"],
                 ["Taro เผือก","53"],
                 ["Potato มันฝรั่ง","58"],
                 ["Oat milk นมข้าวโอ๊ต","60"],
+                ["Rice berry ข้าวไรซ์เบอร์รี่","62"],
+                ["Pumpkin ฟักทอง","64"],
+                ["Brown rice ข้าวกล้อง","68"],
               ].map(([name,gi],i)=>(<div key={i} style={{display:"flex",justifyContent:"space-between",padding:"3px 0",borderBottom:i<6?`1px solid ${t.warnBorder}33`:"none"}}>
                 <span style={{fontSize:11,color:t.text,fontWeight:600}}>{name}</span>
                 <span style={{fontSize:10,color:t.warn,fontWeight:700}}>GI {gi}</span>
@@ -739,13 +825,13 @@ const [weekData,setWeekData]=useState(()=>{try{const s=localStorage.getItem("ge_
             <div style={{border:`1px solid ${t.dangerBorder}`,borderRadius:t.radiusSm,background:t.dangerBg,padding:"10px 12px"}}>
               <div style={{fontSize:12,fontWeight:800,color:t.danger,marginBottom:8,textAlign:"center"}}>🚫 AVOID</div>
               {[
-                ["Jasmine rice ข้าวหอมมะลิ","89"],
-                ["Sticky rice ข้าวเหนียว","87"],
-                ["White bread ขนมปัง","75"],
                 ["Pastries/croissant","70"],
                 ["Instant noodle มาม่า","73"],
+                ["White bread ขนมปัง","75"],
                 ["Boiled potato (mashed)","78"],
                 ["Rice porridge โจ๊ก","83"],
+                ["Sticky rice ข้าวเหนียว","87"],
+                ["Jasmine rice ข้าวหอมมะลิ","89"],
               ].map(([name,gi],i)=>(<div key={i} style={{display:"flex",justifyContent:"space-between",padding:"3px 0",borderBottom:i<6?`1px solid ${t.dangerBorder}33`:"none"}}>
                 <span style={{fontSize:11,color:t.text,fontWeight:600}}>{name}</span>
                 <span style={{fontSize:10,color:t.danger,fontWeight:700}}>GI {gi}</span>
@@ -760,16 +846,16 @@ const [weekData,setWeekData]=useState(()=>{try{const s=localStorage.getItem("ge_
             <div style={{border:`1px solid ${t.okBorder}`,borderRadius:t.radiusSm,background:t.okBg,padding:"10px 12px"}}>
               <div style={{fontSize:12,fontWeight:800,color:t.ok,marginBottom:8,textAlign:"center"}}>✅ SAFE (GI &lt; 40)</div>
               {[
-                ["Guava ฝรั่ง","12","1"],
-                ["Cherries","22","3"],
-                ["Strawberries","25","1"],
-                ["Blueberries","25","4"],
-                ["Plum","24","2"],
-                ["Grapefruit","25","3"],
-                ["Dried apricot","30","8"],
-                ["Apple","36","5"],
-                ["Pear","38","4"],
-              ].map(([name,gi,gl],i)=>(<div key={i} style={{display:"flex",justifyContent:"space-between",padding:"3px 0",borderBottom:i<8?`1px solid ${t.okBorder}33`:"none"}}>
+                ["Guava ฝรั่ง","12"],
+                ["Cherries","22"],
+                ["Plum","24"],
+                ["Strawberries","25"],
+                ["Blueberries","25"],
+                ["Grapefruit","25"],
+                ["Dried apricot","30"],
+                ["Apple","36"],
+                ["Pear","38"],
+              ].map(([name,gi],i)=>(<div key={i} style={{display:"flex",justifyContent:"space-between",padding:"3px 0",borderBottom:i<8?`1px solid ${t.okBorder}33`:"none"}}>
                 <span style={{fontSize:11,color:t.text,fontWeight:600}}>{name}</span>
                 <span style={{fontSize:10,color:t.ok,fontWeight:700}}>GI {gi}</span>
               </div>))}
@@ -778,16 +864,16 @@ const [weekData,setWeekData]=useState(()=>{try{const s=localStorage.getItem("ge_
             <div style={{border:`1px solid ${t.warnBorder}`,borderRadius:t.radiusSm,background:t.warnBg,padding:"10px 12px"}}>
               <div style={{fontSize:12,fontWeight:800,color:t.warn,marginBottom:8,textAlign:"center"}}>⚠️ LIMIT (GI 40-59)</div>
               {[
-                ["Orange","43","5"],
-                ["Peach","42","5"],
-                ["Dragon fruit แก้วมังกร","48","7"],
-                ["Kiwi","50","5"],
-                ["Mango มะม่วง","51","8"],
-                ["Banana กล้วย","51","13"],
-                ["Grapes","46","8"],
-                ["Longan ลำไย","48","10"],
-                ["Papaya มะละกอ","56","8"],
-              ].map(([name,gi,gl],i)=>(<div key={i} style={{display:"flex",justifyContent:"space-between",padding:"3px 0",borderBottom:i<8?`1px solid ${t.warnBorder}33`:"none"}}>
+                ["Peach","42"],
+                ["Orange","43"],
+                ["Grapes","46"],
+                ["Dragon fruit แก้วมังกร","48"],
+                ["Longan ลำไย","48"],
+                ["Kiwi","50"],
+                ["Mango มะม่วง","51"],
+                ["Banana กล้วย","51"],
+                ["Papaya มะละกอ","56"],
+              ].map(([name,gi],i)=>(<div key={i} style={{display:"flex",justifyContent:"space-between",padding:"3px 0",borderBottom:i<8?`1px solid ${t.warnBorder}33`:"none"}}>
                 <span style={{fontSize:11,color:t.text,fontWeight:600}}>{name}</span>
                 <span style={{fontSize:10,color:t.warn,fontWeight:700}}>GI {gi}</span>
               </div>))}
@@ -796,13 +882,13 @@ const [weekData,setWeekData]=useState(()=>{try{const s=localStorage.getItem("ge_
             <div style={{border:`1px solid ${t.dangerBorder}`,borderRadius:t.radiusSm,background:t.dangerBg,padding:"10px 12px"}}>
               <div style={{fontSize:12,fontWeight:800,color:t.danger,marginBottom:8,textAlign:"center"}}>🚫 AVOID (GI 60+)</div>
               {[
-                ["Pineapple สับปะรด","66","12"],
-                ["Watermelon แตงโม","72","5"],
-                ["Ripe banana","70","16"],
-                ["Lychee ลิ้นจี่","57","12"],
-                ["Rambutan เงาะ","59","12"],
-                ["Durian ทุเรียน","44*","18"],
-              ].map(([name,gi,gl],i)=>(<div key={i} style={{display:"flex",justifyContent:"space-between",padding:"3px 0",borderBottom:i<5?`1px solid ${t.dangerBorder}33`:"none"}}>
+                ["Durian ทุเรียน","44*"],
+                ["Lychee ลิ้นจี่","57"],
+                ["Rambutan เงาะ","59"],
+                ["Pineapple สับปะรด","66"],
+                ["Ripe banana","70"],
+                ["Watermelon แตงโม","72"],
+              ].map(([name,gi],i)=>(<div key={i} style={{display:"flex",justifyContent:"space-between",padding:"3px 0",borderBottom:i<5?`1px solid ${t.dangerBorder}33`:"none"}}>
                 <span style={{fontSize:11,color:t.text,fontWeight:600}}>{name}</span>
                 <span style={{fontSize:10,color:t.danger,fontWeight:700}}>GI {gi}</span>
               </div>))}
@@ -898,29 +984,6 @@ const [weekData,setWeekData]=useState(()=>{try{const s=localStorage.getItem("ge_
             </div>
           </div>
 
-          {/* Supplements — single column with priority colors */}
-          <h3 style={{fontSize:15,fontWeight:700,margin:"0 0 4px"}}>Supplements</h3>
-          <p style={{color:t.textMuted,fontSize:12,marginBottom:10}}>Berberine + fish oil WITH meals · Basil seeds BEFORE · Mg + D3/K2 BEDTIME</p>
-          <div style={{display:"flex",flexDirection:"column",gap:8}}>
-            {supps.map((s,i)=>{const isO=expandedSupp===i;const pc=prioColors[s.p]||t.accent;return(<div key={s.name} onClick={()=>setExpandedSupp(isO?null:i)} style={{background:t.card,border:`1px solid ${isO?pc+"44":t.cardBorder}`,borderRadius:t.radiusSm,padding:"12px 14px",cursor:"pointer"}}>
-              <div style={{display:"flex",alignItems:"center",gap:10}}>
-                <span style={{fontSize:22}}>{s.icon}</span>
-                <div style={{flex:1}}>
-                  <div style={{display:"flex",gap:6,alignItems:"center"}}>
-                    <span style={{fontWeight:700,fontSize:15}}>{s.name}</span>
-                    <span style={{fontSize:10,padding:"2px 7px",borderRadius:t.radiusSm,background:pc+"18",color:pc,fontWeight:700,border:`1px solid ${pc}33`}}>{s.p}</span>
-                  </div>
-                  <div style={{fontSize:13,color:t.textMuted}}>{s.dose}</div>
-                </div>
-                <div style={{textAlign:"right",fontSize:12}}>
-                  <div style={{color:t.danger}}>Trig: {s.trig}</div>
-                  <div style={{color:t.ok}}>A1C: {s.hb}</div>
-                </div>
-              </div>
-              {isO&&<div style={{marginTop:10,paddingTop:10,borderTop:`1px solid ${t.cardBorder}`,fontSize:13,color:t.text,lineHeight:1.5}}>{s.notes}</div>}
-            </div>);})}
-          </div>
-
           {/* Joy Without the Spike — collapsible */}
           <div onClick={()=>setJoyOpen(!joyOpen)} style={{cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center",margin:"20px 0 4px",padding:"10px 14px",background:t.card,border:`1px solid ${joyOpen?t.accent+"44":t.cardBorder}`,borderRadius:t.radiusSm}}>
             <div>
@@ -959,7 +1022,7 @@ const [weekData,setWeekData]=useState(()=>{try{const s=localStorage.getItem("ge_
 
         {/* ══ PROGRESS ══ */}
         {tab===0&&(<div>
-          <h2 style={{fontSize:20,fontWeight:700,margin:"0 0 4px"}}>Weekly Tracker</h2>
+          <h2 style={{fontSize:20,fontWeight:700,margin:"0 0 4px"}}>Habit Tracker</h2>
           <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:14}}>
             <button onClick={()=>shiftW(-1)} style={{background:"none",border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,padding:"4px 10px",cursor:"pointer",fontSize:14,color:t.text}}>◀</button>
             <span style={{fontSize:14,fontWeight:700,color:t.accent}}>{new Date(weekDates[0]).toLocaleDateString("en-GB",{day:"numeric",month:"short"})} — {new Date(weekDates[6]).toLocaleDateString("en-GB",{day:"numeric",month:"short"})}</span>
@@ -967,43 +1030,45 @@ const [weekData,setWeekData]=useState(()=>{try{const s=localStorage.getItem("ge_
           </div>
 
           {/* Single unified table like the Google Sheet */}
-          <div style={{overflowX:"auto",border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,background:t.card,marginBottom:20}}>
+          <div style={{overflowX:"auto",border:`0.5px solid ${t.cardBorder}`,borderRadius:t.radiusSm,background:t.card,marginBottom:20}}>
             <table style={{borderCollapse:"collapse",width:"100%",minWidth:7*70+130}}>
               <thead><tr style={{background:t.sidebarBg}}>
-                <th style={{position:"sticky",left:0,background:t.sidebarBg,zIndex:2,padding:"7px 8px",fontSize:11,color:t.textMuted,textAlign:"left",borderBottom:`1px solid ${t.cardBorder}`,borderRight:`1px solid ${t.cardBorder}`,minWidth:130}}></th>
-                {weekDates.map((d,i)=>(<th key={d} style={{padding:"7px 3px",fontSize:11,color:t.accent,textAlign:"center",borderBottom:`1px solid ${t.cardBorder}`,minWidth:62,fontWeight:700}}><div>{dn[i]}</div><div style={{fontWeight:400,color:t.textLight,fontSize:10}}>{new Date(d).toLocaleDateString("en-GB",{day:"numeric",month:"short"})}</div></th>))}
+                <th style={{position:"sticky",left:0,background:t.sidebarBg,zIndex:2,padding:"7px 8px",fontSize:11,color:t.textMuted,textAlign:"left",borderBottom:`1px solid ${t.cardBorder}`,borderRight:`0.5px solid ${t.cardBorder}`,minWidth:130}}></th>
+                {weekDates.map((d,i)=>(<th key={d} style={{padding:"7px 3px",fontSize:11,color:t.accent,textAlign:"center",borderBottom:`1px solid ${t.cardBorder}`,borderRight:i<6?`0.5px solid ${t.cardBorder}22`:"none",minWidth:62,fontWeight:700}}><div>{dn[i]}</div><div style={{fontWeight:400,color:t.textLight,fontSize:10}}>{new Date(d).toLocaleDateString("en-GB",{day:"numeric",month:"short"})}</div></th>))}
               </tr></thead>
               <tbody>
                 {trackerRows.map((row,ri)=>{
                   const prevSection = ri>0 ? trackerRows[ri-1].section : null;
                   const showDivider = row.section !== prevSection && ri > 0;
                   const wd = (d) => weekData[d]||{};
+                  const rowBg = ri%2===0?t.card:t.bg;
                   return(<React.Fragment key={row.field}>
-                    {showDivider && <tr><td colSpan={8} style={{height:2,background:t.accent+"33",padding:0}}></td></tr>}
-                    <tr style={{background:ri%2===0?t.card:t.bg}}>
-                      <td style={{position:"sticky",left:0,background:ri%2===0?t.card:t.bg,zIndex:1,padding:"4px 8px",fontSize:11,color:t.text,fontWeight:600,borderRight:`1px solid ${t.cardBorder}`,whiteSpace:"nowrap"}}>{row.label}</td>
-                      {weekDates.map(d=>{
+                    {showDivider && <tr><td colSpan={8} style={{height:1.5,background:t.accent+"33",padding:0}}></td></tr>}
+                    <tr style={{background:rowBg}}>
+                      <td style={{position:"sticky",left:0,background:rowBg,zIndex:1,padding:"5px 8px",fontSize:11,color:t.text,fontWeight:600,borderRight:`0.5px solid ${t.cardBorder}`,borderBottom:`0.5px solid ${t.cardBorder}`,whiteSpace:"nowrap"}}>{row.label}</td>
+                      {weekDates.map((d,di)=>{
                         const val = wd(d)[row.field]||"";
+                        const cellBorder = {borderBottom:`0.5px solid ${t.cardBorder}`,borderRight:di<6?`0.5px solid ${t.cardBorder}22`:"none"};
                         if(row.type==="check"){
                           const on = !!wd(d)[row.field];
-                          return(<td key={d} onClick={()=>upWD(d,row.field,!on)} style={{padding:"3px",textAlign:"center",cursor:"pointer"}}>
-                            <div style={{width:22,height:22,borderRadius:4,margin:"0 auto",background:on?t.accent:"transparent",border:on?"none":`1px solid ${t.cardBorder}`,display:"flex",alignItems:"center",justifyContent:"center"}}>{on&&<span style={{fontSize:12,color:"#fff"}}>✓</span>}</div>
+                          return(<td key={d} onClick={()=>upWD(d,row.field,!on)} style={{padding:"3px",textAlign:"center",cursor:"pointer",...cellBorder}}>
+                            <div style={{width:26,height:26,borderRadius:"50%",margin:"0 auto",background:on?"#5c7a44":t.sidebarBg,display:"flex",alignItems:"center",justifyContent:"center",transition:"background 0.15s"}}><span style={{fontSize:11,color:on?"#fff":t.textLight,fontWeight:on?700:400}}>{on?"✓":"·"}</span></div>
                           </td>);
                         }
                         if(row.type==="select"){
-                          return(<td key={d} style={{padding:"2px 2px"}}><select value={val} onChange={e=>upWD(d,row.field,e.target.value)} style={{...inp,padding:"3px 2px",fontSize:10,width:"100%",minWidth:50}}><option value="">—</option>{(row.opts||[]).map(o=><option key={o} value={o}>{o}</option>)}</select></td>);
+                          return(<td key={d} style={{padding:0,...cellBorder}}><select value={val} onChange={e=>upWD(d,row.field,e.target.value)} style={{padding:"5px 2px",border:"none",fontSize:10,width:"100%",minWidth:50,background:"transparent",color:val?t.text:t.textLight,fontFamily:t.font,outline:"none",cursor:"pointer",textAlign:"center"}}><option value="">—</option>{(row.opts||[]).map(o=><option key={o} value={o}>{o}</option>)}</select></td>);
                         }
                         const isGluc = row.section==="glucose" && val;
                         const glucColor = isGluc ? (Number(val)<=99?t.ok:Number(val)<=140?"#d4850f":t.danger) : t.text;
-                        return(<td key={d} style={{padding:"2px 2px"}}><input type={row.type==="number"?"text":row.type} inputMode={row.type==="number"?"numeric":undefined} placeholder={row.ph} value={val} onChange={e=>upWD(d,row.field,e.target.value)} style={{...inp,padding:"3px 4px",fontSize:11,width:"100%",minWidth:50,color:isGluc?glucColor:t.text,fontWeight:isGluc?700:400}}/></td>);
+                        return(<td key={d} style={{padding:0,...cellBorder}}><input type={row.type==="number"?"text":row.type} inputMode={row.type==="number"?"numeric":undefined} placeholder={row.ph||"—"} value={val} onChange={e=>upWD(d,row.field,e.target.value)} style={{padding:"5px 4px",border:"none",fontSize:11,width:"100%",minWidth:50,background:"transparent",color:isGluc?glucColor:t.text,fontWeight:isGluc?700:400,fontFamily:t.font,outline:"none",textAlign:"center",boxSizing:"border-box"}}/></td>);
                       })}
                     </tr>
-                  </React.Fragment>);
-                })}
+                  </React.Fragment>);})}
+
                 {/* Habit Score row */}
-                <tr><td colSpan={8} style={{height:2,background:t.accent+"33",padding:0}}></td></tr>
+                <tr><td colSpan={8} style={{height:1.5,background:t.accent+"33",padding:0}}></td></tr>
                 <tr style={{background:t.accentBg}}>
-                  <td style={{position:"sticky",left:0,background:t.accentBg,zIndex:1,padding:"6px 8px",fontSize:12,color:t.accent,fontWeight:800,borderRight:`1px solid ${t.cardBorder}`}}>Score</td>
+                  <td style={{position:"sticky",left:0,background:t.accentBg,zIndex:1,padding:"6px 8px",fontSize:12,color:t.accent,fontWeight:800,borderRight:`0.5px solid ${t.cardBorder}`}}>Score</td>
                   {weekDates.map(d=>{
                     const wd2=weekData[d]||{};
                     let day_t=0,day_p=0;
@@ -1022,144 +1087,352 @@ const [weekData,setWeekData]=useState(()=>{try{const s=localStorage.getItem("ge_
           </div>
 
           {/* Body Measurements — weekly date format matching tracker */}
-          <h3 style={{fontSize:15,fontWeight:700,margin:"0 0 8px"}}>Body Measurements</h3>
-          <p style={{color:t.textMuted,fontSize:11,marginBottom:8}}>Measure morning before eating. Tape at widest point.</p>
-          <div style={{overflowX:"auto",border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,background:t.card,marginBottom:10}}>
-            <table style={{width:"100%",borderCollapse:"collapse"}}>
+          <h2 style={{fontSize:20,fontWeight:700,margin:"0 0 8px"}}>Body Measurements</h2>
+          <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:10}}>
+            <button onClick={()=>shiftW(-1)} style={{background:"none",border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,padding:"4px 10px",cursor:"pointer",fontSize:14,color:t.text}}>◀</button>
+            <span style={{fontSize:14,fontWeight:700,color:t.accent}}>{new Date(weekDates[0]).toLocaleDateString("en-GB",{day:"numeric",month:"short"})} — {new Date(weekDates[6]).toLocaleDateString("en-GB",{day:"numeric",month:"short"})}</span>
+            <button onClick={()=>shiftW(1)} style={{background:"none",border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,padding:"4px 10px",cursor:"pointer",fontSize:14,color:t.text}}>▶</button>
+          </div>
+          <div style={{overflowX:"auto",border:`0.5px solid ${t.cardBorder}`,borderRadius:t.radiusSm,background:t.card,marginBottom:10}}>
+            <table style={{borderCollapse:"collapse",width:"100%",tableLayout:"fixed"}}>
               <thead><tr style={{background:t.sidebarBg}}>
-                <th style={{padding:"6px 10px",textAlign:"left",fontSize:11,color:t.textMuted,borderBottom:`1px solid ${t.cardBorder}`,minWidth:110}}></th>
-                {weekDates.map((d,i)=>(<th key={d} style={{padding:"6px 3px",textAlign:"center",fontSize:10,color:t.accent,borderBottom:`1px solid ${t.cardBorder}`,fontWeight:600,minWidth:55}}><div style={{fontWeight:700}}>{dn[i]}</div><div style={{fontWeight:400,color:t.textLight,fontSize:9}}>{new Date(d).toLocaleDateString("en-GB",{day:"numeric",month:"short"})}</div></th>))}
+                <th style={{position:"sticky",left:0,background:t.sidebarBg,zIndex:2,padding:"7px 8px",fontSize:11,color:t.textMuted,textAlign:"left",borderBottom:`1px solid ${t.cardBorder}`,borderRight:`0.5px solid ${t.cardBorder}`,width:120}}></th>
+                {weekDates.map((d,i)=>(<th key={d} style={{padding:"7px 3px",fontSize:11,color:t.accent,textAlign:"center",borderBottom:`1px solid ${t.cardBorder}`,borderRight:i<6?`0.5px solid ${t.cardBorder}22`:"none",fontWeight:700}}><div>{dn[i]}</div><div style={{fontWeight:400,color:t.textLight,fontSize:10}}>{new Date(d).toLocaleDateString("en-GB",{day:"numeric",month:"short"})}</div></th>))}
               </tr></thead>
               <tbody>{[
-                {label:"⚖️ Weight (kg)",field:"weight"},
-                {label:"📏 Waist (cm)",field:"waist"},
-                {label:"📏 Belly (cm)",field:"belly"},
-                {label:"📏 Hip (cm)",field:"hip"},
-                {label:"📐 Waist:Hip",field:"whr"},
-                {label:"💪 Upper Arm",field:"arm"},
-                {label:"🦵 Thigh (cm)",field:"thigh"},
-                {label:"🦶 Calve (cm)",field:"calve"},
-                {label:"📏 Chest (cm)",field:"chest"},
-                {label:"📏 Neck (cm)",field:"neck"},
-                {label:"📏 Shoulder",field:"shoulder"},
-              ].map((row,i)=>(
-                <tr key={row.field} style={{background:i%2===0?t.card:t.bg}}>
-                  <td style={{padding:"4px 8px",fontSize:11,fontWeight:600,whiteSpace:"nowrap"}}>{row.label}</td>
-                  {weekDates.map(d=>(
-                    <td key={d} style={{padding:"2px 2px"}}>
-                      <input type="text" value={(bodyMeas[`${row.field}-${d}`])||""} onChange={e=>{const val=e.target.value;setBodyMeas(p=>{const n={...p,[`${row.field}-${d}`]:val};try{localStorage.setItem("ge_bodyMeas",JSON.stringify(n))}catch{};const bodyForDate={};Object.keys(n).forEach(k=>{if(k.endsWith("-"+d)){const field=k.split("-")[0];bodyForDate[field]=n[k];}});queueSave(d,bodyForDate,"body");return n;});}} style={{...inp,textAlign:"center",padding:"4px 2px",background:"transparent",border:`1px solid ${t.cardBorder}44`,borderRadius:6,fontSize:11,width:"100%"}}/>
+                {label:"⚖️ Weight",field:"weight",ph:"kg"},
+                {label:"📏 Waist",field:"waist",ph:"cm"},
+                {label:"📏 Belly",field:"belly",ph:"cm"},
+                {label:"📏 Hip",field:"hip",ph:"cm"},
+                {label:"📐 Waist:Hip",field:"whr",ph:"ratio"},
+                {label:"💪 Upper Arm",field:"arm",ph:"cm"},
+                {label:"🦵 Thigh",field:"thigh",ph:"cm"},
+                {label:"🦶 Calve",field:"calve",ph:"cm"},
+                {label:"📏 Chest",field:"chest",ph:"cm"},
+                {label:"📏 Neck",field:"neck",ph:"cm"},
+                {label:"📏 Shoulder",field:"shoulder",ph:"cm"},
+              ].map((row,i)=>{
+                const rowBg = i%2===0?t.card:t.bg;
+                return(
+                <tr key={row.field} style={{background:rowBg}}>
+                  <td style={{position:"sticky",left:0,background:rowBg,zIndex:1,padding:"5px 8px",fontSize:11,color:t.text,fontWeight:600,borderRight:`0.5px solid ${t.cardBorder}`,borderBottom:`0.5px solid ${t.cardBorder}`,whiteSpace:"nowrap"}}>{row.label}</td>
+                  {weekDates.map((d,di)=>(
+                    <td key={d} style={{padding:0,borderBottom:`0.5px solid ${t.cardBorder}`,borderRight:di<6?`0.5px solid ${t.cardBorder}22`:"none"}}>
+                      <input type="text" placeholder={row.ph} value={(bodyMeas[`${row.field}-${d}`])||""} onChange={e=>{const val=e.target.value;bodyCleared.current=false;try{localStorage.removeItem("ge_bodyMeas_cleared");}catch{};setBodyMeas(p=>{const n={...p,[`${row.field}-${d}`]:val};try{localStorage.setItem("ge_bodyMeas",JSON.stringify(n))}catch{};const bodyForDate={};Object.keys(n).forEach(k=>{if(k.endsWith("-"+d)){const field=k.split("-")[0];bodyForDate[field]=n[k];}});queueSave(d,bodyForDate,"body");return n;});}} style={{padding:"5px 4px",border:"none",fontSize:11,width:"100%",background:"transparent",color:t.text,fontFamily:t.font,outline:"none",textAlign:"center",boxSizing:"border-box"}}/>
                     </td>
                   ))}
-                </tr>
-              ))}</tbody>
+                </tr>);
+              })}</tbody>
             </table>
           </div>
 
-          {/* ══ WEEKLY INSIGHT ══ */}
-          <h3 style={{fontSize:15,fontWeight:700,margin:"0 0 8px"}}>Weekly Insight</h3>
+          {/* ══ INSIGHT ══ */}
+          <h2 style={{fontSize:20,fontWeight:700,margin:"0 0 8px"}}>Insight</h2>
           {(()=>{
-            // Build week-by-week data from protocol start
-            const startDate = new Date("2026-03-02"); // Day 1
+            // Build weeks: W0 = pre-protocol baseline, W1+ = protocol weeks
+            const allWeeks = [];
+            // W0: 26 Feb – 1 Mar (baseline week before protocol)
+            const w0Dates = [];
+            for(let i=0;i<4;i++){const dd=new Date("2026-02-26");dd.setDate(dd.getDate()+i);w0Dates.push(dd.toISOString().split("T")[0]);}
+            allWeeks.push({num:0,label:"W0",sublabel:"Baseline",start:new Date("2026-02-26"),end:new Date("2026-03-01"),dates:w0Dates});
+            // W1+: protocol weeks starting 2 Mar
+            const startDate = new Date("2026-03-02");
             const today = new Date();
-            const weeks = [];
             let ws = new Date(startDate);
             let wNum = 1;
             while(ws <= today) {
               const we = new Date(ws); we.setDate(we.getDate()+6);
               const wDates = [];
               for(let i=0;i<7;i++){const dd=new Date(ws);dd.setDate(dd.getDate()+i);wDates.push(dd.toISOString().split("T")[0]);}
-              weeks.push({num:wNum,start:new Date(ws),end:we>today?today:we,dates:wDates});
+              allWeeks.push({num:wNum,label:`W${wNum}`,sublabel:`Day ${(wNum-1)*7+1}–${wNum*7}`,start:new Date(ws),end:we>today?today:we,dates:wDates});
               ws.setDate(ws.getDate()+7);
               wNum++;
             }
-            // Current week = last in list
-            return weeks.reverse().map(w=>{
-              const wStart=w.start.toLocaleDateString("en-GB",{day:"numeric",month:"short"});
-              const wEnd=w.end.toLocaleDateString("en-GB",{day:"numeric",month:"short"});
-              // Gather glucose data for this week
-              const glucVals=w.dates.map(d=>{const v=weekData[d]?.glucFast;return v?Number(v):null;}).filter(v=>v);
-              const glucMin=glucVals.length?Math.min(...glucVals):null;
-              const glucMax=glucVals.length?Math.max(...glucVals):null;
-              const glucAvg=glucVals.length?Math.round(glucVals.reduce((a,b)=>a+b,0)/glucVals.length):null;
-              // Count habits
-              let habDone=0,habTotal=0;
-              w.dates.forEach(d=>{const wd=weekData[d]||{};
-                ["berb","fish","mag","d3k2"].forEach(f=>{habTotal++;if(wd[f]&&wd[f]!=="0")habDone++;});
-                ["basil","brazil","probio","noSweet","fiberFirst","if14","water"].forEach(f=>{habTotal++;if(wd[f])habDone++;});
-                habTotal++;if(wd.moveAfter)habDone++;
-                habTotal++;if(wd.act)habDone++;
-                habTotal++;if(wd.sleep==="7+"||wd.sleep==="8+")habDone++;
-              });
-              const habPct=habTotal>0?Math.round(habDone/habTotal*100):0;
-              // Get body measurements for this week
-              const bmFields=["weight","waist","hip","whr","belly","neck","chest"];
-              const bm={};
-              bmFields.forEach(f=>{
-                for(let i=w.dates.length-1;i>=0;i--){
-                  const v=bodyMeas[`${f}-${w.dates[i]}`];
-                  if(v){bm[f]=v;break;}
-                }
-              });
-              // Get clinical notes for this week
-              const weekNoteKeys=Object.keys(clinicalNotes).filter(k=>{
-                // Match note keys that fall in this week's date range
-                const dateMatch=k.match(/(\d+)\s+(Mar|Feb)/i);
-                if(dateMatch){
-                  const day=parseInt(dateMatch[1]);
-                  const startDay=w.start.getDate();
-                  const endDay=w.end.getDate();
+            // Default to latest week
+            const activeIdx = insightWeek !== null ? insightWeek : allWeeks.length-1;
+            const w = allWeeks[activeIdx];
+            if(!w) return null;
+
+            const wStart=w.start.toLocaleDateString("en-GB",{day:"numeric",month:"short"});
+            const wEnd=w.end.toLocaleDateString("en-GB",{day:"numeric",month:"short"});
+
+            // Gather glucose data
+            const glucVals=w.dates.map(d=>{const v=weekData[d]?.glucFast;return v?Number(v):null;}).filter(v=>v);
+            const glucMin=glucVals.length?Math.min(...glucVals):null;
+            const glucMax=glucVals.length?Math.max(...glucVals):null;
+            const glucAvg=glucVals.length?Math.round(glucVals.reduce((a,b)=>a+b,0)/glucVals.length):null;
+
+            // Post-meal glucose
+            const postMealVals=w.dates.map(d=>{const v=weekData[d]?.glucPost;return v?Number(v):null;}).filter(v=>v);
+            const postMealMin=postMealVals.length?Math.min(...postMealVals):null;
+            const postMealMax=postMealVals.length?Math.max(...postMealVals):null;
+            const postMealAvg=postMealVals.length?Math.round(postMealVals.reduce((a,b)=>a+b,0)/postMealVals.length):null;
+
+            // Sleep trend
+            let sleepGood=0,sleepTotal=0;
+            w.dates.forEach(d=>{const s=weekData[d]?.sleep;if(s){sleepTotal++;if(s==="7+"||s==="8+")sleepGood++;}});
+
+            // Sleep average hours (estimate from categories)
+            const sleepHours=[];
+            w.dates.forEach(d=>{const s=weekData[d]?.sleep;if(s){
+              if(s==="8+")sleepHours.push(8.5);
+              else if(s==="7+")sleepHours.push(7.5);
+              else if(s==="<7")sleepHours.push(6.5);
+              else if(s==="<6")sleepHours.push(5.5);
+            }});
+            const sleepAvg=sleepHours.length?Math.round(sleepHours.reduce((a,b)=>a+b,0)/sleepHours.length*10)/10:null;
+
+            // Supplement tracking: calculate % of max doses taken this week
+            // Max doses: berb x2, fish x3, mag x2, d3k2 x2
+            let suppsDone=0,suppsMax=0;
+            w.dates.forEach(d=>{
+              const wd=weekData[d];
+              if(!wd) return;
+              // Only count days where at least one supp field exists
+              const hasSupp = wd.berb||wd.fish||wd.mag||wd.d3k2;
+              if(!hasSupp) return;
+              const doseVal=(v,max)=>{if(!v||v==="0")return 0;const n=parseInt(v.replace("x",""));return isNaN(n)?0:Math.min(n,max);};
+              suppsDone+=doseVal(wd.berb,2)+doseVal(wd.fish,3)+doseVal(wd.mag,2)+doseVal(wd.d3k2,2);
+              suppsMax+=2+3+2+2; // 9 total max per day
+            });
+            const suppsPct=suppsMax>0?Math.round(suppsDone/suppsMax*100):0;
+
+            // Count habits
+            let habDone=0,habTotal=0;
+            w.dates.forEach(d=>{const wd=weekData[d]||{};
+              ["berb","fish","mag","d3k2"].forEach(f=>{habTotal++;if(wd[f]&&wd[f]!=="0")habDone++;});
+              ["basil","brazil","probio","noSweet","fiberFirst","if14","water"].forEach(f=>{habTotal++;if(wd[f])habDone++;});
+              habTotal++;if(wd.moveAfter)habDone++;
+              habTotal++;if(wd.act)habDone++;
+              habTotal++;if(wd.sleep==="7+"||wd.sleep==="8+")habDone++;
+            });
+            const habPct=habTotal>0?Math.round(habDone/habTotal*100):0;
+
+            // Body measurements
+            const bmFields=["weight","waist","hip","whr","belly","neck","chest"];
+            const bm={};
+            bmFields.forEach(f=>{
+              for(let i=w.dates.length-1;i>=0;i--){
+                const v=bodyMeas[`${f}-${w.dates[i]}`];
+                if(v){bm[f]=v;break;}
+              }
+            });
+
+            // Clinical notes for this week
+            const weekNoteKeys=Object.keys(clinicalNotes).filter(k=>{
+              const dateMatch=k.match(/(\d+)\s+(Mar|Feb)/i);
+              if(dateMatch){
+                const day=parseInt(dateMatch[1]);
+                const mon=dateMatch[2].toLowerCase();
+                const startDay=w.start.getDate();
+                const endDay=w.end.getDate();
+                const startMon=w.start.getMonth(); // 1=Feb, 2=Mar
+                const noteMon=mon==="feb"?1:2;
+                if(noteMon===startMon||(startMon===1&&noteMon===2&&endDay>=day)){
                   return day>=startDay&&day<=endDay;
                 }
-                return false;
-              });
-              const wNotes=weekNoteKeys.flatMap(k=>clinicalNotes[k]||[]);
-              
-              return(
-              <Card key={w.num} style={{marginBottom:10}}>
-                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
-                  <div style={{fontSize:14,fontWeight:700,color:t.accent}}>W{w.num} <span style={{fontWeight:400,fontSize:12,color:t.textMuted}}>{wStart} – {wEnd}</span></div>
-                  <div style={{fontSize:11,padding:"2px 8px",borderRadius:4,background:habPct>=80?t.okBg:habPct>=50?t.warnBg:t.dangerBg,color:habPct>=80?t.ok:habPct>=50?t.warn:t.danger,fontWeight:700}}>{habPct>0?`${habPct}% habits`:"—"}</div>
-                </div>
-                
-                {/* Glucose summary */}
-                {glucVals.length>0&&(
-                  <div style={{display:"flex",gap:12,marginBottom:8,flexWrap:"wrap"}}>
-                    <div style={{fontSize:11}}><span style={{color:t.textMuted}}>Fasting avg:</span> <span style={{fontWeight:700,color:glucAvg<=99?t.ok:glucAvg<=140?"#d4850f":t.danger}}>{glucAvg}</span></div>
-                    <div style={{fontSize:11}}><span style={{color:t.textMuted}}>Range:</span> <span style={{fontWeight:600}}>{glucMin}–{glucMax}</span></div>
-                    <div style={{fontSize:11}}><span style={{color:t.textMuted}}>Days tracked:</span> <span style={{fontWeight:600}}>{glucVals.length}/7</span></div>
-                  </div>
-                )}
-
-                {/* Body measurements if available */}
-                {Object.keys(bm).length>0&&(
-                  <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:8}}>
-                    {bm.weight&&<span style={{fontSize:11,padding:"2px 6px",background:t.bg,borderRadius:4,border:`1px solid ${t.cardBorder}`}}>⚖️ {bm.weight}kg (BMI {(bm.weight/((167/100)**2)).toFixed(1)})</span>}
-                    {bm.waist&&<span style={{fontSize:11,padding:"2px 6px",background:t.bg,borderRadius:4,border:`1px solid ${t.cardBorder}`}}>📏 Waist {bm.waist}</span>}
-                    {bm.hip&&<span style={{fontSize:11,padding:"2px 6px",background:t.bg,borderRadius:4,border:`1px solid ${t.cardBorder}`}}>📏 Hip {bm.hip}</span>}
-                    {bm.whr&&<span style={{fontSize:11,padding:"2px 6px",background:(parseFloat(bm.whr)>0.85?"#b4423415":parseFloat(bm.whr)>0.80?"#d4850f15":"#16a34a15"),borderRadius:4,border:`1px solid ${parseFloat(bm.whr)>0.85?"#b4423433":parseFloat(bm.whr)>0.80?"#d4850f33":"#16a34a33"}`}}>📐 WHR {bm.whr}</span>}
-                    {bm.neck&&<span style={{fontSize:11,padding:"2px 6px",background:t.bg,borderRadius:4,border:`1px solid ${t.cardBorder}`}}>Neck {bm.neck}</span>}
-                  </div>
-                )}
-
-                {/* Notes from clinical notes */}
-                {wNotes.length>0&&(
-                  <div style={{display:"flex",flexDirection:"column",gap:4}}>
-                    {wNotes.slice(0,4).map((n,ni)=>{const tx2=n.sev==="critical"?t.danger:n.sev==="warning"?t.warn:t.ok;return(
-                      <div key={ni} style={{fontSize:11,color:t.text,lineHeight:1.4,display:"flex",gap:6,alignItems:"flex-start"}}>
-                        <span style={{fontSize:13,flexShrink:0}}>{n.icon}</span>
-                        <div><span style={{fontWeight:700,color:tx2}}>{n.title}:</span> {n.text}</div>
-                      </div>
-                    );})}
-                  </div>
-                )}
-
-                {/* Insights for this week */}
-                {glucVals.length===0&&Object.keys(bm).length===0&&wNotes.length===0&&(
-                  <div style={{fontSize:11,color:t.textMuted,fontStyle:"italic"}}>No data recorded this week yet.</div>
-                )}
-              </Card>
-              );
+                if(startMon===1&&noteMon===1) return day>=startDay;
+                if(startMon===1&&noteMon===2) return day<=endDay;
+                return day>=startDay&&day<=endDay;
+              }
+              return false;
             });
+            const wNotes=weekNoteKeys.flatMap(k=>clinicalNotes[k]||[]);
+
+            return(<div>
+              {/* Week navigation — date bar matching tracker */}
+              <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:14}}>
+                <button onClick={()=>setInsightWeek(Math.max(0,(insightWeek!==null?insightWeek:allWeeks.length-1)-1))} style={{background:"none",border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,padding:"4px 10px",cursor:"pointer",fontSize:14,color:t.text}}>◀</button>
+                <span style={{fontSize:14,fontWeight:700,color:t.accent}}>{w.num===0?"Baseline":`W${w.num}`} · {wStart} – {wEnd}</span>
+                <button onClick={()=>setInsightWeek(Math.min(allWeeks.length-1,(insightWeek!==null?insightWeek:allWeeks.length-1)+1))} style={{background:"none",border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,padding:"4px 10px",cursor:"pointer",fontSize:14,color:t.text}}>▶</button>
+              </div>
+
+              {/* Week content */}
+              <div style={{padding:"0 0 12px"}}>
+
+                {/* ── 1. Week Score Ring + Weekly Summary ── */}
+                {w.num>0&&(()=>{
+                  // Calculate week score (0-100)
+                  let score=0,factors=0;
+                  if(glucAvg){score+=(glucAvg<=99?100:glucAvg<=140?70:glucAvg<=180?40:20);factors++;}
+                  if(sleepAvg){score+=(sleepAvg>=7?100:sleepAvg>=6.5?60:30);factors++;}
+                  if(suppsPct!==undefined){score+=(suppsPct>=80?100:suppsPct>=40?50:20);factors++;}
+                  if(bm.weight){const d=Math.abs(Number(bm.weight)-73.6);score+=(d>=2?100:d>=1?70:50);factors++;}
+                  const weekScore=factors?Math.round(score/factors):null;
+                  if(!weekScore) return null;
+
+                  // Prediction comparison
+                  const dayNum=w.num*7;
+                  const expectedGluc=dayNum>0?Math.round(211-(211-150)*(dayNum/30)):null;
+                  const aheadOfPred=expectedGluc&&glucAvg?glucAvg<expectedGluc:false;
+                  const predDiff=expectedGluc&&glucAvg?expectedGluc-glucAvg:0;
+
+                  // Build narrative
+                  const parts=[];
+                  if(glucAvg){
+                    let g=`Fasting glucose avg at ${glucAvg}`;
+                    if(aheadOfPred) g+=`, beating the Day ${dayNum} prediction by ${predDiff} points`;
+                    g+=".";
+                    parts.push(g);
+                  }
+                  if(bm.weight){
+                    const wd=Math.round((73.6-Number(bm.weight))*10)/10;
+                    if(wd>0) parts.push(`Body weight trending down at ${bm.weight}kg (-${wd}).`);
+                  }
+                  if(sleepAvg&&sleepAvg<7) parts.push(`Sleep remains below target at ${sleepAvg}h average with ${sleepGood}/${sleepTotal} nights hitting 7+.`);
+                  if(suppsPct<40) parts.push(`Supplement adherence critically low at ${suppsPct}%.`);
+                  else if(suppsPct<80) parts.push(`Supplement adherence at ${suppsPct}%, needs improvement.`);
+
+                  const ringColor=weekScore>=70?t.ok:weekScore>=40?"#d4850f":t.danger;
+                  const circumference=2*Math.PI*30;
+                  const offset=circumference-((weekScore/100)*circumference);
+
+                  return(
+                  <div style={{display:"flex",gap:14,marginBottom:14,alignItems:"center"}}>
+                    <div style={{flexShrink:0,textAlign:"center"}}>
+                      <svg width={72} height={72} viewBox="0 0 72 72">
+                        <circle cx={36} cy={36} r={30} fill="none" stroke={t.cardBorder} strokeWidth={4.5}/>
+                        <circle cx={36} cy={36} r={30} fill="none" stroke={ringColor} strokeWidth={4.5} strokeDasharray={circumference} strokeDashoffset={offset} strokeLinecap="round" transform="rotate(-90 36 36)"/>
+                        <text x={36} y={33} textAnchor="middle" dominantBaseline="central" style={{fontSize:18,fontWeight:800,fill:t.text}}>{weekScore}</text>
+                        <text x={36} y={48} textAnchor="middle" style={{fontSize:9,fill:t.textMuted}}>/100</text>
+                      </svg>
+                      <div style={{fontSize:9,color:t.textMuted,textTransform:"uppercase",letterSpacing:"0.3px",marginTop:2}}>Week score</div>
+                    </div>
+                    <div style={{flex:1,fontSize:12,color:t.text,lineHeight:1.7}}>
+                      {parts.map((p,pi)=><span key={pi}>{pi>0?" ":""}{p}</span>)}
+                    </div>
+                  </div>);
+                })()}
+
+                {/* ── 2. Key Learnings (green) + Next Week Focus (blue) ── */}
+                {w.num>0&&(()=>{
+                  const learnings = [];
+                  wNotes.forEach(n=>{
+                    const tl = n.title.toLowerCase();
+                    if(tl.includes("spike")||tl.includes("rice")||tl.includes("no spike")||tl.includes("no-carb")||tl.includes("salmon")||tl.includes("brain work")||tl.includes("exhausted")) {
+                      learnings.push({text:n.title, color:n.sev==="excellent"?t.ok:n.sev==="grow"?t.danger:"#d4850f", sev:n.sev});
+                    }
+                  });
+                  learnings.sort((a,b)=>(a.color===t.ok?0:1)-(b.color===t.ok?0:1));
+                  const focus=[];
+                  if(sleepAvg&&sleepAvg<7) focus.push({icon:"😴",text:`Sleep avg ${sleepAvg}h, aim for 7+ every night`});
+                  if(suppsPct<80) focus.push({icon:"💊",text:`Supps at ${suppsPct}%, take all 4 daily`});
+                  if(glucAvg&&glucAvg>130) focus.push({icon:"🩸",text:`Fasting still ${glucAvg}, keep berberine x2 + walks`});
+                  if(postMealAvg&&postMealAvg>160) focus.push({icon:"🍚",text:`Post-meal avg ${postMealAvg}, try konjac rice`});
+                  if(sleepAvg&&sleepAvg>=7&&suppsPct>=80&&glucAvg&&glucAvg<=130) focus.push({icon:"🔥",text:"Great momentum, maintain consistency"});
+                  const hasRiceSpike = wNotes.some(n=>n.title.toLowerCase().includes("rice")&&n.sev==="grow");
+                  if(hasRiceSpike) focus.push({icon:"🍚",text:"Rice still spikes, switch to konjac or skip"});
+                  if(learnings.length===0&&focus.length===0) return null;
+                  return(
+                  <div style={{display:"flex",gap:10,marginBottom:14}}>
+                    {learnings.length>0&&<div style={{flex:1,padding:"10px 14px",background:t.okBg,borderRadius:t.radiusSm}}>
+                      <div style={{fontSize:10,fontWeight:700,color:t.ok,textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:6}}>Key Learnings</div>
+                      {learnings.map((l,li)=>(
+                        <div key={li} style={{fontSize:12,color:l.color,fontWeight:600,lineHeight:1.7}}>{l.color===t.ok?"✓":"⚠"} {l.text}</div>
+                      ))}
+                    </div>}
+                    {focus.length>0&&<div style={{flex:1,padding:"10px 14px",background:"#dde8f5",borderRadius:t.radiusSm}}>
+                      <div style={{fontSize:10,fontWeight:700,color:"#185fa5",textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:6}}>Next Week Focus</div>
+                      {focus.slice(0,3).map((f,fi)=>(
+                        <div key={fi} style={{fontSize:12,color:t.text,fontWeight:600,lineHeight:1.7}}>{f.icon} {f.text}</div>
+                      ))}
+                    </div>}
+                  </div>);
+                })()}
+
+                {/* ── Key highlights in one row with | separators ── */}
+                {(glucVals.length>0||postMealVals.length>0)&&(()=>{
+
+                  // Prev week data for deltas
+                  const prev = activeIdx>0?allWeeks[activeIdx-1]:null;
+                  const pGluc=prev?prev.dates.map(d=>{const v=weekData[d]?.glucFast;return v?Number(v):null;}).filter(v=>v):[];
+                  const pGlucAvg=pGluc.length?Math.round(pGluc.reduce((a,b)=>a+b,0)/pGluc.length):null;
+                  const pPost=prev?prev.dates.map(d=>{const v=weekData[d]?.glucPost;return v?Number(v):null;}).filter(v=>v):[];
+                  const pPostAvg=pPost.length?Math.round(pPost.reduce((a,b)=>a+b,0)/pPost.length):null;
+                  const pSleepH=[];if(prev)prev.dates.forEach(d=>{const s=weekData[d]?.sleep;if(s){if(s==="8+")pSleepH.push(8.5);else if(s==="7+")pSleepH.push(7.5);else if(s==="<7")pSleepH.push(6.5);else if(s==="<6")pSleepH.push(5.5);}});
+                  const pSleepAvg=pSleepH.length?Math.round(pSleepH.reduce((a,b)=>a+b,0)/pSleepH.length*10)/10:null;
+
+                  // Prediction: interpolate toward Day 30 (baseline 211 → target ~150)
+                  const dayNum=w.num*7;
+                  const expectedGluc=dayNum>0?Math.round(211-(211-150)*(dayNum/30)):null;
+
+                  // Spike range from night glucose
+                  const nightVals=w.dates.map(d=>{const v=weekData[d]?.glucNight;return v?Number(v):null;}).filter(v=>v);
+                  const spikeRange=postMealVals.length?`${postMealMin}–${postMealMax}`:null;
+
+                  const metrics = [
+                    glucAvg&&{label:"Fasting",val:glucAvg,range:`${glucMin}–${glucMax}`,color:glucAvg<=99?t.ok:glucAvg<=140?"#d4850f":t.danger,
+                      delta:pGlucAvg&&w.num>0?glucAvg-pGlucAvg:null,deltaGood:pGlucAvg?glucAvg<pGlucAvg:false,
+                      pred:expectedGluc&&w.num>0?`vs ~${expectedGluc} prediction`:null,predAhead:expectedGluc?glucAvg<expectedGluc:false},
+                    postMealAvg&&{label:"Post-meal",val:postMealAvg,range:`spike ${postMealMin}–${postMealMax}`,color:postMealAvg<=140?t.ok:postMealAvg<=180?"#d4850f":t.danger,
+                      delta:pPostAvg&&w.num>0?postMealAvg-pPostAvg:null,deltaGood:pPostAvg?postMealAvg<pPostAvg:false,
+                      pred:null,predAhead:false},
+                    sleepAvg&&{label:"Sleep avg",val:`${sleepAvg}h`,range:`${sleepGood}/${sleepTotal} nights 7+`,color:sleepAvg>=7?t.ok:sleepAvg>=6.5?"#d4850f":t.danger,
+                      delta:pSleepAvg&&w.num>0?Math.round((sleepAvg-pSleepAvg)*10)/10:null,deltaGood:pSleepAvg?sleepAvg>pSleepAvg:false,deltaUnit:"h",
+                      pred:null,predAhead:false},
+                    {label:"Supps",val:`${suppsPct}%`,range:null,color:suppsPct>=80?t.ok:suppsPct>=40?"#d4850f":t.danger,
+                      delta:null,pred:null},
+                  ].filter(Boolean);
+                  return(
+                  <div style={{display:"flex",alignItems:"stretch",marginBottom:14,width:"100%"}}>
+                    {metrics.map((m,mi)=>(
+                      <React.Fragment key={mi}>
+                        <div style={{textAlign:"center",padding:"0 8px",flex:1}}>
+                          <div style={{fontSize:10,color:t.textMuted,textTransform:"uppercase",letterSpacing:"0.5px"}}>{m.label}</div>
+                          <div style={{fontSize:22,fontWeight:800,color:m.color}}>{m.val}</div>
+                          {m.range&&<div style={{fontSize:10,color:t.textMuted}}>{m.range}</div>}
+                          {m.delta!=null&&<div style={{fontSize:9,color:m.deltaGood?t.ok:t.danger,fontWeight:700}}>{m.delta>0?"↑":"↓"}{Math.abs(m.delta)}{m.deltaUnit||""}</div>}
+                          {m.pred&&<div style={{fontSize:9,color:m.predAhead?t.ok:"#d4850f",fontWeight:600}}>{m.pred}</div>}
+                        </div>
+                        <div style={{width:1,background:t.cardBorder,flexShrink:0}}/>
+                      </React.Fragment>
+                    ))}
+                    {/* Body composition — same format as Fasting */}
+                    {Object.keys(bm).length>0&&(
+                      <React.Fragment>
+                        <div style={{textAlign:"center",padding:"0 8px",flex:1}}>
+                          <div style={{fontSize:10,color:t.textMuted,textTransform:"uppercase",letterSpacing:"0.5px"}}>Body</div>
+                          <div style={{fontSize:22,fontWeight:800,color:t.text}}>{bm.weight?`${bm.weight}`:""}<span style={{fontSize:13,fontWeight:400,color:t.textMuted}}>kg</span></div>
+                          <div style={{fontSize:10,color:t.textMuted}}>{[`BMI ${BMI}`,bm.waist&&`W${bm.waist}`,bm.belly&&`B${bm.belly}`].filter(Boolean).join(" · ")}</div>
+                          {(()=>{const baseW=73.6;if(!bm.weight)return null;const d=Math.round((Number(bm.weight)-baseW)*10)/10;return d!==0?<div style={{fontSize:9,color:d<0?t.ok:t.danger,fontWeight:700}}>{d>0?"↑":"↓"}{Math.abs(d)}kg</div>:null;})()}
+                        </div>
+                      </React.Fragment>
+                    )}
+                  </div>);
+                })()}
+
+                {/* ── Notes with left-border accents ── */}
+                {wNotes.length>0&&(()=>{
+                  const excellent = wNotes.filter(n=>n.sev==="excellent");
+                  const ontrack = wNotes.filter(n=>n.sev==="ontrack");
+                  const grow = wNotes.filter(n=>n.sev==="grow");
+                  const renderCol = (items, label, borderColor, textColor, key) => (
+                    <div key={key} style={{flex:1,minWidth:0}}>
+                      <div style={{fontSize:10,fontWeight:700,color:textColor,textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:8}}>{label} ({items.length})</div>
+                      {items.map((n,ni)=>(
+                        <div key={ni} style={{borderLeft:`3px solid ${borderColor}`,paddingLeft:10,fontSize:12,fontWeight:600,color:t.text,lineHeight:1.4,marginBottom:6,borderRadius:0}}>
+                          {n.title}
+                        </div>
+                      ))}
+                    </div>
+                  );
+                  const cols = [];
+                  if(excellent.length>0) cols.push({items:excellent,label:"Excellent",borderColor:t.ok,textColor:t.ok});
+                  if(ontrack.length>0) cols.push({items:ontrack,label:"Ok",borderColor:"#d4850f",textColor:"#d4850f"});
+                  if(grow.length>0) cols.push({items:grow,label:"Needs Work",borderColor:t.danger,textColor:t.danger});
+                  if(cols.length===0) return null;
+                  return(
+                  <div style={{display:"flex",gap:20}}>
+                    {cols.map((c,ci)=>renderCol(c.items,c.label,c.borderColor,c.textColor,ci))}
+                  </div>);
+                })()}
+
+                {/* Empty state */}
+                {glucVals.length===0&&Object.keys(bm).length===0&&wNotes.length===0&&(
+                  <div style={{fontSize:12,color:t.textMuted,fontStyle:"italic",padding:"8px 0"}}>No data recorded this week yet.</div>
+                )}
+              </div>
+            </div>);
           })()}
 
 
