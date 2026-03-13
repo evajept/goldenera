@@ -34,33 +34,33 @@ const BMI = (WEIGHT / ((HEIGHT_CM / 100) ** 2)).toFixed(1);
 
 const labMarkers = [
   { marker:"HbA1C", confirmed:"9.4%", normal:"<5.7%", status:"critical",
-    s30:"8.2–8.5%",s60:"7.0–7.5%",s90:"5.8–6.3%", m30:"8.7–9.0%",m60:"7.7–8.2%",m90:"6.8–7.2%", n30:"9.2–9.3%",n60:"8.8–9.0%",n90:"8.2–8.6%" },
-  { marker:"Fasting Glucose", confirmed:"211", normal:"70–99", status:"critical",
-    s30:"140–160",s60:"110–125",s90:"85–100", m30:"160–180",m60:"140–155",m90:"120–140", n30:"195–205",n60:"185–195",n90:"170–200" },
+    s30:"8.2-8.5%",s60:"7.0-7.5%",s90:"5.8-6.3%", m30:"8.7-9.0%",m60:"7.7-8.2%",m90:"6.8-7.2%", n30:"9.2-9.3%",n60:"8.8-9.0%",n90:"8.2-8.6%" },
+  { marker:"Fasting Glucose", confirmed:"211", normal:"70-99", status:"critical",
+    s30:"140-160",s60:"110-125",s90:"85-100", m30:"160-180",m60:"140-155",m90:"120-140", n30:"195-205",n60:"185-195",n90:"170-200" },
   { marker:"Triglycerides", confirmed:"702", normal:"<160", status:"critical",
-    s30:"350–400",s60:"180–220",s90:"100–150", m30:"480–520",m60:"280–320",m90:"180–220", n30:"640–670",n60:"560–600",n90:"450–520" },
-  { marker:"GGT", confirmed:"184", normal:"9–39", status:"critical",
-    s30:"100–130",s60:"50–70",s90:"25–40", m30:"130–150",m60:"80–110",m90:"50–80", n30:"160–175",n60:"140–160",n90:"100–150" },
+    s30:"350-400",s60:"180-220",s90:"100-150", m30:"480-520",m60:"280-320",m90:"180-220", n30:"640-670",n60:"560-600",n90:"450-520" },
+  { marker:"GGT", confirmed:"184", normal:"9-39", status:"critical",
+    s30:"100-130",s60:"50-70",s90:"25-40", m30:"130-150",m60:"80-110",m90:"50-80", n30:"160-175",n60:"140-160",n90:"100-150" },
   { marker:"SGPT (ALT)", confirmed:"50", normal:"<35", status:"warning",
-    s30:"35–40",s60:"25–30",s90:"18–25", m30:"40–45",m60:"30–38",m90:"25–35", n30:"45–50",n60:"40–48",n90:"35–45" },
+    s30:"35-40",s60:"25-30",s90:"18-25", m30:"40-45",m60:"30-38",m90:"25-35", n30:"45-50",n60:"40-48",n90:"35-45" },
   { marker:"SGOT (AST)", confirmed:"31", normal:"<32", status:"ok",
-    s30:"26–30",s60:"22–26",s90:"18–22", m30:"28–31",m60:"25–29",m90:"22–28", n30:"30–32",n60:"29–31",n90:"28–32" },
+    s30:"26-30",s60:"22-26",s90:"18-22", m30:"28-31",m60:"25-29",m90:"22-28", n30:"30-32",n60:"29-31",n90:"28-32" },
   { marker:"Cholesterol", confirmed:"220", normal:"<200", status:"warning",
-    s30:"200–210",s60:"190–200",s90:"180–195", m30:"210–218",m60:"200–210",m90:"195–210", n30:"218–222",n60:"215–220",n90:"210–220" },
-  { marker:"Uric Acid", confirmed:"7.2", normal:"2.3–6.1", status:"warning",
-    s30:"6.2–6.5",s60:"5.5–6.0",s90:"5.0–5.5", m30:"6.5–6.8",m60:"6.0–6.5",m90:"5.5–6.2", n30:"7.0–7.1",n60:"6.8–7.0",n90:"6.5–7.0" },
+    s30:"200-210",s60:"190-200",s90:"180-195", m30:"210-218",m60:"200-210",m90:"195-210", n30:"218-222",n60:"215-220",n90:"210-220" },
+  { marker:"Uric Acid", confirmed:"7.2", normal:"2.3-6.1", status:"warning",
+    s30:"6.2-6.5",s60:"5.5-6.0",s90:"5.0-5.5", m30:"6.5-6.8",m60:"6.0-6.5",m90:"5.5-6.2", n30:"7.0-7.1",n60:"6.8-7.0",n90:"6.5-7.0" },
   { marker:"HDL-C", confirmed:"45", normal:">44", status:"ok",
-    s30:"46–48",s60:"48–52",s90:"52–58", m30:"45–47",m60:"46–49",m90:"48–52", n30:"44–45",n60:"44–46",n90:"44–46" },
+    s30:"46-48",s60:"48-52",s90:"52-58", m30:"45-47",m60:"46-49",m90:"48-52", n30:"44-45",n60:"44-46",n90:"44-46" },
   { marker:"LDL-C", confirmed:"109", normal:"<130", status:"ok",
-    s30:"105–110",s60:"100–108",s90:"95–105", m30:"108–112",m60:"105–110",m90:"100–115", n30:"108–112",n60:"107–112",n90:"105–115" },
-  { marker:"Creatinine", confirmed:"0.52", normal:"0.5–0.9", status:"ok",
+    s30:"105-110",s60:"100-108",s90:"95-105", m30:"108-112",m60:"105-110",m90:"100-115", n30:"108-112",n60:"107-112",n90:"105-115" },
+  { marker:"Creatinine", confirmed:"0.52", normal:"0.5-0.9", status:"ok",
     s30:"0.52",s60:"0.52",s90:"0.52", m30:"0.52",m60:"0.52",m90:"0.52", n30:"0.52",n60:"0.52",n90:"0.52" },
   { marker:"eGFR", confirmed:"130", normal:">90", status:"ok",
     s30:"130",s60:"130",s90:"128", m30:"130",m60:"130",m90:"129", n30:"130",n60:"130",n90:"130" },
   { marker:"Weight", confirmed:"73.6", normal:"BMI<23", status:"warning",
-    s30:"69–70",s60:"65–67",s90:"60–63", m30:"71–72",m60:"68–70",m90:"65–67", n30:"72–73",n60:"71–72",n90:"69–71" },
-  { marker:"BMI", confirmed:"26.4", normal:"18.5–22.9", status:"warning",
-    s30:"24.7–25.1",s60:"23.3–24.0",s90:"21.5–22.6", m30:"25.4–25.8",m60:"24.4–25.1",m90:"23.3–24.0", n30:"25.8–26.2",n60:"25.4–25.8",n90:"24.7–25.4" },
+    s30:"69-70",s60:"65-67",s90:"60-63", m30:"71-72",m60:"68-70",m90:"65-67", n30:"72-73",n60:"71-72",n90:"69-71" },
+  { marker:"BMI", confirmed:"26.4", normal:"18.5-22.9", status:"warning",
+    s30:"24.7-25.1",s60:"23.3-24.0",s90:"21.5-22.6", m30:"25.4-25.8",m60:"24.4-25.1",m90:"23.3-24.0", n30:"25.8-26.2",n60:"25.4-25.8",n90:"24.7-25.4" },
 ];
 
 // Clinical notes per checkup date
@@ -122,7 +122,7 @@ const clinicalNotes = {
     { icon:"🥔", sev:"ontrack", title:"Potatoes: 120→140 (controlled)", text:"Lunch: handful of potatoes spiked 120→140 (+20). More moderate than rice. Potatoes with fiber/protein may be tolerable in small amounts." },
     { icon:"🍗", sev:"excellent", title:"Chicken + veggies: no spike", text:"Dinner (3:30pm): 148 before, chicken and veggies, no spike, dropped to 134. Protein + veg meals continue to be safe." },
     { icon:"🏊", sev:"excellent", title:"Swimming dropped glucose 131→101", text:"Evening swim brought glucose from 131 down to 101. First reading in normal range (<100 is target). Exercise is a powerful tool." },
-    { icon:"💊", sev:"excellent", title:"All 4 supps active + berberine 2x", text:"Berberine at morning and lunch. All core supplements now running. Score 98+7 — near-perfect protocol day." },
+    { icon:"💊", sev:"excellent", title:"All 4 supps active + berberine 2x", text:"Berberine at morning and lunch. All core supplements now running. Score 98+7 - near-perfect protocol day." },
     { icon:"😴", sev:"ontrack", title:"Sleep still inconsistent", text:"Alternating <7 and 7+ nights. Sleep remains the biggest opportunity for further glucose reduction." },
   ],
 };
@@ -214,7 +214,7 @@ const activityRecovery = [
   {name:"Breathing exercises",emoji:"🌬️",pts:"-5-10 pts",benefit:"4-7-8 breathing lowers cortisol and blood sugar within minutes"},
 ];
 
-// ═══ 9F CANTEEN MEAL PLAN — Week 9-13 Mar ═══
+// ═══ 9F CANTEEN MEAL PLAN - Week 9-13 Mar ═══
 const canteenWeek = {
   week: "9-13 Mar 2026",
   dailySalad: "Mixed Green Vegetables with Dressing (auto side dish every day)",
@@ -289,10 +289,10 @@ const foodCats = {
 };
 
 const supps = [
-  { name:"Berberine", dose:"600mg × 2 w/ meals", trig:"-20–35%", hb:"-0.9–2%", icon:"🌿", p:"HIGHEST" },
-  { name:"Fish Oil", dose:"3–4g EPA+DHA split", trig:"-20–50%", hb:"Min", icon:"🐟", p:"HIGHEST" },
-  { name:"Magnesium", dose:"200mg+ bedtime", trig:"-5–15%", hb:"-0.3–0.5%", icon:"💎", p:"HIGHEST" },
-  { name:"D3 + K2", dose:"2000–5000 IU + 100mcg MK-7 bedtime", trig:"Indirect", hb:"-0.3–0.5%", icon:"☀️", p:"HIGHEST" },
+  { name:"Berberine", dose:"600mg × 2 w/ meals", trig:"-20-35%", hb:"-0.9-2%", icon:"🌿", p:"HIGHEST" },
+  { name:"Fish Oil", dose:"3-4g EPA+DHA split", trig:"-20-50%", hb:"Min", icon:"🐟", p:"HIGHEST" },
+  { name:"Magnesium", dose:"200mg+ bedtime", trig:"-5-15%", hb:"-0.3-0.5%", icon:"💎", p:"HIGHEST" },
+  { name:"D3 + K2", dose:"2000-5000 IU + 100mcg MK-7 bedtime", trig:"Indirect", hb:"-0.3-0.5%", icon:"☀️", p:"HIGHEST" },
 ];
 
 const actOpts = ["none","rest","walk","housework","stretch","cardio","weights"];
@@ -321,7 +321,7 @@ const trackerRows = [
 ];
 const keyHabitsForScore = ["berb","fish","mag","d3k2","probio","noSweet","fiberFirst","water","moveAfter","act","sleep"];
 const bodyMeasRows = ["Waist (cm)","Hips (cm)","Chest (cm)","Upper Arm (cm)","Thigh (cm)","Neck (cm)","Waist-to-Hip Ratio","Body Fat % (est.)"];
-const tabDefs = [{icon:"📊",label:"PROGRESS"},{icon:"🩸",label:"LABS"},{icon:"📋",label:"LIFESTYLE"},{icon:"🍽️",label:"FOOD & SUPPS"}];
+const tabDefs = [{icon:"📊",label:"PROGRESS"},{icon:"🩸",label:"LABS"},{icon:"📋",label:"LIFESTYLE"},{icon:"🍽️",label:"FOOD & SUPPS"},{icon:"🔬",label:"BODY SCIENCE"}];
 
 const t = {
   bg:"#faf8f5", card:"#fffefa", cardBorder:"#e8e0d4",
@@ -351,6 +351,7 @@ export default function GoldenEra() {
   const [insightWeek, setInsightWeek] = useState(null); // null = auto-select latest
   const [labMeanTab, setLabMeanTab] = useState(null); // null = auto-select latest (26 Feb)
   const [expandedLab, setExpandedLab] = useState(null); // accordion for lab meanings
+  const [expandedScience, setExpandedScience] = useState(null); // accordion for body science
   
   const seedBodyMeas={};
 const [bodyMeas, setBodyMeas] = useState(()=>{try{if(localStorage.getItem("ge_bodyMeas_cleared")==="1")return {};const s=localStorage.getItem("ge_bodyMeas");if(s){const parsed=JSON.parse(s);return {...seedBodyMeas,...parsed};}return {...seedBodyMeas};}catch{return {...seedBodyMeas};}});
@@ -471,9 +472,9 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
     return{score:avgBase,bonus:avgBonus,total:avgBase+avgBonus,trackedDays,gluc:glucDays};
   };
   const ts=getTrackerScore();
-  const getTP=(marker)=>{const s=ts.score;if(s===0)return"—";const lk={"HbA1C":[8.4,6],"Fasting Glucose":[185,92],"Triglycerides":[485,135],"GGT":[125,32],"SGPT (ALT)":[40,22],"SGOT (AST)":[30,20],"Cholesterol":[215,187],"Uric Acid":[6.8,5.2],"HDL-C":[45,55],"LDL-C":[110,100],"Creatinine":[.52,.52],"eGFR":[130,128],"Weight":[70,62],"BMI":[25.1,21.9]};const[w,b]=lk[marker]||[0,0];if(w===b)return String(w);const p=w+((b-w)*s/100);return marker==="HbA1C"?`~${p.toFixed(1)}%`:marker==="Creatinine"?p.toFixed(2):`~${Math.round(p)}`;};
+  const getTP=(marker)=>{const s=ts.score;if(s===0)return"-";const lk={"HbA1C":[8.4,6],"Fasting Glucose":[185,92],"Triglycerides":[485,135],"GGT":[125,32],"SGPT (ALT)":[40,22],"SGOT (AST)":[30,20],"Cholesterol":[215,187],"Uric Acid":[6.8,5.2],"HDL-C":[45,55],"LDL-C":[110,100],"Creatinine":[.52,.52],"eGFR":[130,128],"Weight":[70,62],"BMI":[25.1,21.9]};const[w,b]=lk[marker]||[0,0];if(w===b)return String(w);const p=w+((b-w)*s/100);return marker==="HbA1C"?`~${p.toFixed(1)}%`:marker==="Creatinine"?p.toFixed(2):`~${Math.round(p)}`;};
 
-  const getInsights=()=>{const tips=[];let berb=0,move=0,sweet=0,sleep=0,fiber=0,mag=0,water=0;weekDates.forEach(d=>{const wd=weekData[d]||{};if(wd.berb&&wd.berb!=="0")berb++;if(wd.moveAfter||wd.act)move++;if(wd.noSweet)sweet++;if(wd.sleep==="7+"||wd.sleep==="8+")sleep++;if(wd.fiberFirst)fiber++;if(wd.mag&&wd.mag!=="0")mag++;if(wd.water)water++;});if(ts.score>0)tips.push({icon:"📊",title:`Score: ${ts.score}/100${ts.bonus?" (+"+ts.bonus+")":""}`,text:`Avg ${ts.score} pts across ${ts.trackedDays} days. ${ts.score>=80?"Full Send pace.":ts.score>=50?"Solid effort.":"Needs more consistency."}`});if(berb>0&&berb<5)tips.push({icon:"🌿",title:"Berberine",text:`${berb}/7 days. Aim for daily.`});if(berb>=5)tips.push({icon:"🌿",title:"Berberine strong",text:`${berb}/7 — excellent.`});if(move<5&&move>0)tips.push({icon:"🚶",title:"Move more",text:`${move}/7 days active. Even 10 min walks count.`});if(sweet>=5)tips.push({icon:"🚫",title:"Sugar-free",text:`${sweet}/7 days — biggest trig driver.`});if(sweet<5&&sweet>0)tips.push({icon:"⚠️",title:"Drinks",text:`${sweet}/7 sugar-free. Each ชาเย็น = +30-50 trig.`});if(sleep<5&&sleep>0)tips.push({icon:"😴",title:"Sleep",text:`${sleep}/7 nights 7+hrs. Poor sleep → glucose +15-30.`});if(mag===0)tips.push({icon:"💊",title:"Magnesium missing",text:"Start tonight. Helps sleep + lowers fasting glucose 5-15 pts."});if(tips.length===0){tips.push({icon:"📊",title:"Start tracking",text:"Fill in the table above to get personalized insights."});tips.push({icon:"💡",title:"Priorities",text:"Zero sweet drinks, berberine, movement, sleep 7+."});tips.push({icon:"🎯",title:"Glucose",text:"Track fasting glucose daily — best predictor of A1C."});}return tips;};
+  const getInsights=()=>{const tips=[];let berb=0,move=0,sweet=0,sleep=0,fiber=0,mag=0,water=0;weekDates.forEach(d=>{const wd=weekData[d]||{};if(wd.berb&&wd.berb!=="0")berb++;if(wd.moveAfter||wd.act)move++;if(wd.noSweet)sweet++;if(wd.sleep==="7+"||wd.sleep==="8+")sleep++;if(wd.fiberFirst)fiber++;if(wd.mag&&wd.mag!=="0")mag++;if(wd.water)water++;});if(ts.score>0)tips.push({icon:"📊",title:`Score: ${ts.score}/100${ts.bonus?" (+"+ts.bonus+")":""}`,text:`Avg ${ts.score} pts across ${ts.trackedDays} days. ${ts.score>=80?"Full Send pace.":ts.score>=50?"Solid effort.":"Needs more consistency."}`});if(berb>0&&berb<5)tips.push({icon:"🌿",title:"Berberine",text:`${berb}/7 days. Aim for daily.`});if(berb>=5)tips.push({icon:"🌿",title:"Berberine strong",text:`${berb}/7 - excellent.`});if(move<5&&move>0)tips.push({icon:"🚶",title:"Move more",text:`${move}/7 days active. Even 10 min walks count.`});if(sweet>=5)tips.push({icon:"🚫",title:"Sugar-free",text:`${sweet}/7 days - biggest trig driver.`});if(sweet<5&&sweet>0)tips.push({icon:"⚠️",title:"Drinks",text:`${sweet}/7 sugar-free. Each ชาเย็น = +30-50 trig.`});if(sleep<5&&sleep>0)tips.push({icon:"😴",title:"Sleep",text:`${sleep}/7 nights 7+hrs. Poor sleep → glucose +15-30.`});if(mag===0)tips.push({icon:"💊",title:"Magnesium missing",text:"Start tonight. Helps sleep + lowers fasting glucose 5-15 pts."});if(tips.length===0){tips.push({icon:"📊",title:"Start tracking",text:"Fill in the table above to get personalized insights."});tips.push({icon:"💡",title:"Priorities",text:"Zero sweet drinks, berberine, movement, sleep 7+."});tips.push({icon:"🎯",title:"Glucose",text:"Track fasting glucose daily - best predictor of A1C."});}return tips;};
 
   const Pill=({active,children,onClick,color})=>(<button onClick={onClick} style={{padding:"5px 12px",borderRadius:t.radius,fontSize:13,border:`1px solid ${active?(color||t.accent):t.cardBorder}`,cursor:"pointer",background:active?(color||t.accent):t.card,color:active?"#fff":t.textMuted,fontWeight:active?700:500,fontFamily:t.font}}>{children}</button>);
   const Card=({children,style:s={}})=>(<div style={{background:t.card,border:`1px solid ${t.cardBorder}`,borderRadius:t.radius,padding:"14px 16px",marginBottom:10,...s}}>{children}</div>);
@@ -488,7 +489,7 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
     <div style={{minHeight:"100vh",background:t.bg,fontFamily:t.font,color:t.text,display:"flex"}}>
       <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
 
-      {/* SIDEBAR — responsive: top bar on mobile, side on desktop */}
+      {/* SIDEBAR - responsive: top bar on mobile, side on desktop */}
       <div style={{width:sidebarOpen?180:48,minHeight:"100vh",background:t.sidebarBg,borderRight:`1px solid ${t.cardBorder}`,padding:sidebarOpen?"16px 12px":"16px 4px",display:"flex",flexDirection:"column",flexShrink:0,transition:"width 0.2s",overflow:"hidden"}}>
         <button onClick={()=>setSidebarOpen(!sidebarOpen)} style={{background:"none",border:"none",color:t.textLight,fontSize:15,cursor:"pointer",alignSelf:sidebarOpen?"flex-end":"center",marginBottom:8}}>{sidebarOpen?"◁":"▷"}</button>
         {sidebarOpen&&<>
@@ -655,12 +656,12 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
                     leftLabel="Confirmed"; leftVal=r.confirmed;
                     rightLabel="Normal"; rightVal=r.normal;
                   } else {
-                    leftLabel="Predicted"; leftVal=r[activeTab.pKey]||"—";
+                    leftLabel="Predicted"; leftVal=r[activeTab.pKey]||"-";
                     rightLabel="Confirmed"; rightVal=null;
                   }
 
                   return(<div key={r.marker} style={{borderBottom:ri<labMarkers.length-1?`0.5px solid ${t.cardBorder}`:"none",background:isOpen?t.bg:t.card}}>
-                    {/* Row header — always visible */}
+                    {/* Row header - always visible */}
                     <div onClick={()=>setExpandedLab(isOpen?null:ri)} style={{display:"flex",alignItems:"center",gap:8,padding:"10px 14px",cursor:"pointer"}}>
                       <div style={{display:"flex",alignItems:"center",gap:8,flex:1}}>
                         <div style={{width:7,height:7,borderRadius:"50%",background:sc2.tx,flexShrink:0}}/>
@@ -673,7 +674,7 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
                       </div>
                       <span style={{fontSize:12,color:t.textLight,marginLeft:4}}>{isOpen?"▲":"▼"}</span>
                     </div>
-                    {/* Expanded meaning — stacked lines */}
+                    {/* Expanded meaning - stacked lines */}
                     {isOpen&&<div style={{padding:"0 14px 10px 29px",fontSize:13,lineHeight:1.7,color:t.text}}>
                       <div>{meaning.what}</div>
                       <div>{meaning.why}</div>
@@ -818,7 +819,7 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
             </table>
           </div>
 
-          {/* Supplements — table format */}
+          {/* Supplements - table format */}
           <h3 style={{fontSize:16,fontWeight:700,margin:"0 0 4px"}}>Supplements</h3>
           <p style={{color:t.textMuted,fontSize:13,marginBottom:10}}>Berberine + fish oil WITH meals · Mg + D3/K2 BEDTIME</p>
           <div style={{border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,background:t.card,marginBottom:20,overflow:"hidden"}}>
@@ -842,7 +843,7 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
             </table>
           </div>
 
-          {/* Quick Rules — 2 column table */}
+          {/* Quick Rules - 2 column table */}
           <div style={{fontSize:14,fontWeight:700,color:t.accent,marginBottom:6,marginTop:14}}>📌 Quick Rules</div>
           <div style={{border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,background:t.card,marginBottom:20,overflow:"hidden"}}>
             <table style={{width:"100%",borderCollapse:"collapse"}}>
@@ -861,7 +862,7 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
             </table>
           </div>
 
-          {/* Carb Guide — 3 columns like fruit */}
+          {/* Carb Guide - 3 columns like fruit */}
           <h3 style={{fontSize:16,fontWeight:700,margin:"0 0 4px"}}>🍚 Carb Guide (Glycemic Index)</h3>
           <p style={{color:t.textMuted,fontSize:13,marginBottom:10}}>Always eat carbs LAST after protein and veggies · Max 25-33g per meal</p>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:20}}>
@@ -971,7 +972,7 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
           </div>
 
 
-          {/* Food Guide — 3-column format per category */}
+          {/* Food Guide - 3-column format per category */}
           <h3 style={{fontSize:16,fontWeight:700,margin:"0 0 8px"}}>Food Guide</h3>
           {/* Protein */}
           <div style={{fontSize:15,fontWeight:700,color:t.accent,marginBottom:6}}>🥩 Protein</div>
@@ -1058,7 +1059,7 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
             </div>
           </div>
 
-          {/* Joy Without the Spike — collapsible */}
+          {/* Joy Without the Spike - collapsible */}
           <div onClick={()=>setJoyOpen(!joyOpen)} style={{cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center",margin:"20px 0 4px",padding:"10px 14px",background:t.card,border:`1px solid ${joyOpen?t.accent+"44":t.cardBorder}`,borderRadius:t.radiusSm}}>
             <div>
               <h3 style={{fontSize:18,fontWeight:700,margin:0}}>Joy Without the Spike</h3>
@@ -1086,9 +1087,85 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
             ))}
           </div>
 
-
-
           </div>}
+
+        </div>)}
+
+        {/* ══ BODY SCIENCE ══ */}
+        {tab===4&&(<div>
+          <h2 style={{fontSize:22,fontWeight:700,margin:"0 0 4px"}}>Body Science</h2>
+          <p style={{color:t.textMuted,fontSize:14,marginBottom:14}}>Understanding why the protocol works</p>
+
+          {[
+            {id:"spikes",icon:"📈",title:"Spike Science",subtitle:"How glucose spikes work & damage zones",content:[
+              {h:"What is a spike?",p:"When you eat carbs, glucose floods your bloodstream. A healthy pancreas releases insulin within minutes (first-phase response) to shuttle glucose into cells. When this system is impaired, glucose stays elevated - that's a spike."},
+              {h:"Delta ranges (before → after meal)",p:"Under +30: Excellent - pancreas responded on time, minimal stress.\n+30 to +50: Moderate - pancreas was late or weak, manageable but shouldn't be daily.\n+50 to +80: Poor - first-phase insulin didn't fire, oxidative damage to blood vessels begins.\n+80 and above: Alarm - pancreas essentially didn't show up, triggers inflammation cascades."},
+              {h:"Absolute ranges",p:"Under 140: Target zone - no damage happening, healthy non-diabetic range.\n140-180: Damage zone - oxidative stress to artery walls, repairable if occasional.\n180-250: Active damage - glycation (sugar sticking to proteins), harms nerves, kidneys, eyes.\n250+: Emergency - risk of ketoacidosis, organ stress."},
+              {h:"Area under the curve",p:"It's not just the peak - it's how LONG glucose stays elevated. A spike to 160 that drops in 30 minutes (post-walk) does far less damage than 160 for 3 hours (sitting at desk). This is why after-meal movement is so powerful."},
+              {h:"Angkhana's data",p:"White rice: +97 spike (120→217) - alarm zone.\nLow GI rice 3 spoons: +46 (117→163) - moderate, pancreas still struggling.\nPotatoes handful: +20 (120→140) - excellent, tolerable.\nChicken + veggies: negative delta (148→134) - pancreas handled it perfectly."},
+            ]},
+            {id:"pancreas",icon:"🫁",title:"Pancreas & Insulin",subtitle:"Beta cells, first-phase response & recovery",content:[
+              {h:"How insulin works",p:"The pancreas contains beta cells that produce insulin. When glucose rises, beta cells release insulin in two phases: a quick burst (first-phase, within 5 min) and a sustained release (second-phase, over 1-2 hours). In Type 2 diabetes, the first-phase is impaired or absent."},
+              {h:"Beta cell fatigue vs death",p:"Good news: in most Type 2 diabetes, beta cells aren't dead - they're exhausted and surrounded by fat (lipotoxicity). Remove the excess fat and reduce demand, and they recover. This is why the protocol works. If beta cells were dead (Type 1), protein meals would spike too - they don't for Angkhana."},
+              {h:"Insulin resistance",p:"Cells throughout the body (muscle, liver, fat) have insulin receptors. When constantly flooded with insulin, receptors downregulate - like turning down the volume when someone keeps shouting. The pancreas compensates by producing MORE insulin, exhausting beta cells further. Breaking this cycle is the core goal."},
+              {h:"How recovery works",p:"1. Remove the demand (no sugar, low carb) - pancreas gets to rest.\n2. Improve sensitivity (berberine, exercise, sleep) - cells respond to less insulin.\n3. Reduce visceral fat (IF, walking) - fat around pancreas and liver melts away.\n4. Beta cells regenerate - first-phase response gradually returns over 4-12 weeks."},
+              {h:"Signs of recovery",p:"Fasting glucose dropping = liver becoming insulin-sensitive again.\nPost-meal spikes shrinking = beta cells recovering first-phase response.\nSame meal producing smaller spike than before = peripheral insulin sensitivity improving."},
+            ]},
+            {id:"exercise",icon:"🏊",title:"Exercise Science",subtitle:"Why movement drops glucose without insulin",content:[
+              {h:"The insulin bypass",p:"Muscle contraction activates GLUT4 transporters - glucose channels that open WITHOUT needing insulin. This is why exercise drops glucose even when the pancreas is struggling. It's a completely separate pathway. Angkhana's swim: 131→101 proves this perfectly."},
+              {h:"Walking after meals",p:"A 10-15 minute walk after eating drops post-meal glucose by 20-40 points. The leg muscles (largest in the body) act as glucose sponges. Even slow walking works. The effect starts within minutes and lasts 1-2 hours."},
+              {h:"Swimming & cardio",p:"Sustained cardio (20-40 min) creates a prolonged glucose-lowering effect. Muscles continue absorbing glucose for hours after exercise. Swimming is especially effective - full body engagement, low joint stress, and the water resistance adds extra muscle demand."},
+              {h:"Weight training",p:"The biggest unused lever. Resistance training creates micro-tears in muscle fibers. For 24-48 hours after, muscles actively absorb glucose to repair. More muscle mass = more glucose disposal capacity 24/7. Even bodyweight exercises (squats, lunges, push-ups) count."},
+              {h:"The 48-hour effect",p:"After intense exercise, insulin sensitivity improves for up to 48 hours. This means tomorrow's fasting glucose will be lower because of today's swim. The effect is cumulative - regular exercise creates a permanently higher baseline of insulin sensitivity."},
+            ]},
+            {id:"supps",icon:"💊",title:"Supplement Science",subtitle:"How each supplement works mechanically",content:[
+              {h:"Berberine (the star)",p:"Works almost identically to metformin. Activates AMPK enzyme in cells, which increases glucose uptake and reduces liver glucose production. Also improves gut bacteria composition. Takes 2-4 weeks to reach full effect. Must be taken WITH food - empty stomach causes nausea and reduces absorption."},
+              {h:"Fish Oil (trig killer)",p:"Omega-3 fatty acids (EPA/DHA) directly reduce liver triglyceride production. The liver packages excess sugar into triglycerides - fish oil slows this process. Also anti-inflammatory, which helps insulin receptor sensitivity. Dose-dependent: 3-4g/day for therapeutic effect on trig 700+."},
+              {h:"Magnesium (sleep + glucose)",p:"Over 300 enzyme reactions require magnesium, including insulin signaling. Mg deficiency (common in diabetes) impairs insulin receptor function AND sleep quality. Glycinate form absorbs best and has calming effect. Bedtime dosing improves sleep → better morning glucose."},
+              {h:"D3 + K2 (insulin receptors)",p:"Vitamin D receptors exist on beta cells and muscle cells. Deficiency (very common in indoor lifestyles) impairs both insulin production and insulin sensitivity. K2 directs calcium to bones instead of arteries - prevents calcification. Always take together, with fat for absorption."},
+              {h:"Why timing matters",p:"Berberine + Fish Oil WITH meals: they work on the food you're eating right now.\nMg + D3/K2 at BEDTIME: Mg calms nervous system for sleep, D3 absorbs overnight with dinner fat still in system. Splitting them maximizes each supplement's effect window."},
+            ]},
+            {id:"sleep",icon:"😴",title:"Sleep & Cortisol",subtitle:"Why poor sleep raises glucose 15-30 points",content:[
+              {h:"The cortisol connection",p:"Poor sleep triggers cortisol release (stress hormone). Cortisol tells the liver to dump stored glucose into the blood - a survival mechanism for 'danger.' But chronic elevation means fasting glucose stays high regardless of diet. One night of <6 hours can raise morning glucose 15-30 points."},
+              {h:"Insulin resistance from sleep loss",p:"Just one night of 4-5 hours sleep reduces insulin sensitivity by 25-30%. After a week of <6 hours, cells become as insulin resistant as a pre-diabetic. This is why Angkhana's worst glucose day (150) coincided with her worst sleep night (<6 hours)."},
+              {h:"Growth hormone & repair",p:"Deep sleep (stages 3-4) triggers growth hormone release, which helps muscle repair, fat metabolism, and beta cell regeneration. Poor sleep = less time in deep stages = slower recovery. This is why sleep isn't optional - it's when the body heals."},
+              {h:"The glucose-sleep cycle",p:"High evening glucose disrupts sleep quality → poor sleep raises morning glucose → higher glucose all day → higher evening glucose. Breaking this cycle requires both: lower evening glucose (early dinner, after-dinner walk) AND sleep hygiene (dark room, consistent bedtime, magnesium)."},
+              {h:"Angkhana's pattern",p:"Days with 7+ sleep: fasting glucose averages lower.\nDays with <7 sleep: fasting glucose bounces up.\nThe <6 hour night on Day 7 preceded a spike to 150 the next morning. Sleep is her single biggest remaining lever."},
+            ]},
+            {id:"food",icon:"🥗",title:"Food Mechanics",subtitle:"Why order, timing & type matter more than calories",content:[
+              {h:"Fiber first, carbs last",p:"Eating fiber before carbs creates a gel barrier in the stomach and intestine. Carbs hit this barrier and absorb slowly instead of flooding the bloodstream. Studies show eating the same meal in different orders can reduce the spike by 40%. The food is identical - only the sequence changes."},
+              {h:"GI index truth",p:"'Low GI' is measured in healthy people with working pancreases. For someone with impaired insulin response, even 'low GI' carbs can spike significantly. Angkhana's low GI rice test (+46) proves this. GI labels are unreliable for diabetics - personal testing is the only way to know."},
+              {h:"Protein + fat = safe",p:"Protein triggers minimal insulin and zero glucose spike. Fat triggers zero insulin and zero glucose. Combined, they provide steady energy for 4-6 hours without stressing the pancreas. Angkhana's chicken + veggies meals consistently produce negative deltas."},
+              {h:"The carb threshold",p:"Everyone has a personal carb threshold - the amount their pancreas can handle in one sitting. For Angkhana right now, it's very low (even 3 spoons rice overwhelmed it). As beta cells recover, this threshold rises. The goal is to stay UNDER the threshold while it gradually increases."},
+              {h:"Intermittent fasting (IF)",p:"During the fasting window (no food), insulin drops to baseline and the body switches to fat-burning. The liver processes stored fat instead of incoming food. A 15:9 or 16:8 window gives the liver 15-16 hours of fat-processing time per day. This directly reduces visceral fat around the pancreas and liver."},
+              {h:"Why meal timing matters",p:"Insulin sensitivity is highest in the morning and drops throughout the day. The same meal at 7am produces a smaller spike than at 7pm. This is why an early eating window (7:00-15:30 like Angkhana's best days) is optimal - carbs are slightly more tolerable earlier."},
+            ]},
+          ].map(topic=>{
+            const isOpen=expandedScience===topic.id;
+            return(
+              <div key={topic.id} style={{border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,background:t.card,marginBottom:8,overflow:"hidden"}}>
+                <button onClick={()=>setExpandedScience(isOpen?null:topic.id)} style={{width:"100%",padding:"12px 14px",display:"flex",alignItems:"center",gap:10,background:"none",border:"none",cursor:"pointer",fontFamily:t.font,textAlign:"left"}}>
+                  <span style={{fontSize:20}}>{topic.icon}</span>
+                  <div style={{flex:1}}>
+                    <div style={{fontSize:15,fontWeight:700,color:t.text}}>{topic.title}</div>
+                    <div style={{fontSize:12,color:t.textMuted}}>{topic.subtitle}</div>
+                  </div>
+                  <span style={{fontSize:13,color:t.textLight}}>{isOpen?"▲":"▼"}</span>
+                </button>
+                {isOpen&&<div style={{padding:"0 14px 14px",borderTop:`1px solid ${t.cardBorder}`}}>
+                  {topic.content.map((c,ci)=>(
+                    <div key={ci} style={{marginTop:12}}>
+                      <div style={{fontSize:14,fontWeight:700,color:t.accent,marginBottom:4}}>{c.h}</div>
+                      {c.p.split("\n").map((line,li)=>(
+                        <div key={li} style={{fontSize:13,color:t.text,lineHeight:1.6,marginBottom:line.match(/^[A-Z]|^\d|^Under|^\+|^140|^180|^250/)&&li>0?6:0}}>{line}</div>
+                      ))}
+                    </div>
+                  ))}
+                </div>}
+              </div>
+            );
+          })}
+
 
         </div>)}
 
@@ -1099,7 +1176,7 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
           <h2 style={{fontSize:22,fontWeight:700,margin:"0 0 4px"}}>Habit Tracker</h2>
           <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:14}}>
             <button onClick={()=>shiftW(-1)} style={{background:"none",border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,padding:"4px 10px",cursor:"pointer",fontSize:15,color:t.text}}>◀</button>
-            <span style={{fontSize:15,fontWeight:700,color:t.accent}}>{new Date(weekDates[0]).toLocaleDateString("en-GB",{day:"numeric",month:"short"})} — {new Date(weekDates[6]).toLocaleDateString("en-GB",{day:"numeric",month:"short"})}</span>
+            <span style={{fontSize:15,fontWeight:700,color:t.accent}}>{new Date(weekDates[0]).toLocaleDateString("en-GB",{day:"numeric",month:"short"})} - {new Date(weekDates[6]).toLocaleDateString("en-GB",{day:"numeric",month:"short"})}</span>
             <button onClick={()=>shiftW(1)} style={{background:"none",border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,padding:"4px 10px",cursor:"pointer",fontSize:15,color:t.text}}>▶</button>
           </div>
 
@@ -1126,7 +1203,7 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
                         if(row.type==="computed"){
                           // IF ratio: auto-calc from first/last meal
                           const m1=wd(d).m1t||"";const mL=wd(d).mLast||"";
-                          let display="—";let ifColor=t.textMuted;
+                          let display="-";let ifColor=t.textMuted;
                           if(m1&&mL){
                             const [h1,mn1]=m1.split(":").map(Number);
                             const [h2,mn2]=mL.split(":").map(Number);
@@ -1152,16 +1229,16 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
                           return(<td key={d} style={{padding:"3px 2px",textAlign:"center",...cellBorder}}>
                             {items.length?<div style={{display:"flex",flexWrap:"wrap",gap:2,justifyContent:"center"}}>{items.map((item,ii)=>(
                               <span key={ii} style={{fontSize:10,padding:"2px 5px",borderRadius:10,background:(chipColors[item.toLowerCase()]||"#6b7c5a")+"22",color:chipColors[item.toLowerCase()]||"#6b7c5a",fontWeight:600,whiteSpace:"nowrap"}}>{item}</span>
-                            ))}</div>:<span style={{fontSize:11,color:t.textLight}}>—</span>}
+                            ))}</div>:<span style={{fontSize:11,color:t.textLight}}>-</span>}
                           </td>);
                         }
                         if(row.type==="select"){
-                          return(<td key={d} style={{padding:0,...cellBorder}}><select value={val} onChange={e=>upWD(d,row.field,e.target.value)} style={{padding:"5px 2px",border:"none",fontSize:11,width:"100%",minWidth:50,background:"transparent",color:val?t.text:t.textLight,fontFamily:t.font,outline:"none",cursor:"pointer",textAlign:"center"}}><option value="">—</option>{(row.opts||[]).map(o=><option key={o} value={o}>{o}</option>)}</select></td>);
+                          return(<td key={d} style={{padding:0,...cellBorder}}><select value={val} onChange={e=>upWD(d,row.field,e.target.value)} style={{padding:"5px 2px",border:"none",fontSize:11,width:"100%",minWidth:50,background:"transparent",color:val?t.text:t.textLight,fontFamily:t.font,outline:"none",cursor:"pointer",textAlign:"center"}}><option value="">-</option>{(row.opts||[]).map(o=><option key={o} value={o}>{o}</option>)}</select></td>);
                         }
                         const isGluc = row.section==="glucose" && val;
                         const glucColor = isGluc ? (Number(val)<=99?t.ok:Number(val)<=140?"#d4850f":t.danger) : t.text;
                         const inputType = row.type==="time"?"text":row.type==="number"?"text":row.type;
-                        const ph = row.type==="time"?"HH:MM":(row.ph||"—");
+                        const ph = row.type==="time"?"HH:MM":(row.ph||"-");
                         return(<td key={d} style={{padding:0,...cellBorder}}><input type={inputType} inputMode={row.type==="number"?"numeric":undefined} placeholder={ph} value={val} onChange={e=>upWD(d,row.field,e.target.value)} style={{padding:"5px 4px",border:"none",fontSize:12,width:"100%",minWidth:50,background:"transparent",color:isGluc?glucColor:t.text,fontWeight:isGluc?700:400,fontFamily:t.font,outline:"none",textAlign:"center",boxSizing:"border-box"}}/></td>);
                       })}
                     </tr>
@@ -1175,7 +1252,7 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
                     const wd2=weekData[d]||{};
                     const ds=getDayScore(wd2);
                     const sc=ds===null?t.textLight:ds.base>=80?t.ok:ds.base>=50?"#d4850f":t.danger;
-                    return(<td key={d} style={{padding:"6px 4px",textAlign:"center",fontSize:14,fontWeight:800,color:sc}}>{ds!==null?`${ds.base}${ds.bonus?"+"+ds.bonus:""}`:"—"}</td>);
+                    return(<td key={d} style={{padding:"6px 4px",textAlign:"center",fontSize:14,fontWeight:800,color:sc}}>{ds!==null?`${ds.base}${ds.bonus?"+"+ds.bonus:""}`:"-"}</td>);
                   })}
                 </tr>
               </tbody>
@@ -1227,11 +1304,11 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
             </div>
           </div>}
 
-          {/* Body Measurements — weekly date format matching tracker */}
+          {/* Body Measurements - weekly date format matching tracker */}
           <h2 style={{fontSize:22,fontWeight:700,margin:"0 0 8px"}}>Body Measurements</h2>
           <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:10}}>
             <button onClick={()=>shiftW(-1)} style={{background:"none",border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,padding:"4px 10px",cursor:"pointer",fontSize:15,color:t.text}}>◀</button>
-            <span style={{fontSize:15,fontWeight:700,color:t.accent}}>{new Date(weekDates[0]).toLocaleDateString("en-GB",{day:"numeric",month:"short"})} — {new Date(weekDates[6]).toLocaleDateString("en-GB",{day:"numeric",month:"short"})}</span>
+            <span style={{fontSize:15,fontWeight:700,color:t.accent}}>{new Date(weekDates[0]).toLocaleDateString("en-GB",{day:"numeric",month:"short"})} - {new Date(weekDates[6]).toLocaleDateString("en-GB",{day:"numeric",month:"short"})}</span>
             <button onClick={()=>shiftW(1)} style={{background:"none",border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,padding:"4px 10px",cursor:"pointer",fontSize:15,color:t.text}}>▶</button>
           </div>
           <div style={{overflowX:"auto",border:`0.5px solid ${t.cardBorder}`,borderRadius:t.radiusSm,background:t.card,marginBottom:10}}>
@@ -1272,7 +1349,7 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
           {(()=>{
             // Build weeks: W0 = pre-protocol baseline, W1+ = protocol weeks
             const allWeeks = [];
-            // W0: 26 Feb – 1 Mar (baseline week before protocol)
+            // W0: 26 Feb - 1 Mar (baseline week before protocol)
             const w0Dates = [];
             for(let i=0;i<4;i++){const dd=new Date("2026-02-26");dd.setDate(dd.getDate()+i);w0Dates.push(dd.toISOString().split("T")[0]);}
             allWeeks.push({num:0,label:"W0",sublabel:"Baseline",start:new Date("2026-02-26"),end:new Date("2026-03-01"),dates:w0Dates});
@@ -1285,7 +1362,7 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
               const we = new Date(ws); we.setDate(we.getDate()+6);
               const wDates = [];
               for(let i=0;i<7;i++){const dd=new Date(ws);dd.setDate(dd.getDate()+i);wDates.push(dd.toISOString().split("T")[0]);}
-              allWeeks.push({num:wNum,label:`W${wNum}`,sublabel:`Day ${(wNum-1)*7+1}–${wNum*7}`,start:new Date(ws),end:we>today?today:we,dates:wDates});
+              allWeeks.push({num:wNum,label:`W${wNum}`,sublabel:`Day ${(wNum-1)*7+1}-${wNum*7}`,start:new Date(ws),end:we>today?today:we,dates:wDates});
               ws.setDate(ws.getDate()+7);
               wNum++;
             }
@@ -1381,10 +1458,10 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
             const wNotes=weekNoteKeys.flatMap(k=>clinicalNotes[k]||[]);
 
             return(<div>
-              {/* Week navigation — date bar matching tracker */}
+              {/* Week navigation - date bar matching tracker */}
               <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:14}}>
                 <button onClick={()=>setInsightWeek(Math.max(0,(insightWeek!==null?insightWeek:allWeeks.length-1)-1))} style={{background:"none",border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,padding:"4px 10px",cursor:"pointer",fontSize:15,color:t.text}}>◀</button>
-                <span style={{fontSize:15,fontWeight:700,color:t.accent}}>{w.num===0?"Baseline":`W${w.num}`} · {wStart} – {wEnd}</span>
+                <span style={{fontSize:15,fontWeight:700,color:t.accent}}>{w.num===0?"Baseline":`W${w.num}`} · {wStart} - {wEnd}</span>
                 <button onClick={()=>setInsightWeek(Math.min(allWeeks.length-1,(insightWeek!==null?insightWeek:allWeeks.length-1)+1))} style={{background:"none",border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,padding:"4px 10px",cursor:"pointer",fontSize:15,color:t.text}}>▶</button>
               </div>
 
@@ -1505,13 +1582,13 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
 
                   // Spike range from night glucose
                   const nightVals=w.dates.map(d=>{const v=weekData[d]?.glucNight;return v?Number(v):null;}).filter(v=>v);
-                  const spikeRange=postMealVals.length?`${postMealMin}–${postMealMax}`:null;
+                  const spikeRange=postMealVals.length?`${postMealMin}-${postMealMax}`:null;
 
                   const metrics = [
-                    glucAvg&&{label:"Fasting",val:glucAvg,range:`${glucMin}–${glucMax}`,color:glucAvg<=99?t.ok:glucAvg<=140?"#d4850f":t.danger,
+                    glucAvg&&{label:"Fasting",val:glucAvg,range:`${glucMin}-${glucMax}`,color:glucAvg<=99?t.ok:glucAvg<=140?"#d4850f":t.danger,
                       delta:pGlucAvg&&w.num>0?glucAvg-pGlucAvg:null,deltaGood:pGlucAvg?glucAvg<pGlucAvg:false,
                       pred:expectedGluc&&w.num>0?`vs ~${expectedGluc} prediction`:null,predAhead:expectedGluc?glucAvg<expectedGluc:false},
-                    postMealAvg&&{label:"Post-meal",val:postMealAvg,range:`spike ${postMealMin}–${postMealMax}`,color:postMealAvg<=140?t.ok:postMealAvg<=180?"#d4850f":t.danger,
+                    postMealAvg&&{label:"Post-meal",val:postMealAvg,range:`spike ${postMealMin}-${postMealMax}`,color:postMealAvg<=140?t.ok:postMealAvg<=180?"#d4850f":t.danger,
                       delta:pPostAvg&&w.num>0?postMealAvg-pPostAvg:null,deltaGood:pPostAvg?postMealAvg<pPostAvg:false,
                       pred:null,predAhead:false},
                     sleepAvg&&{label:"Sleep avg",val:`${sleepAvg}h`,range:`${sleepGood}/${sleepTotal} nights 7+`,color:sleepAvg>=7?t.ok:sleepAvg>=6.5?"#d4850f":t.danger,
@@ -1534,7 +1611,7 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
                         <div style={{width:1,background:t.cardBorder,flexShrink:0}}/>
                       </React.Fragment>
                     ))}
-                    {/* Body composition — same format as Fasting */}
+                    {/* Body composition - same format as Fasting */}
                     {Object.keys(bm).length>0&&(
                       <React.Fragment>
                         <div style={{textAlign:"center",padding:"0 8px",flex:1}}>
