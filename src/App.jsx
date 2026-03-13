@@ -278,7 +278,7 @@ const supps = [
   { name:"D3 + K2", dose:"2000–5000 IU + 100mcg MK-7 bedtime", trig:"Indirect", hb:"-0.3–0.5%", icon:"☀️", p:"HIGHEST" },
 ];
 
-const actOpts = ["Walk","Heel raises","Weight training","Long walk 30+","Swimming","Yoga","Sauna/steam","Stretching","Rest day","Housework","Other"];
+const actOpts = ["none","rest","walk","housework","stretch","cardio","weights"];
 // Tracker rows matching Google Sheet structure exactly
 const trackerRows = [
   {label:"🩸 Fasting Glucose",field:"glucFast",type:"number",ph:"mg/dL",section:"glucose"},
@@ -286,13 +286,13 @@ const trackerRows = [
   {label:"🌙 Night Glucose",field:"glucNight",type:"number",ph:"mg/dL",section:"glucose"},
   {label:"⏰ First meal",field:"m1t",type:"time",ph:"",section:"meals"},
   {label:"⏰ Last meal",field:"mLast",type:"time",ph:"",section:"meals"},
+  {label:"⏳ IF ratio",field:"_ifRatio",type:"computed",section:"meals"},
   {label:"🚶 After meal move",field:"moveAfter",type:"select",ph:"",opts:["x1","x2","x3"],section:"activity"},
-  {label:"🏃 Activity",field:"act",type:"text",ph:"walk, yoga...",section:"activity"},
+  {label:"🏋️ Exercise",field:"act",type:"select",ph:"",opts:actOpts,section:"activity"},
   {label:"🌿 Berberine",field:"berb",type:"select",ph:"",opts:["0","x1","x2"],section:"supps"},
   {label:"🐟 Fish Oil",field:"fish",type:"select",ph:"",opts:["0","x1","x2","x3"],section:"supps"},
   {label:"💊 Magnesium",field:"mag",type:"select",ph:"",opts:["0","x1","x2","x3"],section:"supps"},
   {label:"☀️ D3 + K2",field:"d3k2",type:"select",ph:"",opts:["0","x1","x2"],section:"supps"},
-  {label:"⏳ IF 14:10",field:"if14",type:"check",section:"habits"},
   {label:"🥗 Fiber first, carb last",field:"fiberFirst",type:"check",section:"habits"},
   {label:"🚫 No sugar",field:"noSweet",type:"check",section:"habits"},
   {label:"💧 Water 2L",field:"water",type:"check",section:"habits"},
@@ -302,7 +302,7 @@ const trackerRows = [
   {label:"😴 Sleep (>7h)",field:"sleep",type:"select",ph:"",opts:["<6","<7","7+","8+"],section:"sleep"},
   {label:"📝 Notes",field:"notes",type:"text",ph:"...",section:"notes"},
 ];
-const keyHabitsForScore = ["berb","fish","mag","d3k2","basil","brazil","probio","noSweet","fiberFirst","if14","water","moveAfter","act"];
+const keyHabitsForScore = ["berb","fish","mag","d3k2","probio","noSweet","fiberFirst","water","moveAfter","act","sleep"];
 const bodyMeasRows = ["Waist (cm)","Hips (cm)","Chest (cm)","Upper Arm (cm)","Thigh (cm)","Neck (cm)","Waist-to-Hip Ratio","Body Fat % (est.)"];
 const tabDefs = [{icon:"📊",label:"PROGRESS"},{icon:"🩸",label:"LABS"},{icon:"📋",label:"LIFESTYLE"},{icon:"🍽️",label:"FOOD & SUPPS"}];
 
@@ -324,6 +324,7 @@ export default function GoldenEra() {
   const [sheetStatus, setSheetStatus] = useState("idle"); // idle | loading | synced | error
   const [expandedSupp, setExpandedSupp] = useState(null);
   const [joyOpen, setJoyOpen] = useState(false);
+  const [scoreInfoOpen, setScoreInfoOpen] = useState(false);
   // scenario removed - using real data
   const trackerCleared = React.useRef(false);
   const bodyCleared = React.useRef(false);
@@ -385,21 +386,80 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
   React.useEffect(()=>{try{localStorage.setItem("ge_weekData",JSON.stringify(weekData));}catch{}},[weekData]);
   React.useEffect(()=>{try{localStorage.setItem("ge_habitData",JSON.stringify(habitData));}catch{}},[habitData]);
 
-  const getTrackerScore=()=>{let total=0,possible=0;weekDates.forEach(d=>{const wd=weekData[d]||{};
-    // Check supplements taken (not "0" and not empty)
-    ["berb","fish"].forEach(f=>{possible+=1;if(wd[f]&&wd[f]!=="0")total++;});
-    // Check checkboxes
-    ["mag","d3k2","basil","brazil","probio","noSweet","fiberFirst","if14","water"].forEach(f=>{possible+=1;if(wd[f])total++;});
-    // Movement
-    possible+=1;if(wd.moveAfter)total++;
-    possible+=1;if(wd.act)total++;
-    // Sleep
-    possible+=1;if(wd.sleep==="7+"||wd.sleep==="8+")total++;
-  });let gluc=0;weekDates.forEach(d=>{if((weekData[d]||{}).glucFast)gluc++;});return{score:possible>0?Math.round((total/possible)*100):0,total,possible,gluc};};
+  // Impact-weighted habit score (out of 100/day, skip empty days)
+  // Meal window auto-calc replaces IF 14:10 checkbox
+  // Impact-weighted habit score: 100 base + bonuses
+  // Bonuses: weights +10, cardio/swim +5, meal≤8h +5, dance +4, meal≤9h +2, probiotics +2, brazil +2, basil +1
+  const getDayScore=(wd)=>{
+    if(!wd)return null;
+    const hasData=wd.glucFast||wd.berb||wd.fish||wd.act||wd.moveAfter||wd.noSweet||wd.fiberFirst||wd.water||wd.sleep||wd.mag||wd.d3k2||wd.m1t||wd.mLast;
+    if(!hasData)return null;
+    let base=0,bonus=0;
+    // No sugar (18)
+    if(wd.noSweet)base+=18;
+    // Berberine (15): x1=7, x2=15
+    if(wd.berb==="x2")base+=15;else if(wd.berb==="x1")base+=7;
+    // Sleep (14): 7+=14, <7=7, <6=0
+    if(wd.sleep==="7+"||wd.sleep==="8+")base+=14;else if(wd.sleep==="<7")base+=7;
+    // Fish Oil (10): x1=3, x2=6, x3=10
+    if(wd.fish==="x3")base+=10;else if(wd.fish==="x2")base+=6;else if(wd.fish==="x1")base+=3;
+    // Exercise (5 base): any non-none activity = 5. Multi-select supported (comma-separated)
+    // Bonus: weights +10, cardio +5 per occurrence
+    if(wd.act&&wd.act!=="none"&&wd.act!=="0"){
+      const acts=wd.act.split(",").map(a=>a.trim().toLowerCase());
+      const hasActivity=acts.some(a=>a&&a!=="none");
+      if(hasActivity)base+=5;
+      acts.forEach(a=>{
+        if(a==="weights")bonus+=10;
+        else if(a==="cardio")bonus+=5;
+      });
+    }
+    // After meal move (8): x1=3, x2=6, x3=8
+    if(wd.moveAfter==="x3")base+=8;else if(wd.moveAfter==="x2")base+=6;else if(wd.moveAfter==="x1")base+=3;
+    // Meal window (8 base): ≤10h=8, ≤11h=5, >11h=0. Bonus: ≤8h +5, ≤9h +2
+    if(wd.m1t&&wd.mLast){
+      const [h1,mn1]=(wd.m1t||"").split(":").map(Number);
+      const [h2,mn2]=(wd.mLast||"").split(":").map(Number);
+      if(!isNaN(h1)&&!isNaN(h2)){
+        const mins=(h2*60+(mn2||0))-(h1*60+(mn1||0));
+        if(mins>0&&mins<=480){base+=8;bonus+=5;}
+        else if(mins<=540){base+=8;bonus+=2;}
+        else if(mins<=600)base+=8;
+        else if(mins<=660)base+=5;
+      }
+    }
+    // Fiber first (7)
+    if(wd.fiberFirst)base+=7;
+    // Water 2L (5)
+    if(wd.water)base+=5;
+    // Magnesium (5)
+    if(wd.mag&&wd.mag!=="0")base+=5;
+    // D3+K2 (5)
+    if(wd.d3k2&&wd.d3k2!=="0")base+=5;
+    // Probiotics (+2 bonus)
+    if(wd.probio)bonus+=2;
+    // Brazil nuts (+2 bonus)
+    if(wd.brazil)bonus+=2;
+    // Basil seeds (+2 bonus)
+    if(wd.basil)bonus+=2;
+    return{base,bonus};
+  };
+  const getTrackerScore=()=>{
+    let totalBase=0,totalBonus=0,trackedDays=0,glucDays=0;
+    weekDates.forEach(d=>{
+      const wd=weekData[d]||{};
+      const ds=getDayScore(wd);
+      if(ds!==null){totalBase+=ds.base;totalBonus+=ds.bonus;trackedDays++;}
+      if(wd.glucFast)glucDays++;
+    });
+    const avgBase=trackedDays>0?Math.round(totalBase/trackedDays):0;
+    const avgBonus=trackedDays>0?Math.round(totalBonus/trackedDays):0;
+    return{score:avgBase,bonus:avgBonus,total:avgBase+avgBonus,trackedDays,gluc:glucDays};
+  };
   const ts=getTrackerScore();
   const getTP=(marker)=>{const s=ts.score;if(s===0)return"—";const lk={"HbA1C":[8.4,6],"Fasting Glucose":[185,92],"Triglycerides":[485,135],"GGT":[125,32],"SGPT (ALT)":[40,22],"SGOT (AST)":[30,20],"Cholesterol":[215,187],"Uric Acid":[6.8,5.2],"HDL-C":[45,55],"LDL-C":[110,100],"Creatinine":[.52,.52],"eGFR":[130,128],"Weight":[70,62],"BMI":[25.1,21.9]};const[w,b]=lk[marker]||[0,0];if(w===b)return String(w);const p=w+((b-w)*s/100);return marker==="HbA1C"?`~${p.toFixed(1)}%`:marker==="Creatinine"?p.toFixed(2):`~${Math.round(p)}`;};
 
-  const getInsights=()=>{const tips=[];let berb=0,move=0,sweet=0,sleep=0,fiber=0,ifW=0,mag=0,water=0;weekDates.forEach(d=>{const wd=weekData[d]||{};if(wd.berb&&wd.berb!=="0")berb++;if(wd.moveAfter||wd.act)move++;if(wd.noSweet)sweet++;if(wd.sleep==="7+"||wd.sleep==="8+")sleep++;if(wd.fiberFirst)fiber++;if(wd.if14)ifW++;if(wd.mag)mag++;if(wd.water)water++;});if(ts.score>0)tips.push({icon:"📊",title:`Score: ${ts.score}%`,text:`${ts.total}/${ts.possible} habits. ${ts.score>=80?"Full Send pace.":ts.score>=50?"70% effort pace.":"Needs more consistency."}`});if(berb>0&&berb<5)tips.push({icon:"🌿",title:"Berberine",text:`${berb}/7 days. Aim for daily.`});if(berb>=5)tips.push({icon:"🌿",title:"Berberine strong",text:`${berb}/7 — excellent.`});if(move<5&&move>0)tips.push({icon:"🚶",title:"Move more",text:`${move}/7 days active. Even 10 min walks count.`});if(sweet>=5)tips.push({icon:"🚫",title:"Sugar-free",text:`${sweet}/7 days — biggest trig driver.`});if(sweet<5&&sweet>0)tips.push({icon:"⚠️",title:"Drinks",text:`${sweet}/7 sugar-free. Each ชาเย็น = +30-50 trig.`});if(sleep<5&&sleep>0)tips.push({icon:"😴",title:"Sleep",text:`${sleep}/7 nights 7+hrs. Poor sleep → glucose +15-30.`});if(mag===0)tips.push({icon:"💊",title:"Magnesium missing",text:"Start tonight. Helps sleep + lowers fasting glucose 5-15 pts."});if(tips.length===0){tips.push({icon:"📊",title:"Start tracking",text:"Fill in the table above to get personalized insights."});tips.push({icon:"💡",title:"Priorities",text:"Zero sweet drinks, berberine, movement, sleep 7+."});tips.push({icon:"🎯",title:"Glucose",text:"Track fasting glucose daily — best predictor of A1C."});}return tips;};
+  const getInsights=()=>{const tips=[];let berb=0,move=0,sweet=0,sleep=0,fiber=0,mag=0,water=0;weekDates.forEach(d=>{const wd=weekData[d]||{};if(wd.berb&&wd.berb!=="0")berb++;if(wd.moveAfter||wd.act)move++;if(wd.noSweet)sweet++;if(wd.sleep==="7+"||wd.sleep==="8+")sleep++;if(wd.fiberFirst)fiber++;if(wd.mag&&wd.mag!=="0")mag++;if(wd.water)water++;});if(ts.score>0)tips.push({icon:"📊",title:`Score: ${ts.score}/100${ts.bonus?" (+"+ts.bonus+")":""}`,text:`Avg ${ts.score} pts across ${ts.trackedDays} days. ${ts.score>=80?"Full Send pace.":ts.score>=50?"Solid effort.":"Needs more consistency."}`});if(berb>0&&berb<5)tips.push({icon:"🌿",title:"Berberine",text:`${berb}/7 days. Aim for daily.`});if(berb>=5)tips.push({icon:"🌿",title:"Berberine strong",text:`${berb}/7 — excellent.`});if(move<5&&move>0)tips.push({icon:"🚶",title:"Move more",text:`${move}/7 days active. Even 10 min walks count.`});if(sweet>=5)tips.push({icon:"🚫",title:"Sugar-free",text:`${sweet}/7 days — biggest trig driver.`});if(sweet<5&&sweet>0)tips.push({icon:"⚠️",title:"Drinks",text:`${sweet}/7 sugar-free. Each ชาเย็น = +30-50 trig.`});if(sleep<5&&sleep>0)tips.push({icon:"😴",title:"Sleep",text:`${sleep}/7 nights 7+hrs. Poor sleep → glucose +15-30.`});if(mag===0)tips.push({icon:"💊",title:"Magnesium missing",text:"Start tonight. Helps sleep + lowers fasting glucose 5-15 pts."});if(tips.length===0){tips.push({icon:"📊",title:"Start tracking",text:"Fill in the table above to get personalized insights."});tips.push({icon:"💡",title:"Priorities",text:"Zero sweet drinks, berberine, movement, sleep 7+."});tips.push({icon:"🎯",title:"Glucose",text:"Track fasting glucose daily — best predictor of A1C."});}return tips;};
 
   const Pill=({active,children,onClick,color})=>(<button onClick={onClick} style={{padding:"5px 12px",borderRadius:t.radius,fontSize:12,border:`1px solid ${active?(color||t.accent):t.cardBorder}`,cursor:"pointer",background:active?(color||t.accent):t.card,color:active?"#fff":t.textMuted,fontWeight:active?700:500,fontFamily:t.font}}>{children}</button>);
   const Card=({children,style:s={}})=>(<div style={{background:t.card,border:`1px solid ${t.cardBorder}`,borderRadius:t.radius,padding:"14px 16px",marginBottom:10,...s}}>{children}</div>);
@@ -1049,6 +1109,21 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
                       {weekDates.map((d,di)=>{
                         const val = wd(d)[row.field]||"";
                         const cellBorder = {borderBottom:`0.5px solid ${t.cardBorder}`,borderRight:di<6?`0.5px solid ${t.cardBorder}22`:"none"};
+                        if(row.type==="computed"){
+                          // IF ratio: auto-calc from first/last meal
+                          const m1=wd(d).m1t||"";const mL=wd(d).mLast||"";
+                          let display="—";
+                          if(m1&&mL){
+                            const [h1,mn1]=m1.split(":").map(Number);
+                            const [h2,mn2]=mL.split(":").map(Number);
+                            if(!isNaN(h1)&&!isNaN(h2)){
+                              const eating=Math.round((h2*60+(mn2||0))-(h1*60+(mn1||0)))/60;
+                              const fasting=Math.round(24-eating);
+                              display=`${fasting}:${Math.round(eating)}`;
+                            }
+                          }
+                          return(<td key={d} style={{padding:"5px 4px",textAlign:"center",fontSize:11,color:t.textMuted,fontWeight:600,...cellBorder}}>{display}</td>);
+                        }
                         if(row.type==="check"){
                           const on = !!wd(d)[row.field];
                           return(<td key={d} onClick={()=>upWD(d,row.field,!on)} style={{padding:"3px",textAlign:"center",cursor:"pointer",...cellBorder}}>
@@ -1071,20 +1146,59 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
                   <td style={{position:"sticky",left:0,background:t.accentBg,zIndex:1,padding:"6px 8px",fontSize:12,color:t.accent,fontWeight:800,borderRight:`0.5px solid ${t.cardBorder}`}}>Score</td>
                   {weekDates.map(d=>{
                     const wd2=weekData[d]||{};
-                    let day_t=0,day_p=0;
-                    ["berb","fish","mag","d3k2"].forEach(f=>{day_p++;if(wd2[f]&&wd2[f]!=="0")day_t++;});
-                    ["basil","brazil","probio","noSweet","fiberFirst","if14","water"].forEach(f=>{day_p++;if(wd2[f])day_t++;});
-                    day_p++;if(wd2.moveAfter)day_t++;
-                    day_p++;if(wd2.act)day_t++;
-                    day_p++;if(wd2.sleep==="7+"||wd2.sleep==="8+")day_t++;
-                    const pct=day_p>0?Math.round((day_t/day_p)*100):0;
-                    const sc=pct>=80?t.ok:pct>=50?"#d4850f":pct>0?t.danger:t.textLight;
-                    return(<td key={d} style={{padding:"6px 4px",textAlign:"center",fontSize:13,fontWeight:800,color:sc}}>{pct>0?`${pct}%`:"—"}</td>);
+                    const ds=getDayScore(wd2);
+                    const sc=ds===null?t.textLight:ds.base>=80?t.ok:ds.base>=50?"#d4850f":t.danger;
+                    return(<td key={d} style={{padding:"6px 4px",textAlign:"center",fontSize:13,fontWeight:800,color:sc}}>{ds!==null?`${ds.base}${ds.bonus?"+"+ds.bonus:""}`:"—"}</td>);
                   })}
                 </tr>
               </tbody>
             </table>
           </div>
+
+          {/* Score Explanation Toggle */}
+          <div onClick={()=>setScoreInfoOpen(!scoreInfoOpen)} style={{cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center",margin:"8px 0",padding:"8px 12px"}}>
+            <span style={{fontSize:12,fontWeight:700,color:t.accent}}>📊 How is the score calculated?</span>
+            <span style={{fontSize:12,color:t.textMuted}}>{scoreInfoOpen?"▼":"▶"}</span>
+          </div>
+          {scoreInfoOpen&&<div style={{padding:"10px 12px",marginBottom:12,fontSize:11,lineHeight:1.8}}>
+            <div style={{fontWeight:800,fontSize:12,color:t.text,marginBottom:6}}>Base Score /100</div>
+            {[
+              ["🚫 No sugar","18"],
+              ["🌿 Berberine","15"],
+              ["😴 Sleep","14"],
+              ["🐟 Fish Oil","10"],
+              ["🚶 After meal move","8"],
+              ["⏳ Meal window","8"],
+              ["🥗 Fiber first","7"],
+              ["🏋️ Exercise","5"],
+              ["💧 Water 2L","5"],
+              ["💊 Magnesium","5"],
+              ["☀️ D3+K2","5"],
+            ].map(([name,pts],i)=>(
+              <div key={i} style={{display:"flex",justifyContent:"space-between",padding:"2px 0"}}>
+                <span style={{color:t.text}}>{name}</span>
+                <span style={{color:t.accent,fontWeight:700}}>{pts}</span>
+              </div>
+            ))}
+            <div style={{fontWeight:800,fontSize:12,color:t.text,marginTop:10,marginBottom:6}}>Bonus Points</div>
+            {[
+              ["🏋️ Weights","+10"],
+              ["🏊 Cardio / swim / dance","+5"],
+              ["⏳ Meal window ≤8h","+5"],
+              ["⏳ Meal window ≤9h","+2"],
+              ["🦠 Probiotics","+2"],
+              ["🥜 Brazil nuts","+2"],
+              ["🌱 Basil seeds","+2"],
+            ].map(([name,pts],i)=>(
+              <div key={i} style={{display:"flex",justifyContent:"space-between",padding:"2px 0"}}>
+                <span style={{color:t.textMuted}}>{name}</span>
+                <span style={{color:t.ok,fontWeight:700}}>{pts}</span>
+              </div>
+            ))}
+            <div style={{marginTop:8,color:t.textMuted,fontSize:10}}>
+              Daily score = <strong style={{color:t.text}}>base+bonus</strong> · Weekly avg skips empty days · Max 121
+            </div>
+          </div>}
 
           {/* Body Measurements — weekly date format matching tracker */}
           <h2 style={{fontSize:20,fontWeight:700,margin:"0 0 8px"}}>Body Measurements</h2>
@@ -1252,14 +1366,20 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
 
                 {/* ── 1. Week Score Ring + Weekly Summary ── */}
                 {w.num>0&&(()=>{
-                  // Calculate week score (0-100)
-                  let score=0,factors=0;
-                  if(glucAvg){score+=(glucAvg<=99?100:glucAvg<=140?70:glucAvg<=180?40:20);factors++;}
-                  if(sleepAvg){score+=(sleepAvg>=7?100:sleepAvg>=6.5?60:30);factors++;}
-                  if(suppsPct!==undefined){score+=(suppsPct>=80?100:suppsPct>=40?50:20);factors++;}
-                  if(bm.weight){const d=Math.abs(Number(bm.weight)-73.6);score+=(d>=2?100:d>=1?70:50);factors++;}
-                  const weekScore=factors?Math.round(score/factors):null;
-                  if(!weekScore) return null;
+                  // Calculate week score using impact-weighted system
+                  let totalBase=0,totalBonus=0,trackedDays=0,weightDays=0;
+                  w.dates.forEach(d=>{
+                    const wd=weekData[d]||{};
+                    const ds=getDayScore(wd);
+                    if(ds!==null){totalBase+=ds.base;totalBonus+=ds.bonus;trackedDays++;}
+                    if(wd.act==="weights")weightDays++;
+                  });
+                  const avgBase=trackedDays>0?Math.round(totalBase/trackedDays):null;
+                  if(!avgBase) return null;
+                  const avgBonus=trackedDays>0?Math.round(totalBonus/trackedDays):0;
+                  const weightBonus=weightDays>=2?5:0;
+                  const weekScore=avgBase;
+                  const weekBonus=avgBonus+weightBonus;
 
                   // Prediction comparison
                   const dayNum=w.num*7;
@@ -1294,7 +1414,7 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
                         <circle cx={36} cy={36} r={30} fill="none" stroke={t.cardBorder} strokeWidth={4.5}/>
                         <circle cx={36} cy={36} r={30} fill="none" stroke={ringColor} strokeWidth={4.5} strokeDasharray={circumference} strokeDashoffset={offset} strokeLinecap="round" transform="rotate(-90 36 36)"/>
                         <text x={36} y={33} textAnchor="middle" dominantBaseline="central" style={{fontSize:18,fontWeight:800,fill:t.text}}>{weekScore}</text>
-                        <text x={36} y={48} textAnchor="middle" style={{fontSize:9,fill:t.textMuted}}>/100</text>
+                        <text x={36} y={48} textAnchor="middle" style={{fontSize:9,fill:t.textMuted}}>{weekBonus>0?`/100 +${weekBonus}`:"/100"}</text>
                       </svg>
                       <div style={{fontSize:9,color:t.textMuted,textTransform:"uppercase",letterSpacing:"0.3px",marginTop:2}}>Week score</div>
                     </div>
