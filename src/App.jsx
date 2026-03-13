@@ -1141,7 +1141,9 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
                         }
                         const isGluc = row.section==="glucose" && val;
                         const glucColor = isGluc ? (Number(val)<=99?t.ok:Number(val)<=140?"#d4850f":t.danger) : t.text;
-                        return(<td key={d} style={{padding:0,...cellBorder}}><input type={row.type==="number"?"text":row.type} inputMode={row.type==="number"?"numeric":undefined} placeholder={row.ph||"—"} value={val} onChange={e=>upWD(d,row.field,e.target.value)} style={{padding:"5px 4px",border:"none",fontSize:11,width:"100%",minWidth:50,background:"transparent",color:isGluc?glucColor:t.text,fontWeight:isGluc?700:400,fontFamily:t.font,outline:"none",textAlign:"center",boxSizing:"border-box"}}/></td>);
+                        const inputType = row.type==="time"?"text":row.type==="number"?"text":row.type;
+                        const ph = row.type==="time"?"HH:MM":(row.ph||"—");
+                        return(<td key={d} style={{padding:0,...cellBorder}}><input type={inputType} inputMode={row.type==="number"?"numeric":undefined} placeholder={ph} value={val} onChange={e=>upWD(d,row.field,e.target.value)} style={{padding:"5px 4px",border:"none",fontSize:11,width:"100%",minWidth:50,background:"transparent",color:isGluc?glucColor:t.text,fontWeight:isGluc?700:400,fontFamily:t.font,outline:"none",textAlign:"center",boxSizing:"border-box"}}/></td>);
                       })}
                     </tr>
                   </React.Fragment>);})}
