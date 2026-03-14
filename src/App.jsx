@@ -125,13 +125,22 @@ const clinicalNotes = {
     { icon:"💊", sev:"excellent", title:"All 4 supps active + berberine 2x", text:"Berberine at morning and lunch. All core supplements now running. Score 98+7 - near-perfect protocol day." },
     { icon:"😴", sev:"ontrack", title:"Sleep still inconsistent", text:"Alternating <7 and 7+ nights. Sleep remains the biggest opportunity for further glucose reduction." },
   ],
+  "14 Mar (Day 13)": [
+    { icon:"📊", sev:"ontrack", title:"Fasting glucose 118, slight rebound", text:"Day 13: up from 115 yesterday. Post-exercise rebound from swimming + magnesium woke her to pee mid-sleep. Cortisol spike from waking inflated the number. Not a setback - trend is still strong." },
+    { icon:"🍽️", sev:"ontrack", title:"Post-meal 140, only 2 meals today", text:"Protein-heavy day with only 2 meals. Greek yogurt added. Post-meal spike of 140 is moderate - pancreas handling protein well." },
+    { icon:"🏊", sev:"excellent", title:"Swimming + stretching: glucose to 92", text:"After cardio swim and 10 min stretching, glucose dropped to 92 - second time hitting normal range. Then slowly rose: 92 to 111 to 120, stabilized at 115. The rebound is the liver refilling glycogen." },
+    { icon:"🫀", sev:"grow", title:"Liver gap: overnight dump visible", text:"Night glucose 115, tomorrow's fasting will reveal the liver gap. Previous night 101 to fasting 130 showed +29 gap (inflated by post-swim low). Resting night glucose of 115 will give a truer liver fat reading." },
+    { icon:"⏰", sev:"excellent", title:"IF 18:6 achieved (10:30-16:30)", text:"Meal window 10:30 to 16:30 = 6 hours eating, 18 hours fasting. Best IF ratio yet. Liver gets 18 hours of fat-burning time." },
+    { icon:"💊", sev:"excellent", title:"Full protocol + all bonuses", text:"Score 106 (base + bonuses). Cardio bonus, all supps x2+, all habits checked. Near-perfect day. Probiotics, basil seeds, brazil nuts all done." },
+    { icon:"🫁", sev:"grow", title:"Bloating noted", text:"Bloating after meals - could be from Greek yogurt (new food), increased fiber, or gut bacteria adjusting to protocol changes. Monitor if it continues." },
+  ],
 };
 
 // Chart data: confirmed = real, predicted = projection
 // Timeline: 26 Feb = Day 0, 2 Mar = Day 1, 10 Mar = Day 9
 const chartData = {
   strict: {
-    gluc:[{m:"26 Feb",v:211,confirmed:true},{m:"2 Mar",v:180,confirmed:true},{m:"3 Mar",v:170,confirmed:true},{m:"4 Mar",v:160,confirmed:true},{m:"5 Mar",v:142,confirmed:true},{m:"6 Mar",v:140,confirmed:true},{m:"7 Mar",v:147,confirmed:true},{m:"8 Mar",v:150,confirmed:true},{m:"9 Mar",v:150,confirmed:true},{m:"10 Mar",v:123,confirmed:true},{m:"11 Mar",v:120,confirmed:true},{m:"12 Mar",v:123,confirmed:true},{m:"13 Mar",v:115,confirmed:true},{m:"D30",v:100,confirmed:false},{m:"D60",v:88,confirmed:false},{m:"D90",v:82,confirmed:false}],
+    gluc:[{m:"26 Feb",v:211,confirmed:true},{m:"2 Mar",v:180,confirmed:true},{m:"3 Mar",v:170,confirmed:true},{m:"4 Mar",v:160,confirmed:true},{m:"5 Mar",v:142,confirmed:true},{m:"6 Mar",v:140,confirmed:true},{m:"7 Mar",v:147,confirmed:true},{m:"8 Mar",v:150,confirmed:true},{m:"9 Mar",v:150,confirmed:true},{m:"10 Mar",v:123,confirmed:true},{m:"11 Mar",v:120,confirmed:true},{m:"12 Mar",v:123,confirmed:true},{m:"13 Mar",v:115,confirmed:true},{m:"14 Mar",v:118,confirmed:true},{m:"D30",v:100,confirmed:false},{m:"D60",v:88,confirmed:false},{m:"D90",v:82,confirmed:false}],
     hb:[{m:"26 Feb",v:9.4,confirmed:true},{m:"D30",v:7.8,confirmed:false},{m:"D60",v:6.5,confirmed:false},{m:"D90",v:5.7,confirmed:false}],
     trig:[{m:"26 Feb",v:702,confirmed:true},{m:"D30",v:350,confirmed:false},{m:"D60",v:200,confirmed:false},{m:"D90",v:135,confirmed:false}],
     wt:[{m:"26 Feb",v:73.6,confirmed:true},{m:"8 Mar",v:71.8,confirmed:true},{m:"D30",v:68,confirmed:false},{m:"D60",v:64,confirmed:false},{m:"D90",v:61,confirmed:false}],
@@ -301,6 +310,7 @@ const trackerRows = [
   {label:"🩸 Fasting Glucose",field:"glucFast",type:"number",ph:"mg/dL",section:"glucose"},
   {label:"🍽️ Post-meal Glucose",field:"glucPost",type:"number",ph:"mg/dL",section:"glucose"},
   {label:"🌙 Night Glucose",field:"glucNight",type:"number",ph:"mg/dL",section:"glucose"},
+  {label:"🫀 Liver Gap",field:"_liverGap",type:"computed",section:"glucose"},
   {label:"First meal",field:"m1t",type:"time",ph:"",section:"meals"},
   {label:"Last meal",field:"mLast",type:"time",ph:"",section:"meals"},
   {label:"IF ratio",field:"_ifRatio",type:"computed",section:"meals"},
@@ -346,8 +356,8 @@ export default function GoldenEra() {
   const trackerCleared = React.useRef(false);
   const bodyCleared = React.useRef(false);
   const [labChart, setLabChart] = useState("hb");
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [noteTab, setNoteTab] = useState("10 Mar (Day 9)");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [noteTab, setNoteTab] = useState("14 Mar (Day 13)");
   const [insightWeek, setInsightWeek] = useState(null); // null = auto-select latest
   const [labMeanTab, setLabMeanTab] = useState(null); // null = auto-select latest (26 Feb)
   const [expandedLab, setExpandedLab] = useState(null); // accordion for lab meanings
@@ -486,29 +496,43 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
   
 
   return (
-    <div style={{minHeight:"100vh",background:t.bg,fontFamily:t.font,color:t.text,display:"flex"}}>
+    <div style={{minHeight:"100vh",background:t.bg,fontFamily:t.font,color:t.text,display:"flex",flexDirection:"column"}}>
       <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
 
-      {/* SIDEBAR - responsive: top bar on mobile, side on desktop */}
-      <div style={{width:sidebarOpen?180:48,minHeight:"100vh",background:t.sidebarBg,borderRight:`1px solid ${t.cardBorder}`,padding:sidebarOpen?"16px 12px":"16px 4px",display:"flex",flexDirection:"column",flexShrink:0,transition:"width 0.2s",overflow:"hidden"}}>
-        <button onClick={()=>setSidebarOpen(!sidebarOpen)} style={{background:"none",border:"none",color:t.textLight,fontSize:15,cursor:"pointer",alignSelf:sidebarOpen?"flex-end":"center",marginBottom:8}}>{sidebarOpen?"◁":"▷"}</button>
-        {sidebarOpen&&<>
-          <div style={{marginBottom:14}}>
-            <div style={{display:"flex",alignItems:"center",gap:6}}>
-              <div style={{fontSize:15,fontWeight:700,color:t.text,lineHeight:1.2}}>Golden Era</div>
-              {sheetStatus==="synced"&&<span style={{fontSize:8,padding:"2px 5px",borderRadius:4,background:"#16a34a18",color:"#16a34a"}}>☁️</span>}
-              {sheetStatus==="loading"&&<span style={{fontSize:8,padding:"2px 5px",borderRadius:4,background:"#d4850f18",color:"#d4850f"}}>⏳</span>}
-            </div>
-          </div>
-          <div style={{display:"flex",flexDirection:"column",gap:2,flex:1}}>
-            {tabDefs.map((td,i)=>(<button key={td.label} onClick={()=>setTab(i)} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 10px",borderRadius:t.radiusSm,border:"none",background:tab===i?t.accent:"transparent",color:tab===i?"#fff":t.textMuted,fontSize:13,fontWeight:tab===i?700:400,cursor:"pointer",fontFamily:t.font,textAlign:"left",letterSpacing:tab===i?1:0.5}}><span style={{fontSize:15}}>{td.icon}</span><span>{td.label}</span></button>))}
-          </div>
-        </>}
-        {!sidebarOpen&&<div style={{display:"flex",flexDirection:"column",gap:3,alignItems:"center"}}>{tabDefs.map((td,i)=>(<button key={td.label} onClick={()=>setTab(i)} style={{width:34,height:34,borderRadius:t.radiusSm,border:"none",background:tab===i?t.accent:"transparent",color:tab===i?"#fff":t.textMuted,fontSize:15,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>{td.icon}</button>))}</div>}
+      {/* TOP BAR with hamburger */}
+      <div style={{position:"sticky",top:0,zIndex:100,background:t.sidebarBg,borderBottom:`1px solid ${t.cardBorder}`,padding:"10px 16px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+        <div style={{display:"flex",alignItems:"center",gap:8}}>
+          <button onClick={()=>setSidebarOpen(!sidebarOpen)} style={{background:"none",border:"none",cursor:"pointer",padding:4,display:"flex",flexDirection:"column",gap:3}}>
+            <span style={{display:"block",width:20,height:2,background:t.text,borderRadius:1,transition:"all 0.2s",transform:sidebarOpen?"rotate(45deg) translateY(5px)":"none"}}/>
+            <span style={{display:"block",width:20,height:2,background:t.text,borderRadius:1,transition:"all 0.2s",opacity:sidebarOpen?0:1}}/>
+            <span style={{display:"block",width:20,height:2,background:t.text,borderRadius:1,transition:"all 0.2s",transform:sidebarOpen?"rotate(-45deg) translateY(-5px)":"none"}}/>
+          </button>
+          <div style={{fontSize:16,fontWeight:700,color:t.text}}>Golden Era</div>
+          {sheetStatus==="synced"&&<span style={{fontSize:8,padding:"2px 5px",borderRadius:4,background:"#16a34a18",color:"#16a34a"}}>☁️</span>}
+          {sheetStatus==="loading"&&<span style={{fontSize:8,padding:"2px 5px",borderRadius:4,background:"#d4850f18",color:"#d4850f"}}>⏳</span>}
+        </div>
+        <div style={{fontSize:12,color:t.textMuted}}>{tabDefs[tab].icon} {tabDefs[tab].label}</div>
       </div>
 
+      {/* MENU OVERLAY */}
+      {sidebarOpen&&<>
+        <div onClick={()=>setSidebarOpen(false)} style={{position:"fixed",top:0,left:0,right:0,bottom:0,background:"rgba(0,0,0,0.3)",zIndex:200,transition:"opacity 0.2s"}}/>
+        <div style={{position:"fixed",top:0,left:0,width:240,height:"100vh",background:t.sidebarBg,zIndex:201,padding:"20px 16px",boxShadow:"4px 0 20px rgba(0,0,0,0.1)",transition:"transform 0.2s",overflowY:"auto"}}>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:20}}>
+            <div style={{fontSize:18,fontWeight:700,color:t.text}}>Golden Era</div>
+            <button onClick={()=>setSidebarOpen(false)} style={{background:"none",border:"none",fontSize:20,color:t.textMuted,cursor:"pointer",padding:4}}>x</button>
+          </div>
+          <div style={{display:"flex",flexDirection:"column",gap:4}}>
+            {tabDefs.map((td,i)=>(<button key={td.label} onClick={()=>{setTab(i);setSidebarOpen(false);}} style={{display:"flex",alignItems:"center",gap:10,padding:"12px 14px",borderRadius:t.radius,border:"none",background:tab===i?t.accent:"transparent",color:tab===i?"#fff":t.text,fontSize:15,fontWeight:tab===i?700:500,cursor:"pointer",fontFamily:t.font,textAlign:"left",transition:"background 0.15s"}}><span style={{fontSize:18}}>{td.icon}</span><span>{td.label}</span></button>))}
+          </div>
+          <div style={{marginTop:24,padding:"12px 14px",background:t.accentLight,borderRadius:t.radius,fontSize:12,color:t.textMuted,lineHeight:1.5}}>
+            90-Day Wellness Protocol<br/>Started: Mar 2, 2026
+          </div>
+        </div>
+      </>}
+
       {/* CONTENT */}
-      <div style={{flex:1,padding:"24px 28px",overflowY:"auto"}}>
+      <div style={{flex:1,padding:"16px 12px",overflowY:"auto"}}>
 
         {/* ══ LABS ══ */}
         {tab===1&&(<div>
@@ -788,7 +812,7 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
 
           {/* Nutrition Needs + Portion Guide merged */}
           <h3 style={{fontSize:16,fontWeight:700,margin:"0 0 4px"}}>What Your Body Needs</h3>
-          <p style={{color:t.textMuted,fontSize:13,marginBottom:10}}>Updated Day 12: Weight ~71kg, fasting glucose 116, low-carb protocol</p>
+          <p style={{color:t.textMuted,fontSize:13,marginBottom:10}}>Updated Day 13: Weight ~71kg, fasting glucose 118, IF 18:6 protocol</p>
 
           <div style={{border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,background:t.card,marginBottom:12,overflow:"hidden"}}>
             <table style={{width:"100%",borderCollapse:"collapse"}}>
@@ -1201,6 +1225,21 @@ const [weekData,setWeekData]=useState(()=>{try{if(localStorage.getItem("ge_weekD
                         const val = wd(d)[row.field]||"";
                         const cellBorder = {borderBottom:`0.5px solid ${t.cardBorder}`,borderRight:di<6?`0.5px solid ${t.cardBorder}22`:"none"};
                         if(row.type==="computed"){
+                          if(row.field==="_liverGap"){
+                            // Liver Gap: previous day's night glucose vs today's fasting
+                            const todayFast=wd(d).glucFast;
+                            // Get previous day
+                            const prevDate=new Date(d);prevDate.setDate(prevDate.getDate()-1);
+                            const pd=prevDate.toISOString().split("T")[0];
+                            const prevNight=wd(pd).glucNight;
+                            let display="-";let gapColor=t.textMuted;
+                            if(todayFast&&prevNight){
+                              const gap=Number(todayFast)-Number(prevNight);
+                              display=gap>0?`+${gap}`:String(gap);
+                              gapColor=gap<=5?"#2d5016":gap<=10?t.ok:gap<=15?"#d4850f":t.danger;
+                            }
+                            return(<td key={d} style={{padding:"5px 4px",textAlign:"center",fontSize:12,color:gapColor,...cellBorder}}>{display}</td>);
+                          }
                           // IF ratio: auto-calc from first/last meal
                           const m1=wd(d).m1t||"";const mL=wd(d).mLast||"";
                           let display="-";let ifColor=t.textMuted;
