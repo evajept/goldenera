@@ -159,7 +159,7 @@ const clinicalNotes = {
     { icon:"💧", sev:"grow", title:"Dehydration day - water under 2L", text:"Water 2L not hit today despite cardio in the sun. This is likely the main driver of the headache and fatigue. Electrolytes (salt, coconut water) would help more than plain water after heat exposure. Priority for tomorrow: hydrate before going out." },
     { icon:"🌙", sev:"excellent", title:"Night glucose 112, strong recovery", text:"Despite the sugar spike to 170, night glucose recovered to 112. The body pulled it all the way back down. Tomorrow's fasting will show if the liver held overnight." },
     { icon:"⏰", sev:"excellent", title:"IF 18:6 maintained (11:00-17:00)", text:"Eating window 11:00 to 17:00 = 6 hours. Second consecutive 18:6 day. Consistent fasting window." },
-    { icon:"💊", sev:"ontrack", title:"Supps reduced: Mg x1, D3+K2 x1", text:"Magnesium dropped from x2 to x1, D3+K2 from x2 to x1. Water under 2L. Brazil nuts skipped. Basil seeds and probiotics still on. Score 91 (down from 106)." },
+    { icon:"💊", sev:"ontrack", title:"D3+K2 reduced to x1, Mg x2 (extra for headache)", text:"D3+K2 dropped from x2 to x1. Magnesium stayed at x2 - took extra dose at night for the temple headache from heat/dehydration. Water under 2L. Brazil nuts skipped. Basil seeds and probiotics still on. Score 91 (down from 106)." },
   ],
 };
 
