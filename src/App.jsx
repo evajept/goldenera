@@ -854,7 +854,7 @@ IMPORTANT RULES:
                 { label:"Fasting glucose", baseline:211, current:95, d30:150, d60:118, d90:93, goal:85, unit:"mg/dL", dec:0, note:"Hit normal range Day 15" },
                 { label:"Weight", baseline:73.6, current:70.9, d30:69.5, d60:66, d90:61.5, goal:60, unit:"kg", dec:1, note:"5% threshold at 69.9 kg" },
                 { label:"BMI", baseline:26.4, current:25.4, d30:24.9, d60:23.7, d90:22.1, goal:22, unit:"", dec:1, note:"" },
-                { label:"Triglycerides", baseline:702, current:null, d30:375, d60:200, d90:125, goal:100, unit:"mg/dL", dec:0, note:"Awaiting Day 30 lab result" },
+                { label:"Triglycerides", baseline:702, current:231, d30:170, d60:125, d90:95, goal:100, unit:"mg/dL", dec:0, note:"Day 15: 231 (-67%)" },
                 { label:"HbA1C", baseline:9.4, current:null, d30:8.4, d60:7.3, d90:6.1, goal:5.5, unit:"%", dec:1, note:"Awaiting Day 30 lab result" },
                 { label:"GGT", baseline:184, current:null, d30:115, d60:60, d90:33, goal:25, unit:"U/L", dec:0, note:"Awaiting Day 30 lab result" },
                 { label:"SGPT (ALT)", baseline:50, current:null, d30:38, d60:28, d90:22, goal:18, unit:"U/L", dec:0, note:"Awaiting Day 30 lab result" },
