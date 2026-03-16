@@ -1818,7 +1818,7 @@ const [weekData,setWeekData]=useState(()=>{try{if(safeStorage.getItem("ge_weekDa
               const sleepLabelsV=["<7","<7","<7","<7","<7","<7","<6","<7","7+","7+","<7","7+","7+","","7+"];
               const ifData=[14,12,14,15,15,15,12,15,15,15,14,15,18,null,18];
 
-              const W=320,H=70,PAD={t:12,b:16,l:26,r:10};
+              const W=320,H=90,PAD={t:14,b:18,l:26,r:10};
               const cw=W-PAD.l-PAD.r,ch2=H-PAD.t-PAD.b;
 
               const mkLine=(data,labels,yMin,yMax,color,title,unit,refLines,multiLines)=>{
@@ -1837,9 +1837,9 @@ const [weekData,setWeekData]=useState(()=>{try{if(safeStorage.getItem("ge_weekDa
                 };
                 const lines=multiLines||[{data,color,label:null}];
                 return(
-                  <Card style={{padding:"8px 8px"}}>
-                    <div style={{fontSize:11,fontWeight:700,color:t.text,marginBottom:2}}>{title}</div>
-                    <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:120}}>
+                  <Card style={{padding:"14px 12px",marginTop:4}}>
+                    <div style={{fontSize:12,fontWeight:700,color:t.text,marginBottom:6}}>{title}</div>
+                    <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:180}}>
                       <line x1={PAD.l} y1={PAD.t} x2={W-PAD.r} y2={PAD.t} stroke={t.cardBorder} strokeWidth="0.3"/>
                       <line x1={PAD.l} y1={H-PAD.b} x2={W-PAD.r} y2={H-PAD.b} stroke={t.cardBorder} strokeWidth="0.3"/>
                       <text x={PAD.l-3} y={PAD.t+3} textAnchor="end" fontSize="7" fill={t.textMuted}>{yHi}{unit}</text>
@@ -1891,12 +1891,12 @@ const [weekData,setWeekData]=useState(()=>{try{if(safeStorage.getItem("ge_weekDa
                 [{v:100,color:t.accent,label:"Max base"}],null);
               if(trendChart==="weight") return mkLine(weightData,weightLabels,null,null,t.accent,"Weight (kg)","kg",null,null);
               if(trendChart==="sleep"){
-                const sleepH=50;
+                const sleepH=70;
                 const barW=cw/sleepData.length;
                 return(
-                  <Card style={{padding:"8px 8px"}}>
-                    <div style={{fontSize:11,fontWeight:700,color:t.text,marginBottom:2}}>Sleep Quality</div>
-                    <svg viewBox={`0 0 ${W} ${sleepH}`} style={{width:"100%",height:120}}>
+                  <Card style={{padding:"14px 12px",marginTop:4}}>
+                    <div style={{fontSize:12,fontWeight:700,color:t.text,marginBottom:6}}>Sleep Quality</div>
+                    <svg viewBox={`0 0 ${W} ${sleepH}`} style={{width:"100%",height:180}}>
                       {sleepData.map((v,i)=>{
                         if(v===null)return null;
                         const colors=[t.danger,"#d4850f",t.ok];
