@@ -1661,71 +1661,96 @@ const [weekData,setWeekData]=useState(()=>{try{if(safeStorage.getItem("ge_weekDa
 
                 {/* ── 2. Key Learnings (green) + Next Week Focus (blue) ── */}
                 {w.num>0&&(()=>{
-                  // Deep analysis: synthesize patterns across the week, not just individual note dumps
+                  // Deep pattern analysis - synthesize week-level insights, not daily note dumps
                   const learnings = [];
                   const focus = [];
 
-                  // Analyze glucose patterns
+                  // Skip W3 if only 1 day of data
+                  const trackedDates=w.dates.filter(d=>{const wd=weekData[d]||{};return wd.glucFast||wd.glucPost||wd.berb;});
+                  if(trackedDates.length<=1) return null;
+
+                  // ── GLUCOSE TREND ANALYSIS ──
                   if(glucVals.length>=3){
                     const trend=glucVals[glucVals.length-1]-glucVals[0];
-                    if(glucAvg<=99) learnings.push({text:"Fasting glucose hit normal range - liver insulin sensitivity recovering",sev:"excellent"});
-                    else if(trend<=-15) learnings.push({text:`Fasting dropped ${Math.abs(Math.round(trend))} pts across the week - protocol momentum strong`,sev:"excellent"});
-                    else if(glucAvg<=130) learnings.push({text:`Fasting consolidating in low ${Math.round(glucAvg/10)*10}s - approaching normal range`,sev:"excellent"});
-                    else if(trend>10) learnings.push({text:`Fasting bounced up ${Math.round(trend)} pts - check sleep and supplement consistency`,sev:"grow"});
+                    const lowestFast=Math.min(...glucVals);
+                    if(lowestFast<=99) learnings.push({text:"Fasting glucose reached normal range (<100) - liver insulin sensitivity is recovering",sev:"excellent"});
+                    else if(trend<=-15) learnings.push({text:`Fasting dropped ${Math.abs(Math.round(trend))} pts this week - supplement stack and protocol are working`,sev:"excellent"});
+                    else if(glucAvg<=130) learnings.push({text:`Fasting consolidating in the ${Math.round(glucAvg/10)*10}s range - approaching normal`,sev:"excellent"});
+                  } else if(glucVals.length>=1&&glucAvg){
+                    if(glucAvg<=110) learnings.push({text:`Fasting averaging ${glucAvg} - strong progress toward normal range`,sev:"excellent"});
                   }
 
-                  // Analyze post-meal patterns
+                  // ── SUPPLEMENT STACK CREDIT ──
+                  const berbDays=w.dates.filter(d=>{const v=weekData[d]?.berb;return v&&v!=="0";}).length;
+                  const fishDays=w.dates.filter(d=>{const v=weekData[d]?.fish;return v&&v!=="0";}).length;
+                  const stackDays=Math.min(berbDays,fishDays);
+                  if(stackDays>=5&&glucVals.length>=3){
+                    const trend=glucVals[glucVals.length-1]-glucVals[0];
+                    if(trend<0) learnings.push({text:`Berberine + fish oil taken ${stackDays}/7 days - glucose trending down confirms the stack is working`,sev:"excellent"});
+                  } else if(berbDays<=2&&fishDays<=2&&glucVals.length>=3){
+                    learnings.push({text:"Supplement stack was inconsistent early in the week - glucose responds to daily dosing, not occasional",sev:"grow"});
+                  }
+
+                  // ── CARB RESPONSE PATTERN ──
                   if(postMealVals.length>=2){
-                    const highSpikes=postMealVals.filter(v=>v>=170).length;
-                    const lowSpikes=postMealVals.filter(v=>v<140).length;
-                    if(lowSpikes>highSpikes&&lowSpikes>=2) learnings.push({text:"Most meals staying under 140 - pancreas handling protein + veggie meals well",sev:"excellent"});
-                    else if(highSpikes>=2) learnings.push({text:`${highSpikes} high spikes (170+) this week - carb portions still overwhelming pancreas`,sev:"grow"});
-                    // Rice/carb pattern
-                    const riceNotes=wNotes.filter(n=>n.title.toLowerCase().match(/rice|carb|wrap|bread|noodle/));
-                    const noSpikeNotes=wNotes.filter(n=>n.title.toLowerCase().match(/no spike|no-spike|chicken|vegg|protein|salmon/));
-                    if(riceNotes.length>0&&noSpikeNotes.length>0) learnings.push({text:"Pattern confirmed: protein + veggies = no spike, any starch = spike. Pancreas handles fat and protein but not carbs yet",sev:"ontrack"});
+                    const highSpikes=postMealVals.filter(v=>v>=160).length;
+                    const lowSpikes=postMealVals.filter(v=>v<=140).length;
+                    // Check for both carb spikes and protein-safe meals
+                    const hasHighCarb=wNotes.some(n=>{const t2=n.title.toLowerCase();return t2.includes("rice")||t2.includes("217")||t2.includes("noodle");});
+                    const hasComplexCarb=wNotes.some(n=>{const t2=n.title.toLowerCase();return t2.includes("potato")||t2.includes("pumpkin")||t2.includes("sweet potato")||t2.includes("wrap");});
+                    const hasProteinSafe=wNotes.some(n=>{const t2=n.title.toLowerCase();return t2.includes("no spike")||t2.includes("chicken")||t2.includes("salmon")||t2.includes("no carb");});
+
+                    if(hasHighCarb&&hasProteinSafe){
+                      learnings.push({text:"Protein + veggies = no spike. White rice = alarm spike (+80-100). Pancreas handles fat and protein well but can't process refined starch yet",sev:"ontrack"});
+                    }
+                    if(hasComplexCarb){
+                      learnings.push({text:"Complex carbs (potato, pumpkin) spike less (+20-40) than rice (+80-100) and recover faster - pancreas handles them better. Be selective with carb type",sev:"ontrack"});
+                    }
+                    if(highSpikes>=2&&!hasComplexCarb){
+                      learnings.push({text:`${highSpikes} spikes over 160 this week - under +30 delta is safe, +30-50 is manageable, above +50 means pancreas couldn't respond`,sev:"grow"});
+                    }
                   }
 
-                  // Sleep-glucose correlation
+                  // ── POST-MEAL WALK IMPACT ──
+                  const walkDays=w.dates.filter(d=>{const wd=weekData[d]||{};return wd.moveAfter;}).length;
+                  if(walkDays>=4){
+                    learnings.push({text:"Post-meal walks taken consistently - walking immediately after eating drops glucose 20-40 pts, the sooner the more impactful",sev:"excellent"});
+                  } else if(walkDays>=1&&walkDays<=3){
+                    learnings.push({text:`Post-meal movement on ${walkDays}/7 days - timing matters: immediate walk after eating is most effective at blunting the spike`,sev:"ontrack"});
+                  }
+
+                  // ── SLEEP-GLUCOSE CORRELATION ──
                   if(sleepTotal>=3){
-                    if(sleepGood>=5) learnings.push({text:`${sleepGood}/${sleepTotal} nights 7+ hours - sleep foundation solid, supporting glucose recovery`,sev:"excellent"});
-                    else if(sleepGood<=2) learnings.push({text:`Only ${sleepGood}/${sleepTotal} nights with 7+ sleep - this is likely holding fasting glucose higher than it should be`,sev:"grow"});
+                    if(sleepGood>=5) learnings.push({text:`${sleepGood}/${sleepTotal} nights 7+ hours - sleep foundation solid, cortisol stays low`,sev:"excellent"});
+                    else if(sleepGood<=2) learnings.push({text:`Only ${sleepGood}/${sleepTotal} nights 7+ sleep - poor sleep raises cortisol, which tells liver to dump glucose. This can add 15-30 pts to fasting`,sev:"grow"});
                   }
 
-                  // Supplement consistency
-                  if(suppsPct>=85) learnings.push({text:"Supplement stack running consistently - berberine + fish oil need 2-4 weeks for full effect",sev:"excellent"});
-                  else if(suppsPct<50) learnings.push({text:`Supplements only ${suppsPct}% consistent - berberine and fish oil need daily dosing to work`,sev:"grow"});
-
-                  // IF pattern
-                  const ifVals=w.dates.map(d=>{const v=weekData[d]?.ifHours;return v?Number(v):null;}).filter(v=>v);
-                  if(ifVals.length>=3){
-                    const ifAvg=Math.round(ifVals.reduce((a,b)=>a+b,0)/ifVals.length);
-                    if(ifAvg>=16) learnings.push({text:`IF averaging ${ifAvg}:${24-ifAvg} - extended fasting giving liver maximum fat-processing time`,sev:"excellent"});
-                    else if(ifAvg>=14) learnings.push({text:`IF averaging ${ifAvg}:${24-ifAvg} - solid window, pushing toward 16:8 would accelerate liver recovery`,sev:"ontrack"});
+                  // ── SUNLIGHT / HEAT / DEHYDRATION ──
+                  const stressNotes=wNotes.filter(n=>{const t2=n.title.toLowerCase();return t2.includes("sun")||t2.includes("heat")||t2.includes("exhausted")||t2.includes("dehydrat")||t2.includes("stress")||t2.includes("brain work")||t2.includes("warm");});
+                  if(stressNotes.length>0){
+                    learnings.push({text:"Sunlight exposure, dehydration, and physical stress can spike cortisol and raise glucose even without food - stay hydrated and manage heat",sev:"ontrack"});
                   }
 
-                  // Sort: excellent first, then ontrack, then grow
+                  // Sort: excellent (green) first, ontrack (amber) middle, grow (red) last
                   learnings.sort((a,b)=>{const ord={excellent:0,ontrack:1,grow:2};return (ord[a.sev]||1)-(ord[b.sev]||1);});
 
-                  // Next Week Focus - actionable, specific recommendations
-                  if(glucAvg&&glucAvg>99) focus.push({icon:"🩸",text:"Keep berberine x2 and fish oil x3 with meals - stay consistent daily"});
-                  if(sleepGood<sleepTotal) focus.push({icon:"😴",text:"Prioritize 7+ hours every night - Mg glycinate at bedtime helps"});
-                  if(postMealAvg&&postMealAvg>150) focus.push({icon:"🍚",text:"Experiment with complex carbs (sweet potato, konjac) instead of rice - test and compare spikes"});
-                  else if(postMealVals.length>0) focus.push({icon:"🥦",text:"Keep carbs last in meal order - protein and fiber first locks in lower spikes"});
-                  const hasExercise=w.dates.some(d=>{const wd=weekData[d]||{};return wd.act;});
+                  // ── NEXT WEEK FOCUS - concise, actionable ──
+                  if(suppsPct<90) focus.push({icon:"💊",text:"Stay consistent with supplement stack daily"});
+                  if(sleepGood<sleepTotal) focus.push({icon:"😴",text:"Prioritize 7+ hours sleep every night"});
+                  if(postMealAvg&&postMealAvg>140) focus.push({icon:"🍚",text:"Experiment with complex carbs (sweet potato, pumpkin, konjac) instead of rice"});
                   const exerciseDays=w.dates.filter(d=>{const wd=weekData[d]||{};return wd.act;}).length;
-                  if(exerciseDays<3) focus.push({icon:"🏃",text:"Add cardio 2-3x this week (swim, cycle, walk 30 min) - exercise drops glucose via insulin-independent pathway"});
-                  if(!w.dates.some(d=>weekData[d]?.act==="weights")) focus.push({icon:"💪",text:"Start weight training - muscles absorb glucose for 48 hours after, biggest unused lever"});
-                  if(focus.length===0) focus.push({icon:"🔥",text:"Protocol running at full strength - maintain all habits and let the compounding work"});
+                  if(exerciseDays<4) focus.push({icon:"🏃",text:"Add cardio at least 2-3x this week"});
+                  if(!w.dates.some(d=>weekData[d]?.act==="weights")) focus.push({icon:"💪",text:"Start weight training - muscles absorb glucose for 48 hours after"});
+                  if(walkDays<5) focus.push({icon:"🚶",text:"Walk immediately after every meal - sooner = bigger glucose drop"});
+                  if(focus.length===0) focus.push({icon:"🔥",text:"Protocol at full strength - maintain consistency and let compounding work"});
 
-                  if(learnings.length===0&&focus.length===0) return null;
                   const sevColor={excellent:t.ok,ontrack:"#d4850f",grow:t.danger};
                   const sevIcon={excellent:"✓",ontrack:"→",grow:"⚠"};
                   return(
                   <div style={{display:"flex",gap:10,marginBottom:14}}>
                     {learnings.length>0&&<div style={{flex:1,padding:"10px 14px",background:t.okBg,borderRadius:t.radiusSm}}>
                       <div style={{fontSize:11,fontWeight:700,color:t.ok,textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:6}}>Key Learnings</div>
-                      {learnings.slice(0,5).map((l,li)=>(
+                      {learnings.slice(0,6).map((l,li)=>(
                         <div key={li} style={{fontSize:13,color:sevColor[l.sev]||"#d4850f",fontWeight:600,lineHeight:1.7}}>{sevIcon[l.sev]||"→"} {l.text}</div>
                       ))}
                     </div>}
@@ -1851,10 +1876,10 @@ const [weekData,setWeekData]=useState(()=>{try{if(safeStorage.getItem("ge_weekDa
             </div>
             {(()=>{
               const trendLabels=["D1","D2","D3","D4","D5","D6","D7","D8","D9","D10","D11","D12","D13","D14","D15"];
-              const fastingData=[180,170,160,142,140,147,150,150,123,120,123,115,118,108,108];
+              const fastingData=[180,170,160,142,140,147,150,150,123,120,123,115,118,108,95];
               const postMealData=[null,null,null,null,null,180,217,150,160,143,150,163,140,null,170];
-              const nightData=[null,null,null,null,null,null,140,137,131,127,137,120,115,null,112];
-              const scoreData=[33,40,60,67,73,67,61,85,89,93,91,105,106,null,91];
+              const nightData=[null,null,null,null,null,null,140,137,131,127,137,120,115,109,null];
+              const scoreData=[33,40,60,67,73,67,61,85,89,93,91,105,106,108,96];
               const weightLabels=["Base","D7","D14"];
               const weightData=[73.6,71.8,70.9];
               const sleepData=[1,1,1,1,1,1,0,1,2,2,1,2,2,null,2];
