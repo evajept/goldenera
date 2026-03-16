@@ -1552,46 +1552,6 @@ IMPORTANT RULES:
             </div>
           </div>}
 
-          {/* Body Measurements - weekly date format matching tracker */}
-          <h2 style={{fontSize:22,fontWeight:700,textTransform:"uppercase",margin:"12px 0 8px"}}>Body Measurements</h2>
-          <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:10}}>
-            <button onClick={()=>shiftW(-1)} style={{background:"none",border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,padding:"4px 10px",cursor:"pointer",fontSize:15,color:t.text}}>◀</button>
-            <span style={{fontSize:15,fontWeight:700,color:t.accent}}>{new Date(weekDates[0]).toLocaleDateString("en-GB",{day:"numeric",month:"short"})} - {new Date(weekDates[6]).toLocaleDateString("en-GB",{day:"numeric",month:"short"})}</span>
-            <button onClick={()=>shiftW(1)} style={{background:"none",border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,padding:"4px 10px",cursor:"pointer",fontSize:15,color:t.text}}>▶</button>
-          </div>
-          <div style={{overflowX:"auto",border:`0.5px solid ${t.cardBorder}`,borderRadius:t.radiusSm,background:t.card,marginBottom:10}}>
-            <table style={{borderCollapse:"collapse",width:"100%",tableLayout:"fixed"}}>
-              <thead><tr style={{background:t.sidebarBg}}>
-                <th style={{position:"sticky",left:0,background:t.sidebarBg,zIndex:2,padding:"7px 8px",fontSize:12,color:t.textMuted,textAlign:"left",borderBottom:`1px solid ${t.cardBorder}`,borderRight:`0.5px solid ${t.cardBorder}`,width:120}}></th>
-                {weekDates.map((d,i)=>(<th key={d} style={{padding:"7px 3px",fontSize:12,color:t.accent,textAlign:"center",borderBottom:`1px solid ${t.cardBorder}`,borderRight:i<6?`0.5px solid ${t.cardBorder}22`:"none",fontWeight:700}}><div>{dn[i]}</div><div style={{fontWeight:400,color:t.textLight,fontSize:11}}>{new Date(d).toLocaleDateString("en-GB",{day:"numeric",month:"short"})}</div></th>))}
-              </tr></thead>
-              <tbody>{[
-                {label:"⚖️ Weight",field:"weight",ph:"kg"},
-                {label:"📏 Waist",field:"waist",ph:"cm"},
-                {label:"📏 Belly",field:"belly",ph:"cm"},
-                {label:"📏 Hip",field:"hip",ph:"cm"},
-                {label:"📐 Waist:Hip",field:"whr",ph:"ratio"},
-                {label:"💪 Upper Arm",field:"arm",ph:"cm"},
-                {label:"🦵 Thigh",field:"thigh",ph:"cm"},
-                {label:"🦶 Calve",field:"calve",ph:"cm"},
-                {label:"📏 Chest",field:"chest",ph:"cm"},
-                {label:"📏 Neck",field:"neck",ph:"cm"},
-                {label:"📏 Shoulder",field:"shoulder",ph:"cm"},
-              ].map((row,i)=>{
-                const rowBg = i%2===0?t.card:t.bg;
-                return(
-                <tr key={row.field} style={{background:rowBg}}>
-                  <td style={{position:"sticky",left:0,background:rowBg,zIndex:1,padding:"5px 8px",fontSize:12,color:t.text,fontWeight:600,borderRight:`0.5px solid ${t.cardBorder}`,borderBottom:`0.5px solid ${t.cardBorder}`,whiteSpace:"nowrap"}}>{row.label}</td>
-                  {weekDates.map((d,di)=>(
-                    <td key={d} style={{padding:0,borderBottom:`0.5px solid ${t.cardBorder}`,borderRight:di<6?`0.5px solid ${t.cardBorder}22`:"none"}}>
-                      <input type="text" placeholder={row.ph} value={(bodyMeas[`${row.field}-${d}`])||""} onChange={e=>{const val=e.target.value;bodyCleared.current=false;try{safeStorage.removeItem("ge_bodyMeas_cleared");}catch(e){};setBodyMeas(p=>{const n={...p,[`${row.field}-${d}`]:val};try{safeStorage.setItem("ge_bodyMeas",JSON.stringify(n))}catch(e){};const bodyForDate={};Object.keys(n).forEach(k=>{if(k.endsWith("-"+d)){const field=k.split("-")[0];bodyForDate[field]=n[k];}});queueSave(d,bodyForDate,"body");return n;});}} style={{padding:"5px 4px",border:"none",fontSize:12,width:"100%",background:"transparent",color:t.text,fontFamily:t.font,outline:"none",textAlign:"center",boxSizing:"border-box"}}/>
-                    </td>
-                  ))}
-                </tr>);
-              })}</tbody>
-            </table>
-          </div>
-
           {/* ══ INSIGHT ══ */}
           <h2 style={{fontSize:22,fontWeight:700,textTransform:"uppercase",margin:"24px 0 8px"}}>Insight</h2>
           {(()=>{
@@ -2177,6 +2137,45 @@ IMPORTANT RULES:
             })()}
           </div>
 
+          {/* Body Measurements - weekly date format matching tracker */}
+          <h2 style={{fontSize:22,fontWeight:700,textTransform:"uppercase",margin:"24px 0 8px"}}>Body Measurements</h2>
+          <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:10}}>
+            <button onClick={()=>shiftW(-1)} style={{background:"none",border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,padding:"4px 10px",cursor:"pointer",fontSize:15,color:t.text}}>◀</button>
+            <span style={{fontSize:15,fontWeight:700,color:t.accent}}>{new Date(weekDates[0]).toLocaleDateString("en-GB",{day:"numeric",month:"short"})} - {new Date(weekDates[6]).toLocaleDateString("en-GB",{day:"numeric",month:"short"})}</span>
+            <button onClick={()=>shiftW(1)} style={{background:"none",border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,padding:"4px 10px",cursor:"pointer",fontSize:15,color:t.text}}>▶</button>
+          </div>
+          <div style={{overflowX:"auto",border:`0.5px solid ${t.cardBorder}`,borderRadius:t.radiusSm,background:t.card,marginBottom:10}}>
+            <table style={{borderCollapse:"collapse",width:"100%",tableLayout:"fixed"}}>
+              <thead><tr style={{background:t.sidebarBg}}>
+                <th style={{position:"sticky",left:0,background:t.sidebarBg,zIndex:2,padding:"7px 8px",fontSize:12,color:t.textMuted,textAlign:"left",borderBottom:`1px solid ${t.cardBorder}`,borderRight:`0.5px solid ${t.cardBorder}`,width:120}}></th>
+                {weekDates.map((d,i)=>(<th key={d} style={{padding:"7px 3px",fontSize:12,color:t.accent,textAlign:"center",borderBottom:`1px solid ${t.cardBorder}`,borderRight:i<6?`0.5px solid ${t.cardBorder}22`:"none",fontWeight:700}}><div>{dn[i]}</div><div style={{fontWeight:400,color:t.textLight,fontSize:11}}>{new Date(d).toLocaleDateString("en-GB",{day:"numeric",month:"short"})}</div></th>))}
+              </tr></thead>
+              <tbody>{[
+                {label:"⚖️ Weight",field:"weight",ph:"kg"},
+                {label:"📏 Waist",field:"waist",ph:"cm"},
+                {label:"📏 Belly",field:"belly",ph:"cm"},
+                {label:"📏 Hip",field:"hip",ph:"cm"},
+                {label:"📐 Waist:Hip",field:"whr",ph:"ratio"},
+                {label:"💪 Upper Arm",field:"arm",ph:"cm"},
+                {label:"🦵 Thigh",field:"thigh",ph:"cm"},
+                {label:"🦶 Calve",field:"calve",ph:"cm"},
+                {label:"📏 Chest",field:"chest",ph:"cm"},
+                {label:"📏 Neck",field:"neck",ph:"cm"},
+                {label:"📏 Shoulder",field:"shoulder",ph:"cm"},
+              ].map((row,i)=>{
+                const rowBg = i%2===0?t.card:t.bg;
+                return(
+                <tr key={row.field} style={{background:rowBg}}>
+                  <td style={{position:"sticky",left:0,background:rowBg,zIndex:1,padding:"5px 8px",fontSize:12,color:t.text,fontWeight:600,borderRight:`0.5px solid ${t.cardBorder}`,borderBottom:`0.5px solid ${t.cardBorder}`,whiteSpace:"nowrap"}}>{row.label}</td>
+                  {weekDates.map((d,di)=>(
+                    <td key={d} style={{padding:0,borderBottom:`0.5px solid ${t.cardBorder}`,borderRight:di<6?`0.5px solid ${t.cardBorder}22`:"none"}}>
+                      <input type="text" placeholder={row.ph} value={(bodyMeas[`${row.field}-${d}`])||""} onChange={e=>{const val=e.target.value;bodyCleared.current=false;try{safeStorage.removeItem("ge_bodyMeas_cleared");}catch(e){};setBodyMeas(p=>{const n={...p,[`${row.field}-${d}`]:val};try{safeStorage.setItem("ge_bodyMeas",JSON.stringify(n))}catch(e){};const bodyForDate={};Object.keys(n).forEach(k=>{if(k.endsWith("-"+d)){const field=k.split("-")[0];bodyForDate[field]=n[k];}});queueSave(d,bodyForDate,"body");return n;});}} style={{padding:"5px 4px",border:"none",fontSize:12,width:"100%",background:"transparent",color:t.text,fontFamily:t.font,outline:"none",textAlign:"center",boxSizing:"border-box"}}/>
+                    </td>
+                  ))}
+                </tr>);
+              })}</tbody>
+            </table>
+          </div>
 
         </div>)}
 
