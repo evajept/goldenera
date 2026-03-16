@@ -46,8 +46,8 @@ const labMarkers = [
     s30:"8.2-8.5%",s60:"7.0-7.5%",s90:"5.8-6.3%", m30:"8.7-9.0%",m60:"7.7-8.2%",m90:"6.8-7.2%", n30:"9.2-9.3%",n60:"8.8-9.0%",n90:"8.2-8.6%" },
   { marker:"Fasting Glucose", confirmed:"211", normal:"70-99", status:"critical",
     s30:"140-160",s60:"110-125",s90:"85-100", m30:"160-180",m60:"140-155",m90:"120-140", n30:"195-205",n60:"185-195",n90:"170-200" },
-  { marker:"Triglycerides", confirmed:"702", normal:"<160", status:"critical",
-    s30:"350-400",s60:"180-220",s90:"100-150", m30:"480-520",m60:"280-320",m90:"180-220", n30:"640-670",n60:"560-600",n90:"450-520" },
+  { marker:"Triglycerides", confirmed:"702", day15:"231", normal:"<160", status:"critical",
+    s30:"160-180",s60:"120-140",s90:"90-110", m30:"200-230",m60:"150-170",m90:"110-140", n30:"280-320",n60:"220-260",n90:"160-200" },
   { marker:"GGT", confirmed:"184", normal:"9-39", status:"critical",
     s30:"100-130",s60:"50-70",s90:"25-40", m30:"130-150",m60:"80-110",m90:"50-80", n30:"160-175",n60:"140-160",n90:"100-150" },
   { marker:"SGPT (ALT)", confirmed:"50", normal:"<35", status:"warning",
@@ -161,6 +161,12 @@ const clinicalNotes = {
     { icon:"⏰", sev:"excellent", title:"IF 18:6 maintained (11:00-17:00)", text:"Eating window 11:00 to 17:00 = 6 hours. Second consecutive 18:6 day. Consistent fasting window." },
     { icon:"💊", sev:"ontrack", title:"D3+K2 reduced to x1, Mg x2 (extra for headache)", text:"D3+K2 dropped from x2 to x1. Magnesium stayed at x2 - took extra dose at night for the temple headache from heat/dehydration. Water under 2L. Brazil nuts skipped. Basil seeds and probiotics still on. Score 91 (down from 106)." },
   ],
+  "16 Mar (Day 15)": [
+    { icon:"🎉", sev:"excellent", title:"TRIGLYCERIDES 231 - down 67% from 702", text:"Lab confirmed: triglycerides dropped from 702 to 231 in 15 days. This is a 471-point drop (-67%). She's now well below the 500 acute pancreatitis danger threshold. Still flagged H (normal is <150) but the trajectory is extraordinary. At this rate, could reach normal range within 3-4 weeks." },
+    { icon:"🐟", sev:"excellent", title:"Fish oil x3 validated", text:"Therapeutic-dose fish oil (3-4g/day omega-3) combined with sugar elimination and IF is clearly driving this result. Fish oil alone can reduce TG 20-50%, but the 67% drop shows compounding effect of all protocol elements working together." },
+    { icon:"🎯", sev:"ontrack", title:"Next target: TG under 150", text:"To close the final 81 points from 231 to <150: maintain fish oil x3, stay strict on refined carbs (not just sugar - rice, noodles, white bread all convert to triglycerides via liver), increase swimming/cardio to 3-4x per week, hold IF at 16:8 minimum. The rate of decline will slow as values approach normal, so consistency is key." },
+    { icon:"📋", sev:"ontrack", title:"GGT + ALT scheduled for month end", text:"Liver enzymes (GGT 184, ALT 50 at baseline) will be tested at end of March. With triglycerides dropping this fast, the liver is getting less fat dumped on it. Early prediction: GGT 80-110, ALT 30-35 (possibly back in normal range)." },
+  ],
 };
 
 // Chart data: confirmed = real, predicted = projection
@@ -169,7 +175,7 @@ const chartData = {
   strict: {
     gluc:[{m:"26 Feb",v:211,confirmed:true},{m:"2 Mar",v:180,confirmed:true},{m:"3 Mar",v:170,confirmed:true},{m:"4 Mar",v:160,confirmed:true},{m:"5 Mar",v:142,confirmed:true},{m:"6 Mar",v:140,confirmed:true},{m:"7 Mar",v:147,confirmed:true},{m:"8 Mar",v:150,confirmed:true},{m:"9 Mar",v:150,confirmed:true},{m:"10 Mar",v:123,confirmed:true},{m:"11 Mar",v:120,confirmed:true},{m:"12 Mar",v:123,confirmed:true},{m:"13 Mar",v:115,confirmed:true},{m:"14 Mar",v:118,confirmed:true},{m:"15 Mar",v:108,confirmed:true},{m:"D30",v:95,confirmed:false},{m:"D60",v:85,confirmed:false},{m:"D90",v:80,confirmed:false}],
     hb:[{m:"26 Feb",v:9.4,confirmed:true},{m:"D30",v:7.8,confirmed:false},{m:"D60",v:6.5,confirmed:false},{m:"D90",v:5.7,confirmed:false}],
-    trig:[{m:"26 Feb",v:702,confirmed:true},{m:"D30",v:350,confirmed:false},{m:"D60",v:200,confirmed:false},{m:"D90",v:135,confirmed:false}],
+    trig:[{m:"26 Feb",v:702,confirmed:true},{m:"16 Mar",v:231,confirmed:true},{m:"D30",v:170,confirmed:false},{m:"D60",v:125,confirmed:false},{m:"D90",v:95,confirmed:false}],
     wt:[{m:"26 Feb",v:73.6,confirmed:true},{m:"8 Mar",v:71.8,confirmed:true},{m:"15 Mar",v:70.9,confirmed:true},{m:"D30",v:69,confirmed:false},{m:"D60",v:65,confirmed:false},{m:"D90",v:62,confirmed:false}],
     ggt:[{m:"26 Feb",v:184,confirmed:true},{m:"D30",v:110,confirmed:false},{m:"D60",v:55,confirmed:false},{m:"D90",v:30,confirmed:false}],
     chol:[{m:"26 Feb",v:220,confirmed:true},{m:"D30",v:205,confirmed:false},{m:"D60",v:195,confirmed:false},{m:"D90",v:187,confirmed:false}],
@@ -224,7 +230,7 @@ const extraActs = [
   { task:"Cold shower finish 30-60s", icon:"🧊", p:"MED", impact:"Activates brown fat, improves insulin sensitivity" },
   { task:"Cacao drink (unsweetened)", icon:"🍫", p:"MED", impact:"Satisfies sweet craving. Rich in magnesium" },
   { task:"Acupressure: ST36, SP6, LIV3", icon:"📍", p:"MED", impact:"Stimulates digestive and metabolic points" },
-  { task:"Hijama (end of month 2)", icon:"🩸", p:"MED", impact:"Schedule after trig drops below 300" },
+  { task:"Hijama (schedule when ready)", icon:"🩸", p:"MED", impact:"Trig now below 300 (231). Can schedule when convenient" },
 ];
 const prioColors = { HIGHEST:"#15803d", HIGH:"#16a34a", MED:"#65a30d", LOW:"#ca8a04", OPT:"#9ca3af", SCHED:"#9ca3af" };
 
@@ -512,7 +518,7 @@ const [weekData,setWeekData]=useState(()=>{try{if(safeStorage.getItem("ge_weekDa
     return{score:avgBase,bonus:avgBonus,total:avgBase+avgBonus,trackedDays,gluc:glucDays};
   };
   const ts=getTrackerScore();
-  const getTP=(marker)=>{const s=ts.score;if(s===0)return"-";const lk={"HbA1C":[8.4,6],"Fasting Glucose":[185,92],"Triglycerides":[485,135],"GGT":[125,32],"SGPT (ALT)":[40,22],"SGOT (AST)":[30,20],"Cholesterol":[215,187],"Uric Acid":[6.8,5.2],"HDL-C":[45,55],"LDL-C":[110,100],"Creatinine":[.52,.52],"eGFR":[130,128],"Weight":[70,62],"BMI":[25.1,21.9]};const[w,b]=lk[marker]||[0,0];if(w===b)return String(w);const p=w+((b-w)*s/100);return marker==="HbA1C"?`~${p.toFixed(1)}%`:marker==="Creatinine"?p.toFixed(2):`~${Math.round(p)}`;};
+  const getTP=(marker)=>{const s=ts.score;if(s===0)return"-";const lk={"HbA1C":[8.4,6],"Fasting Glucose":[185,92],"Triglycerides":[200,95],"GGT":[125,32],"SGPT (ALT)":[40,22],"SGOT (AST)":[30,20],"Cholesterol":[215,187],"Uric Acid":[6.8,5.2],"HDL-C":[45,55],"LDL-C":[110,100],"Creatinine":[.52,.52],"eGFR":[130,128],"Weight":[70,62],"BMI":[25.1,21.9]};const[w,b]=lk[marker]||[0,0];if(w===b)return String(w);const p=w+((b-w)*s/100);return marker==="HbA1C"?`~${p.toFixed(1)}%`:marker==="Creatinine"?p.toFixed(2):`~${Math.round(p)}`;};
 
   const getInsights=()=>{const tips=[];let berb=0,move=0,sweet=0,sleep=0,fiber=0,mag=0,water=0;weekDates.forEach(d=>{const wd=weekData[d]||{};if(wd.berb&&wd.berb!=="0")berb++;if(wd.moveAfter||wd.act)move++;if(wd.noSweet)sweet++;if(wd.sleep==="7+"||wd.sleep==="8+")sleep++;if(wd.fiberFirst)fiber++;if(wd.mag&&wd.mag!=="0")mag++;if(wd.water)water++;});if(ts.score>0)tips.push({icon:"📊",title:`Score: ${ts.score+ts.bonus}/100`,text:`Avg ${ts.score+ts.bonus} pts across ${ts.trackedDays} days. ${ts.score+ts.bonus>=80?"Full Send pace.":ts.score+ts.bonus>=50?"Solid effort.":"Needs more consistency."}`});if(berb>0&&berb<5)tips.push({icon:"🌿",title:"Berberine",text:`${berb}/7 days. Aim for daily.`});if(berb>=5)tips.push({icon:"🌿",title:"Berberine strong",text:`${berb}/7 - excellent.`});if(move<5&&move>0)tips.push({icon:"🚶",title:"Move more",text:`${move}/7 days active. Even 10 min walks count.`});if(sweet>=5)tips.push({icon:"🚫",title:"Sugar-free",text:`${sweet}/7 days - biggest trig driver.`});if(sweet<5&&sweet>0)tips.push({icon:"⚠️",title:"Drinks",text:`${sweet}/7 sugar-free. Each ชาเย็น = +30-50 trig.`});if(sleep<5&&sleep>0)tips.push({icon:"😴",title:"Sleep",text:`${sleep}/7 nights 7+hrs. Poor sleep → glucose +15-30.`});if(mag===0)tips.push({icon:"💊",title:"Magnesium missing",text:"Start tonight. Helps sleep + lowers fasting glucose 5-15 pts."});if(tips.length===0){tips.push({icon:"📊",title:"Start tracking",text:"Fill in the table above to get personalized insights."});tips.push({icon:"💡",title:"Priorities",text:"Zero sweet drinks, berberine, movement, sleep 7+."});tips.push({icon:"🎯",title:"Glucose",text:"Track fasting glucose daily - best predictor of A1C."});}return tips;};
 
@@ -557,7 +563,7 @@ const [weekData,setWeekData]=useState(()=>{try{if(safeStorage.getItem("ge_weekDa
       const payload = {
         dayNumber: dayNum,
         date: dateStr,
-        baseline: { fastingGlucose: 211, hba1c: 9.4, triglycerides: 702, ggt: 184, weight: 73.6 },
+        baseline: { fastingGlucose: 211, hba1c: 9.4, triglycerides: 702, ggt: 184, weight: 73.6, triglyceridesDay15: 231 },
         today: {
           fastingGlucose: wd.glucFast || null,
           postMealGlucose: wd.glucPost || null,
@@ -587,7 +593,7 @@ const [weekData,setWeekData]=useState(()=>{try{if(safeStorage.getItem("ge_weekDa
         recentTrend: trend3
       };
 
-      const systemPrompt = `You are a metabolic health analyst for Angkhana's 90-day wellness protocol. She is Thai, 32F, started with fasting glucose 211, HbA1C 9.4%, triglycerides 702, GGT 184.
+      const systemPrompt = `You are a metabolic health analyst for Angkhana's 90-day wellness protocol. She is Thai, 32F, started with fasting glucose 211, HbA1C 9.4%, triglycerides 702 (now 231 as of Day 15 - down 67%), GGT 184.
 
 Her supplement stack: berberine (x2 with meals), fish oil (x3 with meals), magnesium glycinate (x2 bedtime), D3+K2 (x1-x2 bedtime).
 
@@ -702,7 +708,7 @@ IMPORTANT RULES:
             const labMeanings = {
               "HbA1C":{what:"Average blood sugar over 3 months",why:"9.4% = uncontrolled diabetes. Above 6.5% = diabetic. Below 5.7% = normal.",risk:"Nerve damage, kidney disease, vision loss within 1-2 years if sustained above 8%.",fix:"Berberine, low-carb, walking after meals, sleep 7+"},
               "Fasting Glucose":{what:"Blood sugar after 8+ hours fasting",why:"211 = severely elevated. Normal is 70-99. Pre-diabetic 100-125.",risk:"Damages blood vessels, nerves. Dawn effect makes morning readings higher.",fix:"Berberine before meals, fiber first, zero sweet drinks, IF 14:10"},
-              "Triglycerides":{what:"Fat in the blood from food and liver",why:"702 = 4x the upper limit (160). Above 500 = acute pancreatitis risk.",risk:"Pancreatitis (severe stomach pain, ER visit). Also causes fatty liver.",fix:"Fish oil 3-4g/day, zero sweet drinks (#1 driver), walking, low carbs"},
+              "Triglycerides":{what:"Fat in the blood from food and liver",why:"Started at 702 (4x upper limit). Day 15 lab: 231 (-67%). Still above normal (<150) but pancreatitis risk cleared.",risk:"Pancreatitis risk eliminated. Now focused on reaching normal range (<150).",fix:"Fish oil 3-4g/day, zero sweet drinks, strict on refined carbs, swimming 3-4x/week"},
               "GGT":{what:"Liver enzyme, marker for liver damage and inflammation",why:"184 = 4.7x upper limit (39). Signals fatty liver disease (NAFLD).",risk:"Liver inflammation, scarring, cirrhosis if untreated.",fix:"Liver regenerates in 6-8 weeks. Remove sugar, alcohol, seed oils"},
               "SGPT (ALT)":{what:"Liver enzyme, more specific to liver cell damage",why:"50 = slightly above limit (35). Confirms liver stress alongside GGT.",risk:"Mild elevation. Will normalize as fatty liver resolves.",fix:"Same as GGT. ALT drops faster than GGT"},
               "SGOT (AST)":{what:"Enzyme found in liver, heart, and muscles",why:"31 = within normal (<32). Less liver-specific than ALT.",risk:"Currently OK. Monitor alongside ALT.",fix:"No action needed. Will improve with protocol"},
@@ -718,9 +724,9 @@ IMPORTANT RULES:
 
             const tabSummaries = {
               baseline: "Triglycerides at 702 (4x the safe limit) and HbA1C 9.4% are the biggest concerns. Liver enzymes are elevated from fatty liver. The good news: kidneys and LDL are healthy, and every one of these markers can improve significantly with diet and lifestyle changes alone.",
-              d30: "Trig predicted to drop to 350-400, still high but pancreatitis risk clearing. Glucose should hit 140-160 range (down from 211). Liver GGT starting recovery.",
-              d60: "Trig should approach 200, near safe zone. Glucose 110-125 entering pre-diabetic range (out of diabetic). GGT 50-70 means liver healing well. HbA1C 7.0-7.5%, real progress but still diabetic.",
-              d90: "Target: Trig 100-150 (safe), glucose 85-100 (normal), GGT 25-40 (normal), HbA1C 5.8-6.3% (near-normal). Full metabolic reset. Liver clean. Weight 60-63 kg.",
+              d30: "Trig already at 231 on Day 15 (was predicted 350-400 for Day 30). Now targeting 160-180 by Day 30 - could enter normal range. Glucose should hit 95-110 range. Liver GGT test scheduled end of March.",
+              d60: "Trig should be 120-140, well within normal range. Glucose 85-95 entering normal. GGT predicted 50-70, liver healing well. HbA1C 6.5-7.0%, dropping out of diabetic range.",
+              d90: "Target: Trig 90-110 (optimal), glucose 80-90 (normal), GGT 25-40 (normal), HbA1C 5.7-6.2% (near-normal). Full metabolic reset. Liver clean. Weight 60-63 kg.",
             };
 
             return(<div>
