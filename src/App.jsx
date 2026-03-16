@@ -1661,34 +1661,77 @@ const [weekData,setWeekData]=useState(()=>{try{if(safeStorage.getItem("ge_weekDa
 
                 {/* ── 2. Key Learnings (green) + Next Week Focus (blue) ── */}
                 {w.num>0&&(()=>{
+                  // Deep analysis: synthesize patterns across the week, not just individual note dumps
                   const learnings = [];
-                  wNotes.forEach(n=>{
-                    const tl = n.title.toLowerCase();
-                    if(tl.includes("spike")||tl.includes("rice")||tl.includes("no spike")||tl.includes("no-carb")||tl.includes("salmon")||tl.includes("brain work")||tl.includes("exhausted")||tl.includes("stevia")||tl.includes("sugar broken")||tl.includes("headache")||tl.includes("dehydration")) {
-                      learnings.push({text:n.title, color:n.sev==="excellent"?t.ok:n.sev==="grow"?t.danger:"#d4850f", sev:n.sev});
-                    }
-                  });
+                  const focus = [];
+
+                  // Analyze glucose patterns
+                  if(glucVals.length>=3){
+                    const trend=glucVals[glucVals.length-1]-glucVals[0];
+                    if(glucAvg<=99) learnings.push({text:"Fasting glucose hit normal range - liver insulin sensitivity recovering",sev:"excellent"});
+                    else if(trend<=-15) learnings.push({text:`Fasting dropped ${Math.abs(Math.round(trend))} pts across the week - protocol momentum strong`,sev:"excellent"});
+                    else if(glucAvg<=130) learnings.push({text:`Fasting consolidating in low ${Math.round(glucAvg/10)*10}s - approaching normal range`,sev:"excellent"});
+                    else if(trend>10) learnings.push({text:`Fasting bounced up ${Math.round(trend)} pts - check sleep and supplement consistency`,sev:"grow"});
+                  }
+
+                  // Analyze post-meal patterns
+                  if(postMealVals.length>=2){
+                    const highSpikes=postMealVals.filter(v=>v>=170).length;
+                    const lowSpikes=postMealVals.filter(v=>v<140).length;
+                    if(lowSpikes>highSpikes&&lowSpikes>=2) learnings.push({text:"Most meals staying under 140 - pancreas handling protein + veggie meals well",sev:"excellent"});
+                    else if(highSpikes>=2) learnings.push({text:`${highSpikes} high spikes (170+) this week - carb portions still overwhelming pancreas`,sev:"grow"});
+                    // Rice/carb pattern
+                    const riceNotes=wNotes.filter(n=>n.title.toLowerCase().match(/rice|carb|wrap|bread|noodle/));
+                    const noSpikeNotes=wNotes.filter(n=>n.title.toLowerCase().match(/no spike|no-spike|chicken|vegg|protein|salmon/));
+                    if(riceNotes.length>0&&noSpikeNotes.length>0) learnings.push({text:"Pattern confirmed: protein + veggies = no spike, any starch = spike. Pancreas handles fat and protein but not carbs yet",sev:"ontrack"});
+                  }
+
+                  // Sleep-glucose correlation
+                  if(sleepTotal>=3){
+                    if(sleepGood>=5) learnings.push({text:`${sleepGood}/${sleepTotal} nights 7+ hours - sleep foundation solid, supporting glucose recovery`,sev:"excellent"});
+                    else if(sleepGood<=2) learnings.push({text:`Only ${sleepGood}/${sleepTotal} nights with 7+ sleep - this is likely holding fasting glucose higher than it should be`,sev:"grow"});
+                  }
+
+                  // Supplement consistency
+                  if(suppsPct>=85) learnings.push({text:"Supplement stack running consistently - berberine + fish oil need 2-4 weeks for full effect",sev:"excellent"});
+                  else if(suppsPct<50) learnings.push({text:`Supplements only ${suppsPct}% consistent - berberine and fish oil need daily dosing to work`,sev:"grow"});
+
+                  // IF pattern
+                  const ifVals=w.dates.map(d=>{const v=weekData[d]?.ifHours;return v?Number(v):null;}).filter(v=>v);
+                  if(ifVals.length>=3){
+                    const ifAvg=Math.round(ifVals.reduce((a,b)=>a+b,0)/ifVals.length);
+                    if(ifAvg>=16) learnings.push({text:`IF averaging ${ifAvg}:${24-ifAvg} - extended fasting giving liver maximum fat-processing time`,sev:"excellent"});
+                    else if(ifAvg>=14) learnings.push({text:`IF averaging ${ifAvg}:${24-ifAvg} - solid window, pushing toward 16:8 would accelerate liver recovery`,sev:"ontrack"});
+                  }
+
+                  // Sort: excellent first, then ontrack, then grow
                   learnings.sort((a,b)=>{const ord={excellent:0,ontrack:1,grow:2};return (ord[a.sev]||1)-(ord[b.sev]||1);});
-                  const focus=[];
-                  if(sleepAvg&&sleepAvg<7) focus.push({icon:"😴",text:`Sleep avg ${sleepAvg}h, aim for 7+ every night`});
-                  if(suppsPct<80) focus.push({icon:"💊",text:`Supps at ${suppsPct}%, take all 4 daily`});
-                  if(glucAvg&&glucAvg>130) focus.push({icon:"🩸",text:`Fasting still ${glucAvg}, keep berberine x2 + walks`});
-                  if(postMealAvg&&postMealAvg>160) focus.push({icon:"🍚",text:`Post-meal avg ${postMealAvg}, try konjac rice`});
-                  if(sleepAvg&&sleepAvg>=7&&suppsPct>=80&&glucAvg&&glucAvg<=130) focus.push({icon:"🔥",text:"Great momentum, maintain consistency"});
-                  const hasRiceSpike = wNotes.some(n=>n.title.toLowerCase().includes("rice")&&n.sev==="grow");
-                  if(hasRiceSpike) focus.push({icon:"🍚",text:"Rice still spikes, switch to konjac or skip"});
+
+                  // Next Week Focus - actionable, specific recommendations
+                  if(glucAvg&&glucAvg>99) focus.push({icon:"🩸",text:"Keep berberine x2 and fish oil x3 with meals - stay consistent daily"});
+                  if(sleepGood<sleepTotal) focus.push({icon:"😴",text:"Prioritize 7+ hours every night - Mg glycinate at bedtime helps"});
+                  if(postMealAvg&&postMealAvg>150) focus.push({icon:"🍚",text:"Experiment with complex carbs (sweet potato, konjac) instead of rice - test and compare spikes"});
+                  else if(postMealVals.length>0) focus.push({icon:"🥦",text:"Keep carbs last in meal order - protein and fiber first locks in lower spikes"});
+                  const hasExercise=w.dates.some(d=>{const wd=weekData[d]||{};return wd.act;});
+                  const exerciseDays=w.dates.filter(d=>{const wd=weekData[d]||{};return wd.act;}).length;
+                  if(exerciseDays<3) focus.push({icon:"🏃",text:"Add cardio 2-3x this week (swim, cycle, walk 30 min) - exercise drops glucose via insulin-independent pathway"});
+                  if(!w.dates.some(d=>weekData[d]?.act==="weights")) focus.push({icon:"💪",text:"Start weight training - muscles absorb glucose for 48 hours after, biggest unused lever"});
+                  if(focus.length===0) focus.push({icon:"🔥",text:"Protocol running at full strength - maintain all habits and let the compounding work"});
+
                   if(learnings.length===0&&focus.length===0) return null;
+                  const sevColor={excellent:t.ok,ontrack:"#d4850f",grow:t.danger};
+                  const sevIcon={excellent:"✓",ontrack:"→",grow:"⚠"};
                   return(
                   <div style={{display:"flex",gap:10,marginBottom:14}}>
                     {learnings.length>0&&<div style={{flex:1,padding:"10px 14px",background:t.okBg,borderRadius:t.radiusSm}}>
                       <div style={{fontSize:11,fontWeight:700,color:t.ok,textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:6}}>Key Learnings</div>
-                      {learnings.map((l,li)=>(
-                        <div key={li} style={{fontSize:13,color:l.color,fontWeight:600,lineHeight:1.7}}>{l.color===t.ok?"✓":"⚠"} {l.text}</div>
+                      {learnings.slice(0,5).map((l,li)=>(
+                        <div key={li} style={{fontSize:13,color:sevColor[l.sev]||"#d4850f",fontWeight:600,lineHeight:1.7}}>{sevIcon[l.sev]||"→"} {l.text}</div>
                       ))}
                     </div>}
                     {focus.length>0&&<div style={{flex:1,padding:"10px 14px",background:"#dde8f5",borderRadius:t.radiusSm}}>
                       <div style={{fontSize:11,fontWeight:700,color:"#185fa5",textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:6}}>Next Week Focus</div>
-                      {focus.slice(0,3).map((f,fi)=>(
+                      {focus.slice(0,4).map((f,fi)=>(
                         <div key={fi} style={{fontSize:13,color:t.text,fontWeight:600,lineHeight:1.7}}>{f.icon} {f.text}</div>
                       ))}
                     </div>}
