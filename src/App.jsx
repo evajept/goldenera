@@ -1967,13 +1967,29 @@ IMPORTANT RULES:
                       if((noteMon===startMon||noteMon===startMon+1)&&day>=startDay&&day<=endDay) allDayKeys.add(k);
                     }
                   });
-                  if(allDayKeys.size===0) return null;
+
+                  // Build "today" label for this week
+                  const today=new Date().toISOString().split("T")[0];
+                  const todayDayNum=Math.max(0,Math.floor((new Date()-new Date("2026-03-02"))/(1000*60*60*24))+1);
+                  const todayD=new Date().getDate();
+                  const todayMon=new Date().getMonth();
+                  const todayMonStr=todayMon===1?"Feb":"Mar";
+                  const todayLabel=`${todayD} ${todayMonStr} (Day ${todayDayNum})`;
+                  // Check if today falls within this week
+                  const todayDate=new Date();
+                  const todayInWeek=todayDate>=w.start&&todayDate<=new Date(w.end.getTime()+24*60*60*1000);
+                  // Auto-add today to keys if it's in this week and has tracker data
+                  if(todayInWeek&&!allDayKeys.has(todayLabel)){
+                    const todayWd=weekData[today]||{};
+                    if(todayWd.glucFast||todayWd.berb||todayWd.sleep) allDayKeys.add(todayLabel);
+                  }
+
                   const sortedKeys=[...allDayKeys].sort((a,b)=>{
                     const dA=parseInt((a.match(/(\d+)/)||[])[1])||0;
                     const dB=parseInt((b.match(/(\d+)/)||[])[1])||0;
                     return dA-dB;
                   });
-                  const activeNoteTab=sortedKeys.includes(noteTab)?noteTab:sortedKeys[sortedKeys.length-1];
+                  const activeNoteTab=sortedKeys.includes(noteTab)?noteTab:(sortedKeys.length>0?sortedKeys[sortedKeys.length-1]:todayLabel);
                   // Merge manual + AI notes for active tab
                   const manualNotes=clinicalNotes[activeNoteTab]||[];
                   const aiDayNotes=aiNotes[activeNoteTab]||[];
@@ -1983,22 +1999,15 @@ IMPORTANT RULES:
                   const sevBorder={excellent:t.ok,ontrack:"#d4850f",grow:t.danger};
 
                   // Find date string for analyze button
+                  let analyzeDateStr=today;
+                  let analyzeDayLabel=activeNoteTab||todayLabel;
                   const tabDateMatch=activeNoteTab.match(/(\d+)\s+(Mar|Feb)/i);
-                  let analyzeDateStr=null;
-                  let analyzeDayLabel=null;
                   if(tabDateMatch){
                     const day=parseInt(tabDateMatch[1]);
                     const mon=tabDateMatch[2].toLowerCase()==="feb"?1:2;
                     analyzeDateStr=`2026-${String(mon+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
-                    analyzeDayLabel=activeNoteTab;
                   }
-                  // Also allow analyzing "today" even if no tab exists yet
-                  const today=new Date().toISOString().split("T")[0];
-                  const todayDayNum=Math.max(0,Math.floor((new Date()-new Date("2026-03-02"))/(1000*60*60*24))+1);
-                  const todayD=new Date().getDate();
-                  const todayMon=new Date().getMonth();
-                  const todayLabel=`${todayD} ${todayMon===2?"Mar":"Feb"} (Day ${todayDayNum})`;
-                  const canAnalyzeToday=!sortedKeys.includes(todayLabel)&&todayDayNum>0;
+                  const canAnalyzeToday=todayInWeek&&!sortedKeys.includes(todayLabel)&&todayDayNum>0;
 
                   return(
                   <div style={{marginTop:18}}>
@@ -2007,9 +2016,7 @@ IMPORTANT RULES:
                       <button
                         onClick={()=>{
                           if(analyzing) return;
-                          const dStr=analyzeDateStr||today;
-                          const dLabel=analyzeDayLabel||todayLabel;
-                          analyzeDay(dStr, dLabel);
+                          analyzeDay(analyzeDateStr, analyzeDayLabel);
                         }}
                         disabled={analyzing}
                         style={{
@@ -2023,7 +2030,7 @@ IMPORTANT RULES:
                         {analyzing?"⏳ Analyzing...":"✨ Analyze"}
                       </button>
                     </div>
-                    <div style={{display:"flex",gap:0,marginBottom:12,borderBottom:`1.5px solid ${t.cardBorder}`,flexWrap:"wrap"}}>
+                    {sortedKeys.length>0&&<div style={{display:"flex",gap:0,marginBottom:12,borderBottom:`1.5px solid ${t.cardBorder}`,flexWrap:"wrap"}}>
                       {sortedKeys.map(k=>{
                         const isActive=k===activeNoteTab;
                         const shortLabel=k.replace(/\s*\(Day\s*\d+\)/,"").replace(/\s*(Mar|Feb)/," $1");
@@ -2031,7 +2038,7 @@ IMPORTANT RULES:
                         return(<button key={k} onClick={()=>setNoteTab(k)} style={{padding:"6px 12px",fontSize:12,fontWeight:isActive?700:500,color:isActive?t.accent:t.textMuted,background:"none",border:"none",borderBottom:isActive?`2.5px solid ${t.accent}`:"2.5px solid transparent",cursor:"pointer",fontFamily:t.font,marginBottom:-1.5}}>{shortLabel}{hasAi?" ✨":""}</button>);
                       })}
                       {canAnalyzeToday&&<button onClick={()=>{setNoteTab(todayLabel);analyzeDay(today,todayLabel);}} style={{padding:"6px 12px",fontSize:12,fontWeight:500,color:t.textMuted,background:"none",border:"none",borderBottom:"2.5px solid transparent",cursor:"pointer",fontFamily:t.font,marginBottom:-1.5,fontStyle:"italic"}}>+ Today</button>}
-                    </div>
+                    </div>}
                     {sortedNotes.length>0?sortedNotes.map((n,ni)=>(
                       <div key={ni} style={{display:"flex",gap:8,marginBottom:8,paddingLeft:4}}>
                         <span style={{fontSize:15,flexShrink:0}}>{n.icon}</span>
@@ -2040,7 +2047,7 @@ IMPORTANT RULES:
                           <div style={{fontSize:12,color:t.textMuted,lineHeight:1.5}}>{n.text}</div>
                         </div>
                       </div>
-                    )):<div style={{fontSize:12,color:t.textMuted,fontStyle:"italic"}}>No notes yet. Press ✨ Analyze to generate insights from today's data.</div>}
+                    )):<div style={{fontSize:12,color:t.textMuted,fontStyle:"italic",padding:"8px 0"}}>No notes yet. Press ✨ Analyze to generate insights from the data.</div>}
                   </div>);
                 })()}
               </div>
