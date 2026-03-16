@@ -390,6 +390,8 @@ export default function GoldenEra() {
   const [labMeanTab, setLabMeanTab] = useState(null); // null = auto-select latest (26 Feb)
   const [expandedLab, setExpandedLab] = useState(null); // accordion for lab meanings
   const [expandedScience, setExpandedScience] = useState(null); // accordion for body science
+  const [analyzing, setAnalyzing] = useState(false); // AI analysis loading
+  const [aiNotes, setAiNotes] = useState({}); // AI-generated notes keyed by date label
   
   const seedBodyMeas={};
 const [bodyMeas, setBodyMeas] = useState(()=>{try{if(safeStorage.getItem("ge_bodyMeas_cleared")==="1")return {};const s=safeStorage.getItem("ge_bodyMeas");if(s){const parsed=JSON.parse(s);return {...seedBodyMeas,...parsed};}return {...seedBodyMeas};}catch(e){return {...seedBodyMeas};}});
@@ -526,6 +528,121 @@ const [weekData,setWeekData]=useState(()=>{try{if(safeStorage.getItem("ge_weekDa
   const cSets={hb:{data:chD.hb,label:"HbA1C",ref:5.7,refL:"<5.7%",dom:[4,10]},trig:{data:chD.trig,label:"Trig",ref:150,refL:"<150",dom:[0,750]},wt:{data:wtCondensed,label:"Weight",ref:60,refL:"60kg",dom:[55,75]},ggt:{data:chD.ggt,label:"GGT",ref:39,refL:"<39",dom:[0,200]},chol:{data:chD.chol,label:"Chol",ref:200,refL:"<200",dom:[150,240]},gluc:{data:glucCondensed,label:"Glucose",ref:99,refL:"<99",dom:[50,230]},bmi:{data:bmiCondensed,label:"BMI",ref:23,refL:"<23",dom:[18,28]}};
   const ch=cSets[labChart];
   
+
+  // ── AI-Powered Daily Analysis ──
+  const analyzeDay = async (dateStr, dayLabel) => {
+    setAnalyzing(true);
+    try {
+      const wd = weekData[dateStr] || {};
+      const prevDate = new Date(dateStr);
+      prevDate.setDate(prevDate.getDate() - 1);
+      const prevStr = prevDate.toISOString().split("T")[0];
+      const prev = weekData[prevStr] || {};
+      // 3 days before for trend
+      const trend3 = [];
+      for(let i=3;i>=1;i--){
+        const d=new Date(dateStr);d.setDate(d.getDate()-i);
+        const dStr=d.toISOString().split("T")[0];
+        const dwd=weekData[dStr]||{};
+        if(dwd.glucFast) trend3.push({day:i+"d ago",fasting:dwd.glucFast,postMeal:dwd.glucPost||"-",night:dwd.glucNight||"-",sleep:dwd.sleep||"-",berb:dwd.berb||"0",exercise:dwd.act||"-"});
+      }
+      const dayNum = Math.max(0,Math.floor((new Date(dateStr)-new Date("2026-03-02"))/(1000*60*60*24))+1);
+      const ifHours = (wd.m1t && wd.mLast) ? (() => {
+        const [h1,m1]=(wd.m1t||"").split(":").map(Number);
+        const [h2,m2]=(wd.mLast||"").split(":").map(Number);
+        if(!isNaN(h1)&&!isNaN(h2)){const eat=(h2*60+m2)-(h1*60+m1);return Math.round((24*60-eat)/60);}
+        return null;
+      })() : null;
+
+      const payload = {
+        dayNumber: dayNum,
+        date: dateStr,
+        baseline: { fastingGlucose: 211, hba1c: 9.4, triglycerides: 702, ggt: 184, weight: 73.6 },
+        today: {
+          fastingGlucose: wd.glucFast || null,
+          postMealGlucose: wd.glucPost || null,
+          nightGlucose: wd.glucNight || null,
+          firstMeal: wd.m1t || null,
+          lastMeal: wd.mLast || null,
+          ifHours: ifHours,
+          afterMealWalk: wd.moveAfter || null,
+          exercise: wd.act || null,
+          berberine: wd.berb || "0",
+          fishOil: wd.fish || "0",
+          magnesium: wd.mag || "0",
+          d3k2: wd.d3k2 || "0",
+          fiberFirst: wd.fiberFirst || false,
+          noSugar: wd.noSweet || false,
+          water2L: wd.water || false,
+          probiotics: wd.probio || false,
+          sleep: wd.sleep || null,
+          notes: wd.notes || ""
+        },
+        yesterday: {
+          fastingGlucose: prev.glucFast || null,
+          postMealGlucose: prev.glucPost || null,
+          nightGlucose: prev.glucNight || null,
+          sleep: prev.sleep || null
+        },
+        recentTrend: trend3
+      };
+
+      const systemPrompt = `You are a metabolic health analyst for Angkhana's 90-day wellness protocol. She is Thai, 32F, started with fasting glucose 211, HbA1C 9.4%, triglycerides 702, GGT 184.
+
+Her supplement stack: berberine (x2 with meals), fish oil (x3 with meals), magnesium glycinate (x2 bedtime), D3+K2 (x1-x2 bedtime).
+
+Protocol: intermittent fasting (target 15:9 to 18:6), fiber first carb last, no sugar, post-meal walks, daily exercise.
+
+Given the day's data, generate 3-5 clinical notes. Each note must have:
+- icon: single emoji
+- sev: "excellent" (green, wins/milestones), "ontrack" (amber, observations/patterns), or "grow" (red, concerns/areas to improve)  
+- title: concise headline (under 10 words)
+- text: 1-2 sentence explanation, specific to the data
+
+ANALYSIS PRIORITIES (in order):
+1. Glucose trend: compare today's fasting to yesterday and 3-day trend. Is it dropping, stable, or bouncing? If it hits below 100, that's a milestone.
+2. Supplement consistency: credit the stack when taken consistently and glucose responds. Note if any were missed.
+3. Post-meal response: if post-meal glucose is available, analyze the spike. Under +30 delta is excellent, +30-50 is manageable, +50+ means pancreas couldn't handle it. Connect to what was eaten if notes mention food.
+4. Sleep-glucose link: poor sleep (<7h) raises cortisol which raises fasting glucose 15-30 points. Good sleep (7+) supports recovery.
+5. Exercise impact: note if exercise was done and its likely effect on next-day glucose. Swimming and weights have 24-48hr aftereffects.
+6. IF window: longer fasting = more liver fat processing. Note if the window was 16+ hours.
+7. Environmental stress: sunlight, heat, dehydration, mental stress can raise cortisol and glucose.
+
+IMPORTANT RULES:
+- Be specific to THIS day's numbers. Never be generic.
+- Always lead with the most impactful insight.
+- If user notes mention specific foods, analyze the glycemic response.
+- Use the comparison to yesterday and 3-day trend to tell a story.
+- Keep each note concise. Educational but tight.
+- Respond ONLY with a JSON array, no markdown, no backticks, no preamble. Example:
+[{"icon":"📉","sev":"excellent","title":"Fasting 108, steady","text":"Holding at 108, same as yesterday. Down 103 from baseline 211 (-49%). Liver responding to berberine + fish oil."},{"icon":"😴","sev":"ontrack","title":"Sleep 7+ supports recovery","text":"Second consecutive 7+ night. Cortisol stays low, giving fasting glucose room to drop."}]`;
+
+      const response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 1000,
+          system: systemPrompt,
+          messages: [{ role: "user", content: `Analyze Day ${dayNum} (${dateStr}):\n${JSON.stringify(payload, null, 2)}` }]
+        })
+      });
+
+      const data = await response.json();
+      const text = (data.content || []).map(c => c.text || "").join("");
+      const clean = text.replace(/```json|```/g, "").trim();
+      const notes = JSON.parse(clean);
+
+      if (Array.isArray(notes) && notes.length > 0) {
+        setAiNotes(prev => ({ ...prev, [dayLabel]: notes }));
+        setNoteTab(dayLabel);
+      }
+    } catch (err) {
+      console.error("AI analysis error:", err);
+      setAiNotes(prev => ({ ...prev, [analyzing]: [{ icon: "⚠️", sev: "grow", title: "Analysis failed", text: "Could not connect to AI. Try again." }] }));
+    }
+    setAnalyzing(false);
+  };
 
   return (
     <div style={{minHeight:"100vh",background:t.bg,fontFamily:t.font,color:t.text,display:"flex",flexDirection:"column"}}>
@@ -1586,7 +1703,7 @@ const [weekData,setWeekData]=useState(()=>{try{if(safeStorage.getItem("ge_weekDa
               }
               return false;
             });
-            const wNotes=weekNoteKeys.flatMap(k=>clinicalNotes[k]||[]);
+            const wNotes=[...weekNoteKeys.flatMap(k=>clinicalNotes[k]||[]),...weekNoteKeys.flatMap(k=>aiNotes[k]||[])];
 
             return(<div>
               {/* Week navigation - date bar matching tracker */}
@@ -1834,27 +1951,86 @@ const [weekData,setWeekData]=useState(()=>{try{if(safeStorage.getItem("ge_weekDa
                 )}
 
                 {/* ── Daily Clinical Notes with day tabs ── */}
-                {weekNoteKeys.length>0&&(()=>{
-                  const sortedKeys=weekNoteKeys.sort((a,b)=>{
+                {(()=>{
+                  // Build all day labels for this week (including days with AI notes but no manual notes)
+                  const allDayKeys = new Set([...weekNoteKeys]);
+                  // Add AI note keys that belong to this week
+                  Object.keys(aiNotes).forEach(k=>{
+                    const dateMatch=k.match(/(\d+)\s+(Mar|Feb)/i);
+                    if(dateMatch){
+                      const day=parseInt(dateMatch[1]);
+                      const mon=dateMatch[2].toLowerCase();
+                      const startDay=w.start.getDate();
+                      const endDay=w.end.getDate();
+                      const startMon=w.start.getMonth();
+                      const noteMon=mon==="feb"?1:2;
+                      if((noteMon===startMon||noteMon===startMon+1)&&day>=startDay&&day<=endDay) allDayKeys.add(k);
+                    }
+                  });
+                  if(allDayKeys.size===0) return null;
+                  const sortedKeys=[...allDayKeys].sort((a,b)=>{
                     const dA=parseInt((a.match(/(\d+)/)||[])[1])||0;
                     const dB=parseInt((b.match(/(\d+)/)||[])[1])||0;
                     return dA-dB;
                   });
-                  // Auto-select first tab if noteTab not in this week's keys
                   const activeNoteTab=sortedKeys.includes(noteTab)?noteTab:sortedKeys[sortedKeys.length-1];
-                  const activeNotes=clinicalNotes[activeNoteTab]||[];
+                  // Merge manual + AI notes for active tab
+                  const manualNotes=clinicalNotes[activeNoteTab]||[];
+                  const aiDayNotes=aiNotes[activeNoteTab]||[];
+                  const mergedNotes=[...manualNotes,...aiDayNotes];
                   const sevOrder={excellent:0,ontrack:1,grow:2};
-                  const sortedNotes=[...activeNotes].sort((a,b)=>(sevOrder[a.sev]??1)-(sevOrder[b.sev]??1));
+                  const sortedNotes=[...mergedNotes].sort((a,b)=>(sevOrder[a.sev]??1)-(sevOrder[b.sev]??1));
                   const sevBorder={excellent:t.ok,ontrack:"#d4850f",grow:t.danger};
+
+                  // Find date string for analyze button
+                  const tabDateMatch=activeNoteTab.match(/(\d+)\s+(Mar|Feb)/i);
+                  let analyzeDateStr=null;
+                  let analyzeDayLabel=null;
+                  if(tabDateMatch){
+                    const day=parseInt(tabDateMatch[1]);
+                    const mon=tabDateMatch[2].toLowerCase()==="feb"?1:2;
+                    analyzeDateStr=`2026-${String(mon+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
+                    analyzeDayLabel=activeNoteTab;
+                  }
+                  // Also allow analyzing "today" even if no tab exists yet
+                  const today=new Date().toISOString().split("T")[0];
+                  const todayDayNum=Math.max(0,Math.floor((new Date()-new Date("2026-03-02"))/(1000*60*60*24))+1);
+                  const todayD=new Date().getDate();
+                  const todayMon=new Date().getMonth();
+                  const todayLabel=`${todayD} ${todayMon===2?"Mar":"Feb"} (Day ${todayDayNum})`;
+                  const canAnalyzeToday=!sortedKeys.includes(todayLabel)&&todayDayNum>0;
+
                   return(
                   <div style={{marginTop:18}}>
-                    <div style={{fontSize:14,fontWeight:800,color:t.text,marginBottom:10}}>Daily Notes</div>
-                    <div style={{display:"flex",gap:0,marginBottom:12,borderBottom:`1.5px solid ${t.cardBorder}`}}>
+                    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
+                      <div style={{fontSize:14,fontWeight:800,color:t.text}}>Daily Notes</div>
+                      <button
+                        onClick={()=>{
+                          if(analyzing) return;
+                          const dStr=analyzeDateStr||today;
+                          const dLabel=analyzeDayLabel||todayLabel;
+                          analyzeDay(dStr, dLabel);
+                        }}
+                        disabled={analyzing}
+                        style={{
+                          padding:"5px 12px",fontSize:12,fontWeight:700,
+                          background:analyzing?t.cardBorder:t.accent,color:"#fff",
+                          border:"none",borderRadius:t.radiusSm,cursor:analyzing?"wait":"pointer",
+                          fontFamily:t.font,display:"flex",alignItems:"center",gap:4,
+                          opacity:analyzing?0.7:1
+                        }}
+                      >
+                        {analyzing?"⏳ Analyzing...":"✨ Analyze"}
+                      </button>
+                    </div>
+                    <div style={{display:"flex",gap:0,marginBottom:12,borderBottom:`1.5px solid ${t.cardBorder}`,flexWrap:"wrap"}}>
                       {sortedKeys.map(k=>{
                         const isActive=k===activeNoteTab;
                         const shortLabel=k.replace(/\s*\(Day\s*\d+\)/,"").replace(/\s*(Mar|Feb)/," $1");
-                        return(<button key={k} onClick={()=>setNoteTab(k)} style={{padding:"6px 12px",fontSize:12,fontWeight:isActive?700:500,color:isActive?t.accent:t.textMuted,background:"none",border:"none",borderBottom:isActive?`2.5px solid ${t.accent}`:"2.5px solid transparent",cursor:"pointer",fontFamily:t.font,marginBottom:-1.5}}>{shortLabel}</button>);
+                        const hasAi=!!aiNotes[k];
+                        return(<button key={k} onClick={()=>setNoteTab(k)} style={{padding:"6px 12px",fontSize:12,fontWeight:isActive?700:500,color:isActive?t.accent:t.textMuted,background:"none",border:"none",borderBottom:isActive?`2.5px solid ${t.accent}`:"2.5px solid transparent",cursor:"pointer",fontFamily:t.font,marginBottom:-1.5}}>{shortLabel}{hasAi?" ✨":""}</button>);
                       })}
+                      {canAnalyzeToday&&<button onClick={()=>{setNoteTab(todayLabel);analyzeDay(today,todayLabel);}} style={{padding:"6px 12px",fontSize:12,fontWeight:500,color:t.textMuted,background:"none",border:"none",borderBottom:"2.5px solid transparent",cursor:"pointer",fontFamily:t.font,marginBottom:-1.5,fontStyle:"italic"}}>+ Today</button>}
                     </div>
                     {sortedNotes.length>0?sortedNotes.map((n,ni)=>(
                       <div key={ni} style={{display:"flex",gap:8,marginBottom:8,paddingLeft:4}}>
@@ -1864,7 +2040,7 @@ const [weekData,setWeekData]=useState(()=>{try{if(safeStorage.getItem("ge_weekDa
                           <div style={{fontSize:12,color:t.textMuted,lineHeight:1.5}}>{n.text}</div>
                         </div>
                       </div>
-                    )):<div style={{fontSize:12,color:t.textMuted,fontStyle:"italic"}}>No notes for this day.</div>}
+                    )):<div style={{fontSize:12,color:t.textMuted,fontStyle:"italic"}}>No notes yet. Press ✨ Analyze to generate insights from today's data.</div>}
                   </div>);
                 })()}
               </div>
