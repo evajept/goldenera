@@ -358,7 +358,7 @@ const trackerRows = [
 ];
 const keyHabitsForScore = ["berb","fish","mag","d3k2","probio","noSweet","fiberFirst","water","moveAfter","act","sleep"];
 const bodyMeasRows = ["Waist (cm)","Hips (cm)","Chest (cm)","Upper Arm (cm)","Thigh (cm)","Neck (cm)","Waist-to-Hip Ratio","Body Fat % (est.)"];
-const tabDefs = [{icon:"📊",label:"PROGRESS"},{icon:"🩸",label:"LABS"},{icon:"📈",label:"TRENDS"},{icon:"📋",label:"LIFESTYLE"},{icon:"🍽️",label:"FOOD & SUPPS"},{icon:"🔬",label:"BODY SCIENCE"}];
+const tabDefs = [{icon:"📊",label:"PROGRESS"},{icon:"🩸",label:"LABS"},{icon:"📋",label:"LIFESTYLE"},{icon:"🍽️",label:"FOOD & SUPPS"},{icon:"🔬",label:"BODY SCIENCE"}];
 
 const t = {
   bg:"#faf8f5", card:"#fffefa", cardBorder:"#e8e0d4",
@@ -383,6 +383,8 @@ export default function GoldenEra() {
   const trackerCleared = React.useRef(false);
   const bodyCleared = React.useRef(false);
   const [labChart, setLabChart] = useState("hb");
+  const [trendChart, setTrendChart] = useState("glucose");
+  const [activityTab, setActivityTab] = useState("activities");
   const [noteTab, setNoteTab] = useState("15 Mar (Day 14)");
   const [insightWeek, setInsightWeek] = useState(null); // null = auto-select latest
   const [labMeanTab, setLabMeanTab] = useState(null); // null = auto-select latest (26 Feb)
@@ -510,7 +512,7 @@ const [weekData,setWeekData]=useState(()=>{try{if(safeStorage.getItem("ge_weekDa
   const ts=getTrackerScore();
   const getTP=(marker)=>{const s=ts.score;if(s===0)return"-";const lk={"HbA1C":[8.4,6],"Fasting Glucose":[185,92],"Triglycerides":[485,135],"GGT":[125,32],"SGPT (ALT)":[40,22],"SGOT (AST)":[30,20],"Cholesterol":[215,187],"Uric Acid":[6.8,5.2],"HDL-C":[45,55],"LDL-C":[110,100],"Creatinine":[.52,.52],"eGFR":[130,128],"Weight":[70,62],"BMI":[25.1,21.9]};const[w,b]=lk[marker]||[0,0];if(w===b)return String(w);const p=w+((b-w)*s/100);return marker==="HbA1C"?`~${p.toFixed(1)}%`:marker==="Creatinine"?p.toFixed(2):`~${Math.round(p)}`;};
 
-  const getInsights=()=>{const tips=[];let berb=0,move=0,sweet=0,sleep=0,fiber=0,mag=0,water=0;weekDates.forEach(d=>{const wd=weekData[d]||{};if(wd.berb&&wd.berb!=="0")berb++;if(wd.moveAfter||wd.act)move++;if(wd.noSweet)sweet++;if(wd.sleep==="7+"||wd.sleep==="8+")sleep++;if(wd.fiberFirst)fiber++;if(wd.mag&&wd.mag!=="0")mag++;if(wd.water)water++;});if(ts.score>0)tips.push({icon:"📊",title:`Score: ${ts.score}/100${ts.bonus?" (+"+ts.bonus+")":""}`,text:`Avg ${ts.score} pts across ${ts.trackedDays} days. ${ts.score>=80?"Full Send pace.":ts.score>=50?"Solid effort.":"Needs more consistency."}`});if(berb>0&&berb<5)tips.push({icon:"🌿",title:"Berberine",text:`${berb}/7 days. Aim for daily.`});if(berb>=5)tips.push({icon:"🌿",title:"Berberine strong",text:`${berb}/7 - excellent.`});if(move<5&&move>0)tips.push({icon:"🚶",title:"Move more",text:`${move}/7 days active. Even 10 min walks count.`});if(sweet>=5)tips.push({icon:"🚫",title:"Sugar-free",text:`${sweet}/7 days - biggest trig driver.`});if(sweet<5&&sweet>0)tips.push({icon:"⚠️",title:"Drinks",text:`${sweet}/7 sugar-free. Each ชาเย็น = +30-50 trig.`});if(sleep<5&&sleep>0)tips.push({icon:"😴",title:"Sleep",text:`${sleep}/7 nights 7+hrs. Poor sleep → glucose +15-30.`});if(mag===0)tips.push({icon:"💊",title:"Magnesium missing",text:"Start tonight. Helps sleep + lowers fasting glucose 5-15 pts."});if(tips.length===0){tips.push({icon:"📊",title:"Start tracking",text:"Fill in the table above to get personalized insights."});tips.push({icon:"💡",title:"Priorities",text:"Zero sweet drinks, berberine, movement, sleep 7+."});tips.push({icon:"🎯",title:"Glucose",text:"Track fasting glucose daily - best predictor of A1C."});}return tips;};
+  const getInsights=()=>{const tips=[];let berb=0,move=0,sweet=0,sleep=0,fiber=0,mag=0,water=0;weekDates.forEach(d=>{const wd=weekData[d]||{};if(wd.berb&&wd.berb!=="0")berb++;if(wd.moveAfter||wd.act)move++;if(wd.noSweet)sweet++;if(wd.sleep==="7+"||wd.sleep==="8+")sleep++;if(wd.fiberFirst)fiber++;if(wd.mag&&wd.mag!=="0")mag++;if(wd.water)water++;});if(ts.score>0)tips.push({icon:"📊",title:`Score: ${ts.score+ts.bonus}/100`,text:`Avg ${ts.score+ts.bonus} pts across ${ts.trackedDays} days. ${ts.score+ts.bonus>=80?"Full Send pace.":ts.score+ts.bonus>=50?"Solid effort.":"Needs more consistency."}`});if(berb>0&&berb<5)tips.push({icon:"🌿",title:"Berberine",text:`${berb}/7 days. Aim for daily.`});if(berb>=5)tips.push({icon:"🌿",title:"Berberine strong",text:`${berb}/7 - excellent.`});if(move<5&&move>0)tips.push({icon:"🚶",title:"Move more",text:`${move}/7 days active. Even 10 min walks count.`});if(sweet>=5)tips.push({icon:"🚫",title:"Sugar-free",text:`${sweet}/7 days - biggest trig driver.`});if(sweet<5&&sweet>0)tips.push({icon:"⚠️",title:"Drinks",text:`${sweet}/7 sugar-free. Each ชาเย็น = +30-50 trig.`});if(sleep<5&&sleep>0)tips.push({icon:"😴",title:"Sleep",text:`${sleep}/7 nights 7+hrs. Poor sleep → glucose +15-30.`});if(mag===0)tips.push({icon:"💊",title:"Magnesium missing",text:"Start tonight. Helps sleep + lowers fasting glucose 5-15 pts."});if(tips.length===0){tips.push({icon:"📊",title:"Start tracking",text:"Fill in the table above to get personalized insights."});tips.push({icon:"💡",title:"Priorities",text:"Zero sweet drinks, berberine, movement, sleep 7+."});tips.push({icon:"🎯",title:"Glucose",text:"Track fasting glucose daily - best predictor of A1C."});}return tips;};
 
   const Pill=({active,children,onClick,color})=>(<button onClick={onClick} style={{padding:"5px 12px",borderRadius:t.radius,fontSize:13,border:`1px solid ${active?(color||t.accent):t.cardBorder}`,cursor:"pointer",background:active?(color||t.accent):t.card,color:active?"#fff":t.textMuted,fontWeight:active?700:500,fontFamily:t.font}}>{children}</button>);
   const Card=({children,style:s={}})=>(<div style={{background:t.card,border:`1px solid ${t.cardBorder}`,borderRadius:t.radius,padding:"14px 16px",marginBottom:10,...s}}>{children}</div>);
@@ -667,10 +669,157 @@ const [weekData,setWeekData]=useState(()=>{try{if(safeStorage.getItem("ge_weekDa
           })()}
 
 
+
+
+          {/* Lab prediction charts */}
+          <div style={{marginTop:24,marginBottom:16}}>
+            <h2 style={{fontSize:22,fontWeight:700,textTransform:"uppercase",margin:"0 0 8px"}}>Lab Trend</h2>
+            <div style={{display:"flex",gap:4,flexWrap:"wrap",marginBottom:8}}>{[["hb","HbA1C"],["trig","Trig"],["gluc","Glucose"],["ggt","GGT"],["chol","Chol"],["wt","Weight"]].map(([k,l])=>(<Pill key={k} active={labChart===k} onClick={()=>setLabChart(k)}>{l}</Pill>))}</div>
+            <Card style={{padding:14}}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+                  <span style={{fontSize:14,fontWeight:700,color:sc}}>{ch.label}</span>
+                  <div style={{display:"flex",gap:10,fontSize:11}}>
+                    <span style={{color:sc}}>● Confirmed</span>
+                    <span style={{color:sc,opacity:0.4}}>○ Predicted</span>
+                  </div>
+                </div>
+                {(()=>{
+                  const pts=ch.data.filter(p=>p.v!==null);
+                  if(pts.length===0)return <div style={{fontSize:13,color:t.textMuted}}>No data yet</div>;
+                  const W=400,H=120,PX=50,PY=15;
+                  const minV=ch.dom[0],maxV=ch.dom[1],rangeV=maxV-minV;
+                  const xStep=(W-PX*2)/(ch.data.length-1);
+                  const toY=(v)=>PY+(H-PY*2)*(1-(v-minV)/rangeV);
+                  const toX=(i)=>PX+i*xStep;
+                  const allPts=ch.data.map((p,i)=>({...p,x:toX(i),y:p.v!==null?toY(p.v):null,i}));
+                  const validPts=allPts.filter(p=>p.y!==null);
+                  const confirmedPts=validPts.filter(p=>p.confirmed);
+                  const predictedPts=validPts.filter(p=>!p.confirmed);
+                  const lastConfirmed=confirmedPts[confirmedPts.length-1];
+                  const refY=toY(ch.ref);
+                  return(
+                    <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:140}}>
+                      <line x1={PX} y1={refY} x2={W-PX} y2={refY} stroke={t.ok} strokeDasharray="4,3" strokeWidth={1} opacity={0.6}/>
+                      <text x={W-PX+4} y={refY+3} fontSize={8} fill={t.ok}>{ch.refL}</text>
+                      {confirmedPts.length>1&&<polyline points={confirmedPts.map(p=>`${p.x},${p.y}`).join(" ")} fill="none" stroke={sc} strokeWidth={2.5}/>}
+                      {lastConfirmed&&predictedPts.length>0&&<polyline points={[lastConfirmed,...predictedPts].map(p=>`${p.x},${p.y}`).join(" ")} fill="none" stroke={sc} strokeWidth={1.5} strokeDasharray="5,4" opacity={0.5}/>}
+                      {validPts.map((p,i)=>(
+                        <g key={i}>
+                          <circle cx={p.x} cy={p.y} r={p.confirmed?5:4} fill={p.confirmed?sc:"#fff"} stroke={sc} strokeWidth={p.confirmed?0:1.5} opacity={p.confirmed?1:0.5}/>
+                          <text x={p.x} y={p.y-10} textAnchor="middle" fontSize={9} fontWeight={p.confirmed?700:400} fill={p.confirmed?sc:t.textMuted}>{p.v}{p.confirmed?" ✓":""}</text>
+                        </g>
+                      ))}
+                      {ch.data.map((p,i)=>(
+                        <text key={i} x={toX(i)} y={H-2} textAnchor="middle" fontSize={8} fill={p.confirmed?sc:t.textMuted} fontWeight={p.confirmed?600:400}>{p.m}</text>
+                      ))}
+                    </svg>
+                  );
+                })()}
+              </Card>
+          </div>
+
+          {/* ══ JOURNEY ══ */}
+          <div style={{marginBottom:16}}>
+            <h2 style={{fontSize:22,fontWeight:700,color:t.text,margin:"0 0 6px",textTransform:"uppercase"}}>Journey</h2>
+            <div style={{display:"flex",gap:10,marginBottom:10,fontSize:11,color:t.textMuted,alignItems:"center"}}>
+              <span style={{display:"inline-flex",alignItems:"center",gap:4}}><span style={{width:10,height:10,borderRadius:"50%",background:t.textMuted,border:`2px solid ${t.card}`,display:"inline-block"}}></span> Actual now</span>
+              <span style={{display:"inline-flex",alignItems:"center",gap:4}}><span style={{width:7,height:7,borderRadius:1.5,background:"#999",border:`1.5px solid ${t.card}`,display:"inline-block"}}></span> D30 / D60 / D90 predictions</span>
+            </div>
+            <Card style={{padding:"10px 14px"}}>
+            {(()=>{
+              const journeyData = [
+                { label:"Fasting glucose", baseline:211, current:95, d30:150, d60:118, d90:93, goal:85, unit:"mg/dL", dec:0, note:"Hit normal range Day 15" },
+                { label:"Weight", baseline:73.6, current:70.9, d30:69.5, d60:66, d90:61.5, goal:60, unit:"kg", dec:1, note:"5% threshold at 69.9 kg" },
+                { label:"BMI", baseline:26.4, current:25.4, d30:24.9, d60:23.7, d90:22.1, goal:22, unit:"", dec:1, note:"" },
+                { label:"Triglycerides", baseline:702, current:null, d30:375, d60:200, d90:125, goal:100, unit:"mg/dL", dec:0, note:"Awaiting Day 30 lab result" },
+                { label:"HbA1C", baseline:9.4, current:null, d30:8.4, d60:7.3, d90:6.1, goal:5.5, unit:"%", dec:1, note:"Awaiting Day 30 lab result" },
+                { label:"GGT", baseline:184, current:null, d30:115, d60:60, d90:33, goal:25, unit:"U/L", dec:0, note:"Awaiting Day 30 lab result" },
+                { label:"SGPT (ALT)", baseline:50, current:null, d30:38, d60:28, d90:22, goal:18, unit:"U/L", dec:0, note:"Awaiting Day 30 lab result" },
+                { label:"SGOT (AST)", baseline:31, current:null, d30:28, d60:24, d90:20, goal:18, unit:"U/L", dec:0, note:"Awaiting Day 30 lab result" },
+                { label:"Cholesterol", baseline:220, current:null, d30:205, d60:195, d90:188, goal:180, unit:"mg/dL", dec:0, note:"Awaiting Day 30 lab result" },
+                { label:"Uric Acid", baseline:7.2, current:null, d30:6.4, d60:5.8, d90:5.3, goal:5.0, unit:"mg/dL", dec:1, note:"Awaiting Day 30 lab result" },
+                { label:"HDL-C", baseline:45, current:null, d30:47, d60:50, d90:55, goal:58, unit:"mg/dL", dec:0, note:"Awaiting Day 30 lab result", reverse:true },
+                { label:"LDL-C", baseline:109, current:null, d30:108, d60:104, d90:100, goal:95, unit:"mg/dL", dec:0, note:"Awaiting Day 30 lab result" },
+              ];
+              return journeyData.map((g,gi)=>{
+                const range=Math.abs(g.baseline-g.goal);
+                const progressActual=g.current!==null&&range>0?Math.min(1,Math.max(0,Math.abs(g.baseline-g.current)/range)):0;
+                const pctActual=Math.round(progressActual*100);
+                const pctD30=range>0?Math.round(Math.min(1,Math.max(0,Math.abs(g.baseline-g.d30)/range))*100):0;
+                const pctD60=range>0?Math.round(Math.min(1,Math.max(0,Math.abs(g.baseline-g.d60)/range))*100):0;
+                const pctD90=range>0?Math.round(Math.min(1,Math.max(0,Math.abs(g.baseline-g.d90)/range))*100):0;
+                let dotColor;
+                if(g.current===null)dotColor="#B4B2A9";
+                else if(pctActual>=80)dotColor=t.ok;
+                else if(pctActual>=40)dotColor="#BA7517";
+                else dotColor="#D85A30";
+                const fmt=(v,d)=>v===null?"?":d>0?Number(v).toFixed(d):String(v);
+                const currentDisp=fmt(g.current,g.dec);
+                const goalDisp=fmt(g.goal,g.dec);
+                const baseDisp=fmt(g.baseline,g.dec);
+                const showActual=g.current!==null;
+                const d30Disp=fmt(g.d30,g.dec);
+                const d60Disp=fmt(g.d60,g.dec);
+                const d90Disp=fmt(g.d90,g.dec);
+                const isLast=gi===journeyData.length-1;
+                return(
+                  <div key={gi} style={{paddingBottom:isLast?0:12,marginBottom:isLast?0:12,borderBottom:isLast?"none":`0.5px solid ${t.cardBorder}`}}>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
+                      <span style={{fontSize:13,fontWeight:700,color:t.text}}>{g.label}</span>
+                      <div style={{textAlign:"right"}}>
+                        <span style={{fontSize:18,fontWeight:700,color:showActual?dotColor:"#B4B2A9"}}>{currentDisp}<span style={{fontSize:12,fontWeight:400,color:t.textMuted}}> {g.unit}</span></span>
+                        {showActual&&<div style={{fontSize:11,color:dotColor,fontWeight:500}}>({pctActual}%)</div>}
+                      </div>
+                    </div>
+                    <div style={{display:"flex",alignItems:"center",gap:6}}>
+                      <div style={{flexShrink:0,width:38,textAlign:"center"}}>
+                        <div style={{fontSize:9,fontWeight:500,color:t.textMuted}}>Start</div>
+                        <div style={{fontSize:11,fontWeight:600,color:t.textMuted}}>{baseDisp}</div>
+                      </div>
+                      <div style={{flex:1,position:"relative",height:10,borderRadius:5,background:t.bg,marginTop:22,marginBottom:22,overflow:"visible"}}>
+                        <div style={{position:"absolute",height:"100%",borderRadius:5,left:0,width:"40%",background:"#F09595",opacity:0.3}}></div>
+                        <div style={{position:"absolute",height:"100%",borderRadius:5,left:"40%",width:"30%",background:"#EF9F27",opacity:0.3}}></div>
+                        <div style={{position:"absolute",height:"100%",borderRadius:5,left:"70%",width:"30%",background:"#5DCAA5",opacity:0.3}}></div>
+                        {/* D30 */}
+                        <div style={{position:"absolute",top:"50%",left:pctD30+"%",width:7,height:7,borderRadius:1.5,background:"#999",border:`1.5px solid ${t.card}`,transform:"translate(-50%,-50%)",zIndex:2,opacity:0.5}}></div>
+                        <div style={{position:"absolute",top:16,left:pctD30+"%",transform:"translateX(-50%)",fontSize:9,color:"#999",whiteSpace:"nowrap",textAlign:"center",lineHeight:1.1,opacity:0.7}}>
+                          <div style={{fontWeight:500}}>D30</div><div>{d30Disp}</div>
+                        </div>
+                        {/* D60 */}
+                        <div style={{position:"absolute",top:"50%",left:pctD60+"%",width:7,height:7,borderRadius:1.5,background:"#999",border:`1.5px solid ${t.card}`,transform:"translate(-50%,-50%)",zIndex:2,opacity:0.6}}></div>
+                        <div style={{position:"absolute",top:16,left:pctD60+"%",transform:"translateX(-50%)",fontSize:9,color:"#999",whiteSpace:"nowrap",textAlign:"center",lineHeight:1.1,opacity:0.8}}>
+                          <div style={{fontWeight:500}}>D60</div><div>{d60Disp}</div>
+                        </div>
+                        {/* D90 */}
+                        <div style={{position:"absolute",top:"50%",left:pctD90+"%",width:7,height:7,borderRadius:1.5,background:"#999",border:`1.5px solid ${t.card}`,transform:"translate(-50%,-50%)",zIndex:2,opacity:0.7}}></div>
+                        <div style={{position:"absolute",top:16,left:pctD90+"%",transform:"translateX(-50%)",fontSize:9,color:"#999",whiteSpace:"nowrap",textAlign:"center",lineHeight:1.1,opacity:0.9}}>
+                          <div style={{fontWeight:500}}>D90</div><div>{d90Disp}</div>
+                        </div>
+                        {/* Actual circle */}
+                        {showActual&&<div style={{position:"absolute",top:"50%",left:pctActual+"%",width:14,height:14,borderRadius:"50%",background:dotColor,border:`2px solid ${t.card}`,transform:"translate(-50%,-50%)",zIndex:3}}></div>}
+                        {showActual&&<div style={{position:"absolute",top:-24,left:pctActual+"%",transform:"translateX(-50%)",fontSize:10,fontWeight:600,color:dotColor,whiteSpace:"nowrap",textAlign:"center",lineHeight:1.1,zIndex:4}}>
+                          <div style={{fontWeight:500}}>Now</div><div>{currentDisp}</div>
+                        </div>}
+                      </div>
+                      <div style={{flexShrink:0,width:36,textAlign:"center"}}>
+                        <div style={{fontSize:9,fontWeight:500,color:t.textMuted}}>Goal</div>
+                        <div style={{fontSize:11,fontWeight:700,color:t.ok}}>{goalDisp}</div>
+                      </div>
+                    </div>
+                    {g.note?<div style={{fontSize:11,color:t.textMuted,marginTop:-8,fontStyle:"italic"}}>{g.note}</div>:null}
+                  </div>
+                );
+              });
+            })()}
+            </Card>
+          </div>
+
+
+
         </div>)}
 
         {/* ══ LIFESTYLE ══ */}
-        {tab===3&&(<div>
+        {tab===2&&(<div>
           <div style={{marginBottom:12}}>
             <h2 style={{fontSize:22,fontWeight:700,textTransform:"uppercase",margin:"12px 0 4px"}}>Daily Habits</h2>
             <p style={{color:t.textMuted,fontSize:14,margin:0}}>3 meals in 10-hr window (7:00-17:00) · Fiber first · Move after · Sleep 7+</p>
@@ -688,45 +837,14 @@ const [weekData,setWeekData]=useState(()=>{try{if(safeStorage.getItem("ge_weekDa
             ))}
           </div>
 
-          {/* Hunger Toolkit - single table, two columns */}
-          <h3 style={{fontSize:18,fontWeight:700,margin:"0 0 4px"}}>If Hungry</h3>
-          <p style={{color:t.textMuted,fontSize:13,marginBottom:10}}>What you can have without disrupting fat-burning or spiking insulin</p>
-          <div style={{border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,background:t.card,marginBottom:16,overflow:"hidden"}}>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr"}}>
-              {[hungerToolkit.between, hungerToolkit.after].map((col,ci)=>(
-                <div key={ci} style={{padding:"12px 14px",borderRight:ci===0?`1px solid ${t.cardBorder}`:"none"}}>
-                  <div style={{fontSize:13,fontWeight:700,color:t.accent,marginBottom:8}}>{col.title}</div>
-                  {col.safe.map((item,ii)=>(
-                    <div key={ii} style={{fontSize:13,color:t.text,padding:"3px 0",display:"flex",gap:6}}>
-                      <span style={{color:t.okBorder}}>•</span>{item}
-                    </div>
-                  ))}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Why am I hungry - single table */}
-          <div style={{fontSize:14,fontWeight:700,color:t.text,marginBottom:8}}>Why am I hungry? (check before eating)</div>
-          <div style={{border:`1px solid ${t.accent}22`,borderRadius:t.radiusSm,background:t.accentBg,marginBottom:24,overflow:"hidden"}}>
-            {hungerToolkit.tips.map((tip,i)=>(
-              <div key={i} style={{padding:"10px 14px",display:"flex",gap:10,alignItems:"flex-start",borderBottom:i<hungerToolkit.tips.length-1?`1px solid ${t.accent}15`:"none"}}>
-                <span style={{fontSize:18,flexShrink:0}}>{tip.icon}</span>
-                <div style={{flex:1}}>
-                  <div style={{fontSize:14,fontWeight:700,color:t.accent}}>{tip.q}</div>
-                  <div style={{fontSize:13,color:t.text,lineHeight:1.5,marginTop:2}}>{tip.a}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Activity Ideas - 2 columns: Activities | Recovery */}
+          {/* Activity Ideas - pill selectable */}
           <h3 style={{fontSize:18,fontWeight:700,margin:"0 0 10px"}}>Activity Ideas</h3>
           <p style={{color:t.textMuted,fontSize:13,marginBottom:10}}>Sorted by glucose impact. Recovery is often underestimated.</p>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
-            {/* Activities */}
+          <div style={{display:"flex",gap:4,marginBottom:8}}>
+            {[["activities","Activities"],["recovery","Recovery"]].map(([k,l])=>(<Pill key={k} active={activityTab===k} onClick={()=>setActivityTab(k)}>{l}</Pill>))}
+          </div>
+          {activityTab==="activities"&&(
             <div style={{background:t.card,border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,padding:"12px 14px"}}>
-              <div style={{fontSize:14,fontWeight:700,color:t.accent,marginBottom:8}}>🏃 Activities</div>
               {activityActivities.map((a,i)=>(
                 <div key={i} style={{padding:"5px 0",borderBottom:i<activityActivities.length-1?`1px solid ${t.cardBorder}33`:"none",display:"flex",gap:8,alignItems:"flex-start"}}>
                   <span style={{fontSize:15}}>{a.emoji}</span>
@@ -740,9 +858,9 @@ const [weekData,setWeekData]=useState(()=>{try{if(safeStorage.getItem("ge_weekDa
                 </div>
               ))}
             </div>
-            {/* Recovery */}
-            <div style={{background:t.card,border:`1px solid ${t.accent}22`,borderRadius:t.radiusSm,padding:"12px 14px"}}>
-              <div style={{fontSize:14,fontWeight:700,color:t.accent,marginBottom:4}}>🧘 Recovery</div>
+          )}
+          {activityTab==="recovery"&&(
+            <div style={{background:t.card,border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,padding:"12px 14px"}}>
               <div style={{fontSize:11,color:t.textMuted,marginBottom:8,fontStyle:"italic"}}>Recovery accelerates results more than people think. It lowers cortisol, improves insulin sensitivity, and helps the body repair.</div>
               {activityRecovery.map((a,i)=>(
                 <div key={i} style={{padding:"6px 0",borderBottom:i<activityRecovery.length-1?`1px solid ${t.cardBorder}33`:"none",display:"flex",gap:8,alignItems:"flex-start"}}>
@@ -757,11 +875,11 @@ const [weekData,setWeekData]=useState(()=>{try{if(safeStorage.getItem("ge_weekDa
                 </div>
               ))}
             </div>
-          </div>
+          )}
         </div>)}
 
         {/* ══ FOOD & SUPPS ══ */}
-        {tab===4&&(<div>
+        {tab===3&&(<div>
           <h2 style={{fontSize:22,fontWeight:700,textTransform:"uppercase",margin:"12px 0 4px"}}>Food & Supplements</h2>
           <p style={{color:t.textMuted,fontSize:14,marginBottom:14}}>What to eat, what to skip, and the supplement stack</p>
 
@@ -1038,240 +1156,22 @@ const [weekData,setWeekData]=useState(()=>{try{if(safeStorage.getItem("ge_weekDa
             </div>
           </div>
 
-          {/* Joy Without the Spike - collapsible */}
-          <div onClick={()=>setJoyOpen(!joyOpen)} style={{cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center",margin:"20px 0 4px",padding:"10px 14px",background:t.card,border:`1px solid ${joyOpen?t.accent+"44":t.cardBorder}`,borderRadius:t.radiusSm}}>
-            <div>
-              <h3 style={{fontSize:18,fontWeight:700,margin:0}}>Joy Without the Spike</h3>
-              <p style={{color:t.textMuted,fontSize:13,margin:"2px 0 0"}}>You don't have to give up delicious. Just swap smarter.</p>
-            </div>
-            <span style={{fontSize:15,color:t.textMuted}}>{joyOpen?"▼":"▶"}</span>
-          </div>
-
-          {joyOpen&&<div>
-          <div style={{fontSize:15,fontWeight:700,color:t.accent,marginBottom:8,marginTop:8}}>Sweet Drinks (zero spike)</div>
-          <div style={{border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,background:t.card,marginBottom:16,overflow:"hidden"}}>
-            {[
-              {name:"Cacao Latte", recipe:"1 tbsp raw cacao + 180ml warm almond milk + stevia", note:"Rich in magnesium, kills sugar cravings. Tastes like hot chocolate", icon:"🍫"},
-              {name:"Matcha Latte", recipe:"1 tsp matcha + 180ml warm almond milk + stevia", note:"L-theanine calms the mind, antioxidants. Creamy and satisfying", icon:"🍵"},
-              {name:"Thai Tea (safe version)", recipe:"Thai tea leaves brewed strong + almond milk + stevia + ice", note:"Same flavor, zero sugar. The tea itself has no sugar", icon:"🧋"},
-              {name:"Butterfly Pea Lemon", recipe:"Brewed butterfly pea tea + lemon juice + stevia + ice", note:"Beautiful color change, refreshing, zero calories", icon:"💜"},
-              {name:"Ginger Honey (not honey)", recipe:"Fresh ginger slices + hot water + stevia + lemon", note:"Warming, aids digestion, anti-inflammatory", icon:"🫚"},
-              {name:"Iced Coconut Cacao", recipe:"1 tbsp cacao + coconut milk (2 tbsp) + water + ice + stevia", note:"Creamy, tropical, satisfying. Coconut fat keeps you full", icon:"🥥"},
-            ].map((d,i)=>(
-              <div key={i} style={{padding:"10px 14px",borderBottom:i<5?`1px solid ${t.cardBorder}`:"none",background:i%2===0?t.card:t.bg}}>
-                <div style={{display:"flex",gap:8,alignItems:"center"}}><span style={{fontSize:18}}>{d.icon}</span><span style={{fontSize:14,fontWeight:700,color:t.text}}>{d.name}</span></div>
-                <div style={{fontSize:13,color:t.accent,marginTop:3,marginLeft:24}}>{d.recipe}</div>
-                <div style={{fontSize:12,color:t.textMuted,fontStyle:"italic",marginTop:2,marginLeft:24}}>{d.note}</div>
-              </div>
-            ))}
-          </div>
-
-          </div>}
 
         </div>)}
 
-        {/* ══ TRENDS ══ */}
-        {tab===2&&(<div>
-          <h2 style={{fontSize:22,fontWeight:700,margin:"12px 0 4px",textTransform:"uppercase"}}>Trends</h2>
-          <p style={{color:t.textMuted,fontSize:14,marginBottom:14}}>Protocol data from tracker + lab predictions</p>
-
-          {/* Lab prediction charts */}
-          <div style={{marginBottom:16}}>
-            <div style={{display:"flex",gap:4,flexWrap:"wrap",marginBottom:8}}>{[["hb","HbA1C"],["trig","Trig"],["gluc","Glucose"],["ggt","GGT"],["chol","Chol"],["wt","Weight"]].map(([k,l])=>(<Pill key={k} active={labChart===k} onClick={()=>setLabChart(k)}>{l}</Pill>))}</div>
-            <Card style={{padding:14}}>
-                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
-                  <span style={{fontSize:14,fontWeight:700,color:sc}}>{ch.label}</span>
-                  <div style={{display:"flex",gap:10,fontSize:11}}>
-                    <span style={{color:sc}}>● Confirmed</span>
-                    <span style={{color:sc,opacity:0.4}}>○ Predicted</span>
-                  </div>
-                </div>
-                {(()=>{
-                  const pts=ch.data.filter(p=>p.v!==null);
-                  if(pts.length===0)return <div style={{fontSize:13,color:t.textMuted}}>No data yet</div>;
-                  const W=400,H=120,PX=50,PY=15;
-                  const minV=ch.dom[0],maxV=ch.dom[1],rangeV=maxV-minV;
-                  const xStep=(W-PX*2)/(ch.data.length-1);
-                  const toY=(v)=>PY+(H-PY*2)*(1-(v-minV)/rangeV);
-                  const toX=(i)=>PX+i*xStep;
-                  const allPts=ch.data.map((p,i)=>({...p,x:toX(i),y:p.v!==null?toY(p.v):null,i}));
-                  const validPts=allPts.filter(p=>p.y!==null);
-                  const confirmedPts=validPts.filter(p=>p.confirmed);
-                  const predictedPts=validPts.filter(p=>!p.confirmed);
-                  const lastConfirmed=confirmedPts[confirmedPts.length-1];
-                  const refY=toY(ch.ref);
-                  return(
-                    <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:140}}>
-                      <line x1={PX} y1={refY} x2={W-PX} y2={refY} stroke={t.ok} strokeDasharray="4,3" strokeWidth={1} opacity={0.6}/>
-                      <text x={W-PX+4} y={refY+3} fontSize={8} fill={t.ok}>{ch.refL}</text>
-                      {confirmedPts.length>1&&<polyline points={confirmedPts.map(p=>`${p.x},${p.y}`).join(" ")} fill="none" stroke={sc} strokeWidth={2.5}/>}
-                      {lastConfirmed&&predictedPts.length>0&&<polyline points={[lastConfirmed,...predictedPts].map(p=>`${p.x},${p.y}`).join(" ")} fill="none" stroke={sc} strokeWidth={1.5} strokeDasharray="5,4" opacity={0.5}/>}
-                      {validPts.map((p,i)=>(
-                        <g key={i}>
-                          <circle cx={p.x} cy={p.y} r={p.confirmed?5:4} fill={p.confirmed?sc:"#fff"} stroke={sc} strokeWidth={p.confirmed?0:1.5} opacity={p.confirmed?1:0.5}/>
-                          <text x={p.x} y={p.y-10} textAnchor="middle" fontSize={9} fontWeight={p.confirmed?700:400} fill={p.confirmed?sc:t.textMuted}>{p.v}{p.confirmed?" ✓":""}</text>
-                        </g>
-                      ))}
-                      {ch.data.map((p,i)=>(
-                        <text key={i} x={toX(i)} y={H-2} textAnchor="middle" fontSize={8} fill={p.confirmed?sc:t.textMuted} fontWeight={p.confirmed?600:400}>{p.m}</text>
-                      ))}
-                    </svg>
-                  );
-                })()}
-              </Card>
-          </div>
-
-          {/* ══ TREND CHARTS ══ */}
-          {(()=>{
-            const trendLabels = ["D1","D2","D3","D4","D5","D6","D7","D8","D9","D10","D11","D12","D13","D14","D15"];
-            const fastingData =   [180,170,160,142,140,147,150,150,123,120,123,115,118,108,108];
-            const postMealData =  [null,null,null,null,null,180,217,150,160,143,150,163,140,null,170];
-            const nightData =     [null,null,null,null,null,null,140,137,131,127,137,120,115,null,112];
-            const scoreData =     [33,40,60,67,73,67,61,85,89,93,91,105,106,null,91];
-            const weightLabels =  ["Base","D7","D14"];
-            const weightData =    [73.6,71.8,70.9];
-            const sleepData =     [1,1,1,1,1,1,0,1,2,2,1,2,2,null,2];
-            const sleepLabelsV =  ["<7","<7","<7","<7","<7","<7","<6","<7","7+","7+","<7","7+","7+","","7+"];
-            const ifData =        [14,12,14,15,15,15,12,15,15,15,14,15,18,null,18];
-
-            const W=320, H=75, PAD={t:14,b:18,l:28,r:12};
-            const cw=W-PAD.l-PAD.r, ch=H-PAD.t-PAD.b;
-
-            const mkLine = (data, labels, yMin, yMax, color, title, unit, refLines, multiLines) => {
-              const allVals = multiLines
-                ? multiLines.flatMap(ml=>ml.data.filter(v=>v!==null))
-                : (data||[]).filter(v=>v!==null);
-              if(allVals.length<2) return null;
-              const autoMin=Math.min(...allVals), autoMax=Math.max(...allVals);
-              const margin=(autoMax-autoMin)*0.15||5;
-              const yLo=yMin!==null?yMin:Math.floor(autoMin-margin);
-              const yHi=yMax!==null?yMax:Math.ceil(autoMax+margin);
-              const range=yHi-yLo||1;
-              const x=i=>PAD.l+(i/(labels.length-1))*cw;
-              const y=v=>PAD.t+(1-(v-yLo)/range)*ch;
-              const buildPath=d=>{
-                const pts=d.map((v,i)=>v!==null?{x:x(i),y:y(v)}:null).filter(Boolean);
-                return pts.map((p,pi)=>`${pi===0?"M":"L"}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");
-              };
-              const lines=multiLines||[{data,color,label:null}];
-              return(
-                <div style={{background:t.card,borderRadius:t.radius,border:`1px solid ${t.cardBorder}`,padding:"8px 8px",marginBottom:8}}>
-                  <div style={{fontSize:12,fontWeight:700,color:t.text,marginBottom:4}}>{title}</div>
-                  <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:140}}>
-                    <line x1={PAD.l} y1={PAD.t} x2={W-PAD.r} y2={PAD.t} stroke={t.cardBorder} strokeWidth="0.5"/>
-                    <line x1={PAD.l} y1={H-PAD.b} x2={W-PAD.r} y2={H-PAD.b} stroke={t.cardBorder} strokeWidth="0.5"/>
-                    <text x={PAD.l-4} y={PAD.t+4} textAnchor="end" fontSize="8" fill={t.textMuted}>{yHi}{unit}</text>
-                    <text x={PAD.l-4} y={H-PAD.b+2} textAnchor="end" fontSize="8" fill={t.textMuted}>{yLo}{unit}</text>
-                    {(refLines||[]).map((rl,ri)=>(
-                      <g key={ri}>
-                        <line x1={PAD.l} y1={y(rl.v)} x2={W-PAD.r} y2={y(rl.v)} stroke={rl.color} strokeWidth="0.8" strokeDasharray="3,3"/>
-                        <text x={W-PAD.r+2} y={y(rl.v)+3} fontSize="7" fill={rl.color}>{rl.label}</text>
-                      </g>
-                    ))}
-                    {lines.map((ln,li)=>{
-                      const path=buildPath(ln.data);
-                      const pts=ln.data.map((v,i)=>v!==null?{x:x(i),y:y(v),v}:null).filter(Boolean);
-                      return(
-                        <g key={li}>
-                          <path d={path} fill="none" stroke={ln.color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                          {pts.map((p,pi)=>(
-                            <g key={pi}>
-                              <circle cx={p.x} cy={p.y} r="2.5" fill={ln.color} stroke={t.card} strokeWidth="1.5"/>
-                              {(pi===0||pi===pts.length-1)&&<text x={p.x} y={p.y-6} textAnchor="middle" fontSize="7" fontWeight="700" fill={ln.color}>{typeof p.v==='number'&&p.v%1!==0?p.v.toFixed(1):p.v}</text>}
-                            </g>
-                          ))}
-                        </g>
-                      );
-                    })}
-                    {labels.map((lb,i)=>(
-                      (i===0||i===labels.length-1||i%3===0)&&<text key={i} x={x(i)} y={H-PAD.b+12} textAnchor="middle" fontSize="7" fill={t.textMuted}>{lb}</text>
-                    ))}
-                    {multiLines&&multiLines.length>1&&multiLines.map((ml,mi)=>(
-                      <g key={mi}>
-                        <line x1={PAD.l+mi*80} y1={6} x2={PAD.l+mi*80+14} y2={6} stroke={ml.color} strokeWidth="2"/>
-                        <text x={PAD.l+mi*80+18} y={9} fontSize="7" fill={ml.color}>{ml.label}</text>
-                      </g>
-                    ))}
-                  </svg>
-                </div>
-              );
-            };
-
-            return(
-              <div style={{marginTop:12}}>
-                <div style={{marginBottom:10}}></div>
-
-                {mkLine(null,trendLabels,80,230,null,"Glucose Trend","",
-                  [{v:99,color:t.ok,label:"Normal"}],
-                  [{data:fastingData,color:t.accent,label:"Fasting"},
-                   {data:postMealData,color:"#b44234",label:"Post-meal"},
-                   {data:nightData,color:"#6b7c5e",label:"Night"}]
-                )}
-
-                {(()=>{
-                  const fullGap=trendLabels.map((_,i)=>{
-                    if(i===0)return null;
-                    const pn=nightData[i-1], cf=fastingData[i];
-                    if(pn===null||cf===null)return null;
-                    return cf-pn;
-                  });
-                  return mkLine(fullGap,trendLabels,null,null,"#9b6b3d","Liver Gap (fasting - prev night)","",
-                    [{v:0,color:t.ok,label:"Zero"}],null);
-                })()}
-
-                {mkLine(scoreData,trendLabels,0,121,t.ok,"Habit Score","",
-                  [{v:100,color:t.accent,label:"Max base"}],null)}
-
-                {mkLine(weightData,weightLabels,null,null,t.accent,"Weight (kg)","kg",null,null)}
-
-                {(()=>{
-                  const sleepH=55;
-                  const barW=cw/sleepData.length;
-                  return(
-                    <div style={{background:t.card,borderRadius:t.radius,border:`1px solid ${t.cardBorder}`,padding:"8px 8px",marginBottom:8}}>
-                      <div style={{fontSize:12,fontWeight:700,color:t.text,marginBottom:4}}>Sleep Quality</div>
-                      <svg viewBox={`0 0 ${W} ${sleepH}`} style={{width:"100%",height:140}}>
-                        {sleepData.map((v,i)=>{
-                          if(v===null)return null;
-                          const colors=[t.danger,"#d4850f",t.ok];
-                          const barH=v===0?ch*0.33:v===1?ch*0.66:ch;
-                          const bx=PAD.l+i*barW+barW*0.15, bw=barW*0.7;
-                          const by=sleepH-PAD.b-barH;
-                          return(
-                            <g key={i}>
-                              <rect x={bx} y={by} width={bw} height={barH} rx="2" fill={colors[v]} opacity="0.8"/>
-                              <text x={bx+bw/2} y={by-3} textAnchor="middle" fontSize="6" fill={colors[v]} fontWeight="600">{sleepLabelsV[i]}</text>
-                            </g>
-                          );
-                        })}
-                        {trendLabels.map((lb,i)=>(
-                          (i===0||i===trendLabels.length-1||i%3===0)&&<text key={i} x={PAD.l+i*barW+barW/2} y={sleepH-PAD.b+12} textAnchor="middle" fontSize="7" fill={t.textMuted}>{lb}</text>
-                        ))}
-                      </svg>
-                    </div>
-                  );
-                })()}
-
-                {mkLine(ifData,trendLabels,10,20,"#6b7c5e","Intermittent Fasting (hours fasted)","h",
-                  [{v:14,color:"#d4850f",label:"14:10"},{v:16,color:t.ok,label:"16:8"}],null)}
-              </div>
-            );
-          })()}
-
-        </div>)}
 
         {/* ══ BODY SCIENCE ══ */}
-        {tab===5&&(<div>
+        {tab===4&&(<div>
           <h2 style={{fontSize:22,fontWeight:700,textTransform:"uppercase",margin:"12px 0 4px"}}>Body Science</h2>
           <p style={{color:t.textMuted,fontSize:14,marginBottom:14}}>Understanding why the protocol works</p>
 
           {[
             {id:"spikes",icon:"📈",title:"Spike Science",subtitle:"How glucose spikes work & damage zones",content:[
               {h:"What is a spike?",p:"When you eat carbs, glucose floods your bloodstream. A healthy pancreas releases insulin within minutes (first-phase response) to shuttle glucose into cells. When this system is impaired, glucose stays elevated - that's a spike."},
-              {h:"Delta ranges (before → after meal)",p:"Under +30: Excellent - pancreas responded on time, minimal stress.\n+30 to +50: Moderate - pancreas was late or weak, manageable but shouldn't be daily.\n+50 to +80: Poor - first-phase insulin didn't fire, oxidative damage to blood vessels begins.\n+80 and above: Alarm - pancreas essentially didn't show up, triggers inflammation cascades."},
+              {h:"Delta ranges (before -> after meal)",p:"Under +30: Excellent - pancreas responded on time, minimal stress.\n+30 to +50: Moderate - pancreas was late or weak, manageable but shouldn't be daily.\n+50 to +80: Poor - first-phase insulin didn't fire, oxidative damage to blood vessels begins.\n+80 and above: Alarm - pancreas essentially didn't show up, triggers inflammation cascades."},
               {h:"Absolute ranges",p:"Under 140: Target zone - no damage happening, healthy non-diabetic range.\n140-180: Damage zone - oxidative stress to artery walls, repairable if occasional.\n180-250: Active damage - glycation (sugar sticking to proteins), harms nerves, kidneys, eyes.\n250+: Emergency - risk of ketoacidosis, organ stress."},
               {h:"Area under the curve",p:"It's not just the peak - it's how LONG glucose stays elevated. A spike to 160 that drops in 30 minutes (post-walk) does far less damage than 160 for 3 hours (sitting at desk). This is why after-meal movement is so powerful."},
-              {h:"Angkhana's data",p:"White rice: +97 spike (120→217) - alarm zone.\nLow GI rice 3 spoons: +46 (117→163) - moderate, pancreas still struggling.\nPotatoes handful: +20 (120→140) - excellent, tolerable.\nChicken + veggies: negative delta (148→134) - pancreas handled it perfectly."},
+              {h:"Angkhana's data",p:"White rice: +97 spike (120->217) - alarm zone.\nLow GI rice 3 spoons: +46 (117->163) - moderate, pancreas still struggling.\nPotatoes handful: +20 (120->140) - excellent, tolerable.\nChicken + veggies: negative delta (148->134) - pancreas handled it perfectly."},
             ]},
             {id:"pancreas",icon:"🫁",title:"Pancreas & Insulin",subtitle:"Beta cells, first-phase response & recovery",content:[
               {h:"How insulin works",p:"The pancreas contains beta cells that produce insulin. When glucose rises, beta cells release insulin in two phases: a quick burst (first-phase, within 5 min) and a sustained release (second-phase, over 1-2 hours). In Type 2 diabetes, the first-phase is impaired or absent."},
@@ -1281,7 +1181,7 @@ const [weekData,setWeekData]=useState(()=>{try{if(safeStorage.getItem("ge_weekDa
               {h:"Signs of recovery",p:"Fasting glucose dropping = liver becoming insulin-sensitive again.\nPost-meal spikes shrinking = beta cells recovering first-phase response.\nSame meal producing smaller spike than before = peripheral insulin sensitivity improving."},
             ]},
             {id:"exercise",icon:"🏊",title:"Exercise Science",subtitle:"Why movement drops glucose without insulin",content:[
-              {h:"The insulin bypass",p:"Muscle contraction activates GLUT4 transporters - glucose channels that open WITHOUT needing insulin. This is why exercise drops glucose even when the pancreas is struggling. It's a completely separate pathway. Angkhana's swim: 131→101 proves this perfectly."},
+              {h:"The insulin bypass",p:"Muscle contraction activates GLUT4 transporters - glucose channels that open WITHOUT needing insulin. This is why exercise drops glucose even when the pancreas is struggling. It's a completely separate pathway. Angkhana's swim: 131->101 proves this perfectly."},
               {h:"Walking after meals",p:"A 10-15 minute walk after eating drops post-meal glucose by 20-40 points. The leg muscles (largest in the body) act as glucose sponges. Even slow walking works. The effect starts within minutes and lasts 1-2 hours."},
               {h:"Swimming & cardio",p:"Sustained cardio (20-40 min) creates a prolonged glucose-lowering effect. Muscles continue absorbing glucose for hours after exercise. Swimming is especially effective - full body engagement, low joint stress, and the water resistance adds extra muscle demand."},
               {h:"Weight training",p:"The biggest unused lever. Resistance training creates micro-tears in muscle fibers. For 24-48 hours after, muscles actively absorb glucose to repair. More muscle mass = more glucose disposal capacity 24/7. Even bodyweight exercises (squats, lunges, push-ups) count."},
@@ -1290,7 +1190,7 @@ const [weekData,setWeekData]=useState(()=>{try{if(safeStorage.getItem("ge_weekDa
             {id:"supps",icon:"💊",title:"Supplement Science",subtitle:"How each supplement works mechanically",content:[
               {h:"Berberine (the star)",p:"Works almost identically to metformin. Activates AMPK enzyme in cells, which increases glucose uptake and reduces liver glucose production. Also improves gut bacteria composition. Takes 2-4 weeks to reach full effect. Must be taken WITH food - empty stomach causes nausea and reduces absorption."},
               {h:"Fish Oil (trig killer)",p:"Omega-3 fatty acids (EPA/DHA) directly reduce liver triglyceride production. The liver packages excess sugar into triglycerides - fish oil slows this process. Also anti-inflammatory, which helps insulin receptor sensitivity. Dose-dependent: 3-4g/day for therapeutic effect on trig 700+."},
-              {h:"Magnesium (sleep + glucose)",p:"Over 300 enzyme reactions require magnesium, including insulin signaling. Mg deficiency (common in diabetes) impairs insulin receptor function AND sleep quality. Glycinate form absorbs best and has calming effect. Bedtime dosing improves sleep → better morning glucose."},
+              {h:"Magnesium (sleep + glucose)",p:"Over 300 enzyme reactions require magnesium, including insulin signaling. Mg deficiency (common in diabetes) impairs insulin receptor function AND sleep quality. Glycinate form absorbs best and has calming effect. Bedtime dosing improves sleep - better morning glucose."},
               {h:"D3 + K2 (insulin receptors)",p:"Vitamin D receptors exist on beta cells and muscle cells. Deficiency (very common in indoor lifestyles) impairs both insulin production and insulin sensitivity. K2 directs calcium to bones instead of arteries - prevents calcification. Always take together, with fat for absorption."},
               {h:"Why timing matters",p:"Berberine + Fish Oil WITH meals: they work on the food you're eating right now.\nMg + D3/K2 at BEDTIME: Mg calms nervous system for sleep, D3 absorbs overnight with dinner fat still in system. Splitting them maximizes each supplement's effect window."},
             ]},
@@ -1298,7 +1198,7 @@ const [weekData,setWeekData]=useState(()=>{try{if(safeStorage.getItem("ge_weekDa
               {h:"The cortisol connection",p:"Poor sleep triggers cortisol release (stress hormone). Cortisol tells the liver to dump stored glucose into the blood - a survival mechanism for 'danger.' But chronic elevation means fasting glucose stays high regardless of diet. One night of <6 hours can raise morning glucose 15-30 points."},
               {h:"Insulin resistance from sleep loss",p:"Just one night of 4-5 hours sleep reduces insulin sensitivity by 25-30%. After a week of <6 hours, cells become as insulin resistant as a pre-diabetic. This is why Angkhana's worst glucose day (150) coincided with her worst sleep night (<6 hours)."},
               {h:"Growth hormone & repair",p:"Deep sleep (stages 3-4) triggers growth hormone release, which helps muscle repair, fat metabolism, and beta cell regeneration. Poor sleep = less time in deep stages = slower recovery. This is why sleep isn't optional - it's when the body heals."},
-              {h:"The glucose-sleep cycle",p:"High evening glucose disrupts sleep quality → poor sleep raises morning glucose → higher glucose all day → higher evening glucose. Breaking this cycle requires both: lower evening glucose (early dinner, after-dinner walk) AND sleep hygiene (dark room, consistent bedtime, magnesium)."},
+              {h:"The glucose-sleep cycle",p:"High evening glucose disrupts sleep quality - poor sleep raises morning glucose - higher glucose all day - higher evening glucose. Breaking this cycle requires both: lower evening glucose (early dinner, after-dinner walk) AND sleep hygiene (dark room, consistent bedtime, magnesium)."},
               {h:"Angkhana's pattern",p:"Days with 7+ sleep: fasting glucose averages lower.\nDays with <7 sleep: fasting glucose bounces up.\nThe <6 hour night on Day 7 preceded a spike to 150 the next morning. Sleep is her single biggest remaining lever."},
             ]},
             {id:"food",icon:"🥗",title:"Food Mechanics",subtitle:"Why order, timing & type matter more than calories",content:[
@@ -1312,28 +1212,74 @@ const [weekData,setWeekData]=useState(()=>{try{if(safeStorage.getItem("ge_weekDa
           ].map(topic=>{
             const isOpen=expandedScience===topic.id;
             return(
-              <div key={topic.id} style={{border:`1px solid ${t.cardBorder}`,borderRadius:t.radiusSm,background:t.card,marginBottom:8,overflow:"hidden"}}>
-                <button onClick={()=>setExpandedScience(isOpen?null:topic.id)} style={{width:"100%",padding:"12px 14px",display:"flex",alignItems:"center",gap:10,background:"none",border:"none",cursor:"pointer",fontFamily:t.font,textAlign:"left"}}>
-                  <span style={{fontSize:20}}>{topic.icon}</span>
-                  <div style={{flex:1}}>
-                    <div style={{fontSize:15,fontWeight:700,color:t.text}}>{topic.title}</div>
-                    <div style={{fontSize:12,color:t.textMuted}}>{topic.subtitle}</div>
-                  </div>
-                  <span style={{fontSize:13,color:t.textLight}}>{isOpen?"▲":"▼"}</span>
-                </button>
-                {isOpen&&<div style={{padding:"0 14px 14px",borderTop:`1px solid ${t.cardBorder}`}}>
-                  {topic.content.map((c,ci)=>(
-                    <div key={ci} style={{marginTop:12}}>
-                      <div style={{fontSize:14,fontWeight:700,color:t.accent,marginBottom:4}}>{c.h}</div>
-                      {c.p.split("\n").map((line,li)=>(
-                        <div key={li} style={{fontSize:13,color:t.text,lineHeight:1.6,marginBottom:line.match(/^[A-Z]|^\d|^Under|^\+|^140|^180|^250/)&&li>0?6:0}}>{line}</div>
-                      ))}
-                    </div>
-                  ))}
-                </div>}
+              <div key={topic.id} style={{marginBottom:0}}>
+                {/* Only show pill row once - for first topic or if none selected */}
               </div>
             );
           })}
+
+          {/* Horizontal pill selector */}
+          <div style={{display:"flex",gap:4,flexWrap:"wrap",marginBottom:12}}>
+            {[["spikes","Spikes"],["pancreas","Pancreas"],["exercise","Exercise"],["supps","Supplements"],["sleep","Sleep"],["food","Food"]].map(([k,l])=>(
+              <Pill key={k} active={expandedScience===k} onClick={()=>setExpandedScience(expandedScience===k?null:k)}>{l}</Pill>
+            ))}
+          </div>
+
+          {/* Content for selected topic - transparent, no border */}
+          {(()=>{
+            const topics={
+              spikes:{content:[
+                {h:"What is a spike?",p:"When you eat carbs, glucose floods your bloodstream. A healthy pancreas releases insulin within minutes (first-phase response) to shuttle glucose into cells. When this system is impaired, glucose stays elevated - that's a spike."},
+                {h:"Delta ranges (before -> after meal)",p:"Under +30: Excellent - pancreas responded on time, minimal stress.\n+30 to +50: Moderate - pancreas was late or weak, manageable but shouldn't be daily.\n+50 to +80: Poor - first-phase insulin didn't fire, oxidative damage to blood vessels begins.\n+80 and above: Alarm - pancreas essentially didn't show up, triggers inflammation cascades."},
+                {h:"Absolute ranges",p:"Under 140: Target zone - no damage happening, healthy non-diabetic range.\n140-180: Damage zone - oxidative stress to artery walls, repairable if occasional.\n180-250: Active damage - glycation (sugar sticking to proteins), harms nerves, kidneys, eyes.\n250+: Emergency - risk of ketoacidosis, organ stress."},
+                {h:"Area under the curve",p:"It's not just the peak - it's how LONG glucose stays elevated. A spike to 160 that drops in 30 minutes (post-walk) does far less damage than 160 for 3 hours (sitting at desk). This is why after-meal movement is so powerful."},
+                {h:"Angkhana's data",p:"White rice: +97 spike (120->217) - alarm zone.\nLow GI rice 3 spoons: +46 (117->163) - moderate, pancreas still struggling.\nPotatoes handful: +20 (120->140) - excellent, tolerable.\nChicken + veggies: negative delta (148->134) - pancreas handled it perfectly."},
+              ]},
+              pancreas:{content:[
+                {h:"How insulin works",p:"The pancreas contains beta cells that produce insulin. When glucose rises, beta cells release insulin in two phases: a quick burst (first-phase, within 5 min) and a sustained release (second-phase, over 1-2 hours). In Type 2 diabetes, the first-phase is impaired or absent."},
+                {h:"Beta cell fatigue vs death",p:"Good news: in most Type 2 diabetes, beta cells aren't dead - they're exhausted and surrounded by fat (lipotoxicity). Remove the excess fat and reduce demand, and they recover."},
+                {h:"Insulin resistance",p:"Cells have insulin receptors. When constantly flooded with insulin, receptors downregulate. The pancreas compensates by producing MORE insulin, exhausting beta cells further. Breaking this cycle is the core goal."},
+                {h:"How recovery works",p:"1. Remove the demand (no sugar, low carb) - pancreas rests.\n2. Improve sensitivity (berberine, exercise, sleep).\n3. Reduce visceral fat (IF, walking).\n4. Beta cells regenerate over 4-12 weeks."},
+              ]},
+              exercise:{content:[
+                {h:"The insulin bypass",p:"Muscle contraction activates GLUT4 transporters - glucose channels that open WITHOUT needing insulin. This is why exercise drops glucose even when the pancreas is struggling."},
+                {h:"Walking after meals",p:"A 10-15 minute walk after eating drops post-meal glucose by 20-40 points. The leg muscles act as glucose sponges. Even slow walking works."},
+                {h:"Swimming & cardio",p:"Sustained cardio creates a prolonged glucose-lowering effect. Muscles continue absorbing glucose for hours after exercise."},
+                {h:"The 48-hour effect",p:"After intense exercise, insulin sensitivity improves for up to 48 hours. The effect is cumulative."},
+              ]},
+              supps:{content:[
+                {h:"Berberine (the star)",p:"Works almost identically to metformin. Activates AMPK enzyme, increases glucose uptake and reduces liver glucose production. Takes 2-4 weeks for full effect. Must be taken WITH food."},
+                {h:"Fish Oil (trig killer)",p:"Omega-3s directly reduce liver triglyceride production. Also anti-inflammatory. Dose-dependent: 3-4g/day for therapeutic effect on trig 700+."},
+                {h:"Magnesium (sleep + glucose)",p:"Over 300 enzyme reactions require magnesium, including insulin signaling. Glycinate form absorbs best and has calming effect. Bedtime dosing improves sleep."},
+                {h:"D3 + K2 (insulin receptors)",p:"Vitamin D receptors exist on beta cells and muscle cells. K2 directs calcium to bones instead of arteries. Always take together, with fat."},
+              ]},
+              sleep:{content:[
+                {h:"The cortisol connection",p:"Poor sleep triggers cortisol release. Cortisol tells the liver to dump stored glucose. One night of <6 hours can raise morning glucose 15-30 points."},
+                {h:"Insulin resistance from sleep loss",p:"One night of 4-5 hours sleep reduces insulin sensitivity by 25-30%. This is why Angkhana's worst glucose day (150) coincided with her worst sleep night."},
+                {h:"The glucose-sleep cycle",p:"High evening glucose disrupts sleep - poor sleep raises morning glucose - higher glucose all day. Breaking this cycle requires both: lower evening glucose AND sleep hygiene."},
+              ]},
+              food:{content:[
+                {h:"Fiber first, carbs last",p:"Eating fiber before carbs creates a gel barrier. Studies show eating the same meal in different orders can reduce the spike by 40%."},
+                {h:"Protein + fat = safe",p:"Protein triggers minimal insulin and zero glucose spike. Fat triggers zero insulin and zero glucose. Combined, they provide steady energy for 4-6 hours."},
+                {h:"The carb threshold",p:"Everyone has a personal carb threshold. For Angkhana right now, it's very low. As beta cells recover, this threshold rises."},
+                {h:"Intermittent fasting (IF)",p:"During the fasting window, insulin drops to baseline and the body switches to fat-burning. A 16:8 window gives the liver 16 hours of fat-processing time per day."},
+              ]},
+            };
+            const sel=topics[expandedScience];
+            if(!sel)return <div style={{fontSize:13,color:t.textMuted,fontStyle:"italic"}}>Select a topic above to learn more</div>;
+            return(
+              <div style={{padding:"4px 0"}}>
+                {sel.content.map((c,ci)=>(
+                  <div key={ci} style={{marginBottom:14}}>
+                    <div style={{fontSize:14,fontWeight:700,color:t.accent,marginBottom:4}}>{c.h}</div>
+                    {c.p.split("\n").map((line,li)=>(
+                      <div key={li} style={{fontSize:13,color:t.text,lineHeight:1.6,marginBottom:li>0?4:0}}>{line}</div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            );
+          })()}
 
 
         </div>)}
@@ -1435,8 +1381,9 @@ const [weekData,setWeekData]=useState(()=>{try{if(safeStorage.getItem("ge_weekDa
                   {weekDates.map(d=>{
                     const wd2=weekData[d]||{};
                     const ds=getDayScore(wd2);
-                    const sc=ds===null?t.textLight:ds.base>=80?t.ok:ds.base>=50?"#d4850f":t.danger;
-                    return(<td key={d} style={{padding:"6px 4px",textAlign:"center",fontSize:14,fontWeight:800,color:sc}}>{ds!==null?`${ds.base}${ds.bonus?"+"+ds.bonus:""}`:"-"}</td>);
+                    const total=ds!==null?ds.base+ds.bonus:null;
+                    const sc=total===null?t.textLight:total>=80?t.ok:total>=50?"#d4850f":t.danger;
+                    return(<td key={d} style={{padding:"6px 4px",textAlign:"center",fontSize:14,fontWeight:800,color:sc}}>{total!==null?total:"-"}</td>);
                   })}
                 </tr>
               </tbody>
@@ -1484,7 +1431,7 @@ const [weekData,setWeekData]=useState(()=>{try{if(safeStorage.getItem("ge_weekDa
               </div>
             ))}
             <div style={{marginTop:8,color:t.textMuted,fontSize:11}}>
-              Daily score = <strong style={{color:t.text}}>base+bonus</strong> · Weekly avg skips empty days · Max 121
+              Daily score = habits + bonuses · Weekly avg skips empty days · Max 121
             </div>
           </div>}
 
@@ -1666,8 +1613,8 @@ const [weekData,setWeekData]=useState(()=>{try{if(safeStorage.getItem("ge_weekDa
                   if(!avgBase) return null;
                   const avgBonus=trackedDays>0?Math.round(totalBonus/trackedDays):0;
                   const weightBonus=weightDays>=2?5:0;
-                  const weekScore=avgBase;
-                  const weekBonus=avgBonus+weightBonus;
+                  const weekScore=avgBase+avgBonus;
+                  const weekBonus=weightBonus;
 
                   // Prediction comparison
                   const dayNum=w.num*7;
@@ -1702,7 +1649,7 @@ const [weekData,setWeekData]=useState(()=>{try{if(safeStorage.getItem("ge_weekDa
                         <circle cx={36} cy={36} r={30} fill="none" stroke={t.cardBorder} strokeWidth={4.5}/>
                         <circle cx={36} cy={36} r={30} fill="none" stroke={ringColor} strokeWidth={4.5} strokeDasharray={circumference} strokeDashoffset={offset} strokeLinecap="round" transform="rotate(-90 36 36)"/>
                         <text x={36} y={33} textAnchor="middle" dominantBaseline="central" style={{fontSize:18,fontWeight:800,fill:t.text}}>{weekScore}</text>
-                        <text x={36} y={48} textAnchor="middle" style={{fontSize:10,fill:t.textMuted}}>{weekBonus>0?`/100 +${weekBonus}`:"/100"}</text>
+                        <text x={36} y={48} textAnchor="middle" style={{fontSize:10,fill:t.textMuted}}>/100</text>
                       </svg>
                       <div style={{fontSize:10,color:t.textMuted,textTransform:"uppercase",letterSpacing:"0.3px",marginTop:2}}>Week score</div>
                     </div>
@@ -1717,11 +1664,11 @@ const [weekData,setWeekData]=useState(()=>{try{if(safeStorage.getItem("ge_weekDa
                   const learnings = [];
                   wNotes.forEach(n=>{
                     const tl = n.title.toLowerCase();
-                    if(tl.includes("spike")||tl.includes("rice")||tl.includes("no spike")||tl.includes("no-carb")||tl.includes("salmon")||tl.includes("brain work")||tl.includes("exhausted")) {
+                    if(tl.includes("spike")||tl.includes("rice")||tl.includes("no spike")||tl.includes("no-carb")||tl.includes("salmon")||tl.includes("brain work")||tl.includes("exhausted")||tl.includes("stevia")||tl.includes("sugar broken")||tl.includes("headache")||tl.includes("dehydration")) {
                       learnings.push({text:n.title, color:n.sev==="excellent"?t.ok:n.sev==="grow"?t.danger:"#d4850f", sev:n.sev});
                     }
                   });
-                  learnings.sort((a,b)=>(a.color===t.ok?0:1)-(b.color===t.ok?0:1));
+                  learnings.sort((a,b)=>{const ord={excellent:0,ontrack:1,grow:2};return (ord[a.sev]||1)-(ord[b.sev]||1);});
                   const focus=[];
                   if(sleepAvg&&sleepAvg<7) focus.push({icon:"😴",text:`Sleep avg ${sleepAvg}h, aim for 7+ every night`});
                   if(suppsPct<80) focus.push({icon:"💊",text:`Supps at ${suppsPct}%, take all 4 daily`});
@@ -1825,6 +1772,8 @@ const [weekData,setWeekData]=useState(()=>{try{if(safeStorage.getItem("ge_weekDa
                   // Auto-select first tab if noteTab not in this week's keys
                   const activeNoteTab=sortedKeys.includes(noteTab)?noteTab:sortedKeys[sortedKeys.length-1];
                   const activeNotes=clinicalNotes[activeNoteTab]||[];
+                  const sevOrder={excellent:0,ontrack:1,grow:2};
+                  const sortedNotes=[...activeNotes].sort((a,b)=>(sevOrder[a.sev]||1)-(sevOrder[b.sev]||1));
                   const sevBorder={excellent:t.ok,ontrack:"#d4850f",grow:t.danger};
                   return(
                   <div style={{marginTop:18}}>
@@ -1836,7 +1785,7 @@ const [weekData,setWeekData]=useState(()=>{try{if(safeStorage.getItem("ge_weekDa
                         return(<button key={k} onClick={()=>setNoteTab(k)} style={{padding:"6px 12px",fontSize:12,fontWeight:isActive?700:500,color:isActive?t.accent:t.textMuted,background:"none",border:"none",borderBottom:isActive?`2.5px solid ${t.accent}`:"2.5px solid transparent",cursor:"pointer",fontFamily:t.font,marginBottom:-1.5}}>{shortLabel}</button>);
                       })}
                     </div>
-                    {activeNotes.length>0?activeNotes.map((n,ni)=>(
+                    {sortedNotes.length>0?sortedNotes.map((n,ni)=>(
                       <div key={ni} style={{display:"flex",gap:8,marginBottom:8,paddingLeft:4}}>
                         <span style={{fontSize:15,flexShrink:0}}>{n.icon}</span>
                         <div style={{flex:1}}>
@@ -1851,6 +1800,129 @@ const [weekData,setWeekData]=useState(()=>{try{if(safeStorage.getItem("ge_weekDa
             </div>);
           })()}
 
+          {/* ══ TREND CHARTS - pill selectable ══ */}
+          <div style={{marginTop:24,marginBottom:16}}>
+            <h2 style={{fontSize:22,fontWeight:700,color:t.text,margin:"0 0 8px",textTransform:"uppercase"}}>Trends</h2>
+            <div style={{display:"flex",gap:4,flexWrap:"wrap",marginBottom:8}}>
+              {[["glucose","Glucose"],["liver","Liver Gap"],["score","Score"],["weight","Weight"],["sleep","Sleep"],["if","IF"]].map(([k,l])=>(<Pill key={k} active={trendChart===k} onClick={()=>setTrendChart(k)}>{l}</Pill>))}
+            </div>
+            {(()=>{
+              const trendLabels=["D1","D2","D3","D4","D5","D6","D7","D8","D9","D10","D11","D12","D13","D14","D15"];
+              const fastingData=[180,170,160,142,140,147,150,150,123,120,123,115,118,108,108];
+              const postMealData=[null,null,null,null,null,180,217,150,160,143,150,163,140,null,170];
+              const nightData=[null,null,null,null,null,null,140,137,131,127,137,120,115,null,112];
+              const scoreData=[33,40,60,67,73,67,61,85,89,93,91,105,106,null,91];
+              const weightLabels=["Base","D7","D14"];
+              const weightData=[73.6,71.8,70.9];
+              const sleepData=[1,1,1,1,1,1,0,1,2,2,1,2,2,null,2];
+              const sleepLabelsV=["<7","<7","<7","<7","<7","<7","<6","<7","7+","7+","<7","7+","7+","","7+"];
+              const ifData=[14,12,14,15,15,15,12,15,15,15,14,15,18,null,18];
+
+              const W=320,H=70,PAD={t:12,b:16,l:26,r:10};
+              const cw=W-PAD.l-PAD.r,ch2=H-PAD.t-PAD.b;
+
+              const mkLine=(data,labels,yMin,yMax,color,title,unit,refLines,multiLines)=>{
+                const allVals=multiLines?multiLines.flatMap(ml=>ml.data.filter(v=>v!==null)):(data||[]).filter(v=>v!==null);
+                if(allVals.length<2)return null;
+                const autoMin=Math.min(...allVals),autoMax=Math.max(...allVals);
+                const margin=(autoMax-autoMin)*0.15||5;
+                const yLo=yMin!==null?yMin:Math.floor(autoMin-margin);
+                const yHi=yMax!==null?yMax:Math.ceil(autoMax+margin);
+                const range=yHi-yLo||1;
+                const xp=i=>PAD.l+(i/(labels.length-1))*cw;
+                const yp=v=>PAD.t+(1-(v-yLo)/range)*ch2;
+                const buildPath=d=>{
+                  const pts=d.map((v,i)=>v!==null?{x:xp(i),y:yp(v)}:null).filter(Boolean);
+                  return pts.map((p,pi)=>`${pi===0?"M":"L"}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");
+                };
+                const lines=multiLines||[{data,color,label:null}];
+                return(
+                  <Card style={{padding:"8px 8px"}}>
+                    <div style={{fontSize:11,fontWeight:700,color:t.text,marginBottom:2}}>{title}</div>
+                    <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:120}}>
+                      <line x1={PAD.l} y1={PAD.t} x2={W-PAD.r} y2={PAD.t} stroke={t.cardBorder} strokeWidth="0.3"/>
+                      <line x1={PAD.l} y1={H-PAD.b} x2={W-PAD.r} y2={H-PAD.b} stroke={t.cardBorder} strokeWidth="0.3"/>
+                      <text x={PAD.l-3} y={PAD.t+3} textAnchor="end" fontSize="7" fill={t.textMuted}>{yHi}{unit}</text>
+                      <text x={PAD.l-3} y={H-PAD.b+2} textAnchor="end" fontSize="7" fill={t.textMuted}>{yLo}{unit}</text>
+                      {(refLines||[]).map((rl,ri)=>(
+                        <g key={ri}>
+                          <line x1={PAD.l} y1={yp(rl.v)} x2={W-PAD.r} y2={yp(rl.v)} stroke={rl.color} strokeWidth="0.6" strokeDasharray="3,3"/>
+                          <text x={W-PAD.r+2} y={yp(rl.v)+3} fontSize="6" fill={rl.color}>{rl.label}</text>
+                        </g>
+                      ))}
+                      {lines.map((ln,li)=>{
+                        const path=buildPath(ln.data);
+                        const pts=ln.data.map((v,i)=>v!==null?{x:xp(i),y:yp(v),v}:null).filter(Boolean);
+                        return(
+                          <g key={li}>
+                            <path d={path} fill="none" stroke={ln.color} strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/>
+                            {pts.map((p,pi)=>(
+                              <g key={pi}>
+                                <circle cx={p.x} cy={p.y} r="2" fill={ln.color} stroke={t.card} strokeWidth="1"/>
+                                {(pi===0||pi===pts.length-1)&&<text x={p.x} y={p.y-5} textAnchor="middle" fontSize="6" fontWeight="700" fill={ln.color}>{typeof p.v==='number'&&p.v%1!==0?p.v.toFixed(1):p.v}</text>}
+                              </g>
+                            ))}
+                          </g>
+                        );
+                      })}
+                      {labels.map((lb,i)=>(
+                        (i===0||i===labels.length-1||i%3===0)&&<text key={i} x={xp(i)} y={H-PAD.b+10} textAnchor="middle" fontSize="6" fill={t.textMuted}>{lb}</text>
+                      ))}
+                      {multiLines&&multiLines.length>1&&multiLines.map((ml,mi)=>(
+                        <g key={mi}>
+                          <line x1={PAD.l+mi*70} y1={5} x2={PAD.l+mi*70+12} y2={5} stroke={ml.color} strokeWidth="1"/>
+                          <text x={PAD.l+mi*70+15} y={7.5} fontSize="6" fill={ml.color}>{ml.label}</text>
+                        </g>
+                      ))}
+                    </svg>
+                  </Card>
+                );
+              };
+
+              if(trendChart==="glucose") return mkLine(null,trendLabels,80,230,null,"Glucose Trend","",
+                [{v:99,color:t.ok,label:"Normal"}],
+                [{data:fastingData,color:t.accent,label:"Fasting"},{data:postMealData,color:"#b44234",label:"Post-meal"},{data:nightData,color:"#6b7c5e",label:"Night"}]);
+              if(trendChart==="liver"){
+                const fullGap=trendLabels.map((_,i)=>{if(i===0)return null;const pn=nightData[i-1],cf=fastingData[i];if(pn===null||cf===null)return null;return cf-pn;});
+                return mkLine(fullGap,trendLabels,null,null,"#9b6b3d","Liver Gap (fasting - prev night)","",
+                  [{v:0,color:t.ok,label:"Zero"}],null);
+              }
+              if(trendChart==="score") return mkLine(scoreData,trendLabels,0,121,t.ok,"Habit Score","",
+                [{v:100,color:t.accent,label:"Max base"}],null);
+              if(trendChart==="weight") return mkLine(weightData,weightLabels,null,null,t.accent,"Weight (kg)","kg",null,null);
+              if(trendChart==="sleep"){
+                const sleepH=50;
+                const barW=cw/sleepData.length;
+                return(
+                  <Card style={{padding:"8px 8px"}}>
+                    <div style={{fontSize:11,fontWeight:700,color:t.text,marginBottom:2}}>Sleep Quality</div>
+                    <svg viewBox={`0 0 ${W} ${sleepH}`} style={{width:"100%",height:120}}>
+                      {sleepData.map((v,i)=>{
+                        if(v===null)return null;
+                        const colors=[t.danger,"#d4850f",t.ok];
+                        const barH=v===0?ch2*0.33:v===1?ch2*0.66:ch2;
+                        const bx=PAD.l+i*barW+barW*0.15,bw=barW*0.7;
+                        const by=sleepH-PAD.b-barH;
+                        return(
+                          <g key={i}>
+                            <rect x={bx} y={by} width={bw} height={barH} rx="2" fill={colors[v]} opacity="0.8"/>
+                            <text x={bx+bw/2} y={by-2} textAnchor="middle" fontSize="5" fill={colors[v]} fontWeight="600">{sleepLabelsV[i]}</text>
+                          </g>
+                        );
+                      })}
+                      {trendLabels.map((lb,i)=>(
+                        (i===0||i===trendLabels.length-1||i%3===0)&&<text key={i} x={PAD.l+i*barW+barW/2} y={sleepH-PAD.b+10} textAnchor="middle" fontSize="6" fill={t.textMuted}>{lb}</text>
+                      ))}
+                    </svg>
+                  </Card>
+                );
+              }
+              if(trendChart==="if") return mkLine(ifData,trendLabels,10,20,"#6b7c5e","Intermittent Fasting (hours fasted)","h",
+                [{v:14,color:"#d4850f",label:"14:10"},{v:16,color:t.ok,label:"16:8"}],null);
+              return null;
+            })()}
+          </div>
+
 
         </div>)}
 
@@ -1860,7 +1932,7 @@ const [weekData,setWeekData]=useState(()=>{try{if(safeStorage.getItem("ge_weekDa
       <div style={{position:"sticky",bottom:0,zIndex:100,background:t.card,borderTop:`1px solid ${t.cardBorder}`,display:"flex",paddingTop:6,paddingBottom:Math.max(14,parseInt("env(safe-area-inset-bottom,14px)")||14)}}>
         {tabDefs.map((td,i)=>{
           const isActive=tab===i;
-          const shortLabels=["Progress","Labs","Trends","Lifestyle","Food","Science"];
+          const shortLabels=["Progress","Labs","Lifestyle","Food","Science"];
           return(<button key={td.label} onClick={()=>setTab(i)} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:2,background:"none",border:"none",cursor:"pointer",fontFamily:t.font,padding:"4px 0",transition:"all 0.15s"}}>
             <div style={{width:28,height:28,borderRadius:8,background:isActive?t.accent:"transparent",display:"flex",alignItems:"center",justifyContent:"center",transition:"background 0.15s"}}>
               <span style={{fontSize:14,filter:isActive?"brightness(10)":"none"}}>{td.icon}</span>
