@@ -168,7 +168,7 @@ const trackerRows=[
   {label:"📝 Notes",field:"notes",type:"text",ph:"...",section:"notes"},
 ];
 
-const tabDefs=[{icon:"📊",label:"Log"},{icon:"🗺️",label:"Journey"},{icon:"🩸",label:"Labs"},{icon:"📖",label:"Guide"}];
+const tabDefs=[{icon:"+",label:"Log"},{icon:"↗",label:"Journey"},{icon:"🩸",label:"Labs"},{icon:"📖",label:"Guide"}];
 
 // ─── Score calculation (exact match) ───
 const getDayScore=(wd)=>{
@@ -249,6 +249,7 @@ export default function GoldenEra(){
     fetch(API+"?action=load").then(r=>r.json()).then(d=>{
       if(d.tracker&&Object.keys(d.tracker).length>0)setWD(p=>({...p,...d.tracker}));
       if(d.body&&Object.keys(d.body).length>0)setBM(p=>({...p,...d.body}));
+      if(d.lab&&Object.keys(d.lab).length>0)setLabData(p=>({...p,...d.lab}));
       setSS("synced");
     }).catch(()=>setSS("error"));
   },[]);
@@ -486,17 +487,17 @@ export default function GoldenEra(){
                   {label:"🫁 GGT",field:"lab_ggt",ph:"U/L"},
                   {label:"🫁 SGPT (ALT)",field:"lab_alt",ph:"U/L"},
                   {label:"🫁 SGOT (AST)",field:"lab_ast",ph:"U/L"},
-                  {label:"💛 Cholesterol",field:"lab_chol",ph:"mg/dL"},
-                  {label:"💛 Uric Acid",field:"lab_uric",ph:"mg/dL"},
+                  {label:"❤️ Cholesterol",field:"lab_chol",ph:"mg/dL"},
+                  {label:"🔶 Uric Acid",field:"lab_uric",ph:"mg/dL"},
                   {label:"💚 HDL-C",field:"lab_hdl",ph:"mg/dL"},
-                  {label:"💛 LDL-C",field:"lab_ldl",ph:"mg/dL"},
-                  {label:"💚 Creatinine",field:"lab_creat",ph:"mg/dL"},
-                  {label:"💚 eGFR",field:"lab_egfr",ph:"mL/min"},
+                  {label:"❤️ LDL-C",field:"lab_ldl",ph:"mg/dL"},
+                  {label:"💧 Creatinine",field:"lab_creat",ph:"mg/dL"},
+                  {label:"💧 eGFR",field:"lab_egfr",ph:"mL/min"},
                 ].map((row,i)=>{
                   const bg=i%2===0?t.card:"#F5F2ED";
                   return(<tr key={row.field} style={{background:bg}}>
                     <td style={{position:"sticky",left:0,background:bg,zIndex:1,padding:"6px 10px",fontSize:12,color:t.text,fontWeight:600,whiteSpace:"nowrap"}}>{row.label}</td>
-                    {weekDates.map(d=>(<td key={d} style={{padding:0}}><input type="text" placeholder={row.ph} value={labData[`${row.field}-${d}`]||""} onChange={e=>{const v=e.target.value;setLabData(p=>{const n={...p,[`${row.field}-${d}`]:v};try{LS.set("ge_labData",JSON.stringify(n))}catch{};return n})}} style={{padding:"6px 4px",border:"none",fontSize:12,width:"100%",background:"transparent",color:t.text,fontFamily:t.font,outline:"none",textAlign:"center",boxSizing:"border-box"}}/></td>))}
+                    {weekDates.map(d=>(<td key={d} style={{padding:0}}><input type="text" placeholder={row.ph} value={labData[`${row.field}-${d}`]||""} onChange={e=>{const v=e.target.value;setLabData(p=>{const n={...p,[`${row.field}-${d}`]:v};try{LS.set("ge_labData",JSON.stringify(n))}catch{};const lf={};Object.keys(n).forEach(k=>{if(k.endsWith("-"+d)){lf[k.split("-")[0]]=n[k]}});qSave(d,lf,"lab");return n})}} style={{padding:"6px 4px",border:"none",fontSize:12,width:"100%",background:"transparent",color:t.text,fontFamily:t.font,outline:"none",textAlign:"center",boxSizing:"border-box"}}/></td>))}
                   </tr>)})}</tbody>
               </table>
             </div>
@@ -505,6 +506,13 @@ export default function GoldenEra(){
 
         {/* ══ JOURNEY TAB ══ */}
         {tab===1&&(<div>
+          {/* Week nav (same as Log) */}
+          <div style={{display:"flex",alignItems:"center",gap:14,marginBottom:16}}>
+            <button onClick={()=>shiftW(-1)} style={{background:t.tile,border:"none",borderRadius:50,width:36,height:36,cursor:"pointer",fontSize:16,color:t.text,boxShadow:t.sh,fontFamily:t.font}}>◀</button>
+            <span style={{fontSize:16,fontWeight:700,color:t.accent}}>{new Date(weekDates[0]).toLocaleDateString("en-GB",{day:"numeric",month:"short"})} - {new Date(weekDates[6]).toLocaleDateString("en-GB",{day:"numeric",month:"short"})}</span>
+            <button onClick={()=>shiftW(1)} style={{background:t.tile,border:"none",borderRadius:50,width:36,height:36,cursor:"pointer",fontSize:16,color:t.text,boxShadow:t.sh,fontFamily:t.font}}>▶</button>
+          </div>
+
           {/* Weekly Insight */}
           <div style={{fontSize:16,fontWeight:700,marginBottom:10}}>Insight</div>
           {(()=>{
@@ -519,9 +527,6 @@ export default function GoldenEra(){
             let sleepGood=0,sleepTotal=0;const sleepH=[];
             weekDates.forEach(d=>{const s=weekData[d]?.sleep;if(s){sleepTotal++;if(s==="7+"||s==="8+")sleepGood++;if(s==="8+")sleepH.push(8.5);else if(s==="7+")sleepH.push(7.5);else if(s==="<7")sleepH.push(6.5);else if(s==="<6")sleepH.push(5.5)}});
             const sleepAvg=sleepH.length?Math.round(sleepH.reduce((a,b)=>a+b,0)/sleepH.length*10)/10:null;
-            let suppsDone=0,suppsMax=0;
-            weekDates.forEach(d=>{const wd=weekData[d];if(!wd)return;if(!(wd.berb||wd.fish||wd.mag||wd.d3k2))return;const dv=(v,mx)=>{if(!v||v==="0")return 0;const n=parseInt(v.replace("x",""));return isNaN(n)?0:Math.min(n,mx)};suppsDone+=dv(wd.berb,2)+dv(wd.fish,3)+dv(wd.mag,2)+dv(wd.d3k2,2);suppsMax+=9});
-            const suppsPct=suppsMax>0?Math.round(suppsDone/suppsMax*100):0;
             const weekNum=Math.ceil(dayNum/7);
             const expectedGluc=weekNum>0?Math.round(211-(211-150)*(weekNum*7/30)):null;
             const aheadPred=expectedGluc&&glucAvg?glucAvg<expectedGluc:false;
@@ -537,7 +542,6 @@ export default function GoldenEra(){
             if(walkDays>=4)learnings.push({text:`Post-meal walks ${walkDays}/7 days`,sev:"excellent"});
             if(sleepTotal>=3&&sleepGood>=5)learnings.push({text:`${sleepGood}/${sleepTotal} nights 7+ hours`,sev:"excellent"});
             if(sleepTotal>=3&&sleepGood<=2)learnings.push({text:`Only ${sleepGood}/${sleepTotal} nights 7+ sleep`,sev:"grow"});
-            if(suppsPct<90)focus.push({icon:"💊",text:"Stay consistent with supplement stack daily"});
             if(sleepGood<sleepTotal)focus.push({icon:"😴",text:"Prioritize 7+ hours sleep every night"});
             if(postAvg&&postAvg>140)focus.push({icon:"🍚",text:"Experiment with complex carbs instead of rice"});
             const exDays=weekDates.filter(d=>weekData[d]?.act&&weekData[d].act!=="none").length;
@@ -547,17 +551,33 @@ export default function GoldenEra(){
             const sevColor={excellent:t.ok,ontrack:t.warn,grow:t.danger};
             const sevIcon={excellent:"\u2713",ontrack:"\u2192",grow:"\u26A0"};
             learnings.sort((a,b)=>({excellent:0,ontrack:1,grow:2}[a.sev]??1)-({excellent:0,ontrack:1,grow:2}[b.sev]??1));
-            const ringColor=ws.total>=70?t.ok:ws.total>=40?t.warn:t.danger;
-            const circ=2*Math.PI*30;
-            const offset=circ-((Math.min(ws.total,100)/100)*circ);
+
+            // Key highlights: Week Score (left) | Fasting | Post-meal | Sleep (no Supps)
+            const highlights=[
+              ws.days>0?{label:"Week Score",val:ws.total,range:`${ws.days} days tracked`,color:ws.total>=70?t.ok:ws.total>=40?t.warn:t.danger}:null,
+              glucAvg?{label:"Fasting",val:glucAvg,range:`${glucMin}-${glucMax}`,color:glucAvg<=99?t.ok:glucAvg<=140?t.warn:t.danger,pred:expectedGluc?`vs ~${expectedGluc} pred`:null,predAhead:aheadPred}:null,
+              postAvg?{label:"Post-meal",val:postAvg,range:`spike ${postMin}-${postMax}`,color:postAvg<=140?t.ok:postAvg<=180?t.warn:t.danger}:null,
+              sleepAvg?{label:"Sleep avg",val:`${sleepAvg}h`,range:`${sleepGood}/${sleepTotal} nights 7+`,color:sleepAvg>=7?t.ok:sleepAvg>=6.5?t.warn:t.danger}:null,
+            ].filter(Boolean);
+
             return(<div>
-              {ws.days>0&&<div style={{display:"flex",gap:16,marginBottom:16,alignItems:"center"}}>
-                <div style={{flexShrink:0,textAlign:"center"}}>
-                  <svg width={72} height={72} viewBox="0 0 72 72"><circle cx={36} cy={36} r={30} fill="none" stroke={t.tile} strokeWidth={4.5}/><circle cx={36} cy={36} r={30} fill="none" stroke={ringColor} strokeWidth={4.5} strokeDasharray={circ} strokeDashoffset={offset} strokeLinecap="round" transform="rotate(-90 36 36)"/><text x={36} y={33} textAnchor="middle" dominantBaseline="central" style={{fontSize:18,fontWeight:800,fill:t.text,fontFamily:t.font}}>{ws.total}</text><text x={36} y={48} textAnchor="middle" style={{fontSize:10,fill:t.muted,fontFamily:t.font}}>/100</text></svg>
-                  <div style={{fontSize:10,color:t.muted,textTransform:"uppercase",letterSpacing:"0.3px",marginTop:2}}>Week score</div>
-                </div>
-                <div style={{flex:1,fontSize:13,color:t.text,lineHeight:1.7}}>{parts.join(" ")}</div>
+              {/* Narrative */}
+              {parts.length>0&&<div style={{fontSize:13,color:t.text,lineHeight:1.7,marginBottom:16}}>{parts.join(" ")}</div>}
+
+              {/* Key highlights row (score first, then metrics) */}
+              {highlights.length>0&&<div style={{display:"flex",alignItems:"stretch",marginBottom:16}}>
+                {highlights.map((m,i,arr)=>(<React.Fragment key={i}>
+                  <div style={{textAlign:"center",padding:"0 10px",flex:1}}>
+                    <div style={{fontSize:11,color:t.muted,textTransform:"uppercase",letterSpacing:"0.5px"}}>{m.label}</div>
+                    <div style={{fontSize:22,fontWeight:800,color:m.color}}>{m.val}</div>
+                    {m.range&&<div style={{fontSize:11,color:t.muted}}>{m.range}</div>}
+                    {m.pred&&<div style={{fontSize:10,color:m.predAhead?t.ok:t.warn,fontWeight:600}}>{m.pred}</div>}
+                  </div>
+                  {i<arr.length-1&&<div style={{width:1,background:t.tile,flexShrink:0}}/>}
+                </React.Fragment>))}
               </div>}
+
+              {/* Key Learnings + Next Week Focus (below highlights) */}
               {(learnings.length>0||focus.length>0)&&<div style={{display:"flex",gap:10,marginBottom:16}}>
                 {learnings.length>0&&<Card style={{flex:1,background:t.okBg,padding:"12px 16px",marginBottom:0}}>
                   <div style={{fontSize:11,fontWeight:700,color:t.ok,textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:8}}>Key Learnings</div>
@@ -567,17 +587,6 @@ export default function GoldenEra(){
                   <div style={{fontSize:11,fontWeight:700,color:"#185fa5",textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:8}}>Next Week Focus</div>
                   {focus.slice(0,4).map((f,i)=>(<div key={i} style={{fontSize:13,color:t.text,fontWeight:600,lineHeight:1.7}}>{f.icon} {f.text}</div>))}
                 </Card>}
-              </div>}
-              {(glucVals.length>0||postVals.length>0)&&<div style={{display:"flex",alignItems:"stretch",marginBottom:16}}>
-                {[glucAvg&&{label:"Fasting",val:glucAvg,range:`${glucMin}-${glucMax}`,color:glucAvg<=99?t.ok:glucAvg<=140?t.warn:t.danger,pred:expectedGluc?`vs ~${expectedGluc} pred`:null,predAhead:aheadPred},postAvg&&{label:"Post-meal",val:postAvg,range:`spike ${postMin}-${postMax}`,color:postAvg<=140?t.ok:postAvg<=180?t.warn:t.danger},sleepAvg&&{label:"Sleep avg",val:`${sleepAvg}h`,range:`${sleepGood}/${sleepTotal} nights 7+`,color:sleepAvg>=7?t.ok:sleepAvg>=6.5?t.warn:t.danger},{label:"Supps",val:`${suppsPct}%`,color:suppsPct>=80?t.ok:suppsPct>=40?t.warn:t.danger}].filter(Boolean).map((m,i,arr)=>(<React.Fragment key={i}>
-                  <div style={{textAlign:"center",padding:"0 10px",flex:1}}>
-                    <div style={{fontSize:11,color:t.muted,textTransform:"uppercase",letterSpacing:"0.5px"}}>{m.label}</div>
-                    <div style={{fontSize:22,fontWeight:800,color:m.color}}>{m.val}</div>
-                    {m.range&&<div style={{fontSize:11,color:t.muted}}>{m.range}</div>}
-                    {m.pred&&<div style={{fontSize:10,color:m.predAhead?t.ok:t.warn,fontWeight:600}}>{m.pred}</div>}
-                  </div>
-                  {i<arr.length-1&&<div style={{width:1,background:t.tile,flexShrink:0}}/>}
-                </React.Fragment>))}
               </div>}
             </div>);
           })()}
