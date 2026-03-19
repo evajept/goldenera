@@ -21,7 +21,7 @@ const API="https://script.google.com/macros/s/AKfycbxWHehS2Drs5gXKPuNv1u173pLu7M
 
 // Debounced save
 const _sq={};let _st=null;
-const qSave=(date,data,type="tracker")=>{_sq[type+"-"+date]={date,data,type};clearTimeout(_st);_st=setTimeout(async()=>{const items=Object.values(_sq);Object.keys(_sq).forEach(k=>delete _sq[k]);for(const i of items){try{await fetch(API,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({action:i.type==="body"?"saveBody":"saveDay",date:i.date,data:i.data})})}catch(e){console.log("Sync err:",e)}}},2000)};
+const qSave=(date,data,type="tracker")=>{_sq[type+"-"+date]={date,data,type};clearTimeout(_st);_st=setTimeout(async()=>{const items=Object.values(_sq);Object.keys(_sq).forEach(k=>delete _sq[k]);for(const i of items){try{const action=i.type==="body"?"saveBody":i.type==="lab"?"saveLab":"saveDay";await fetch(API,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({action,date:i.date,data:i.data})})}catch(e){console.log("Sync err:",e)}}},2000)};
 
 const WEIGHT=73.6,HCM=167;
 const BMI_VAL=(WEIGHT/((HCM/100)**2)).toFixed(1);
@@ -247,7 +247,19 @@ export default function GoldenEra(){
   React.useEffect(()=>{
     setSS("loading");
     fetch(API+"?action=load").then(r=>r.json()).then(d=>{
-      if(d.tracker&&Object.keys(d.tracker).length>0)setWD(p=>({...p,...d.tracker}));
+      if(d.tracker&&Object.keys(d.tracker).length>0){
+        setWD(p=>({...p,...d.tracker}));
+        // Extract body_ and lab_ fields into their states
+        const bm={},ld={};
+        Object.entries(d.tracker).forEach(([date,dayData])=>{
+          Object.entries(dayData).forEach(([k,v])=>{
+            if(k.startsWith("body_")) bm[`${k.replace("body_","")}-${date}`]=v;
+            if(k.startsWith("lab_")) ld[`${k}-${date}`]=v;
+          });
+        });
+        if(Object.keys(bm).length>0) setBM(p=>({...p,...bm}));
+        if(Object.keys(ld).length>0) setLabData(p=>({...p,...ld}));
+      }
       if(d.body&&Object.keys(d.body).length>0)setBM(p=>({...p,...d.body}));
       if(d.lab&&Object.keys(d.lab).length>0)setLabData(p=>({...p,...d.lab}));
       setSS("synced");
