@@ -45,7 +45,7 @@ const GRID = [
 
 const EXERCISES = ["rest", "walk", "stretch", "cardio", "weights"];
 
-// ─── Helpers ───
+// --- Helpers ---
 const dayN = () => Math.max(1, Math.floor((new Date() - DAY1) / 864e5) + 1);
 const todayISO = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
 const fmtShort = () => new Date().toLocaleDateString("en-US", { day: "numeric", month: "short" });
@@ -98,7 +98,7 @@ function gridIsOn(field, val) {
   return val && val !== "0" && val !== "";
 }
 
-// ─── API ───
+// --- API ---
 async function apiLoad() {
   try {
     const r = await fetch(`${API}?action=load&t=${Date.now()}`);
@@ -117,7 +117,7 @@ function apiSave(date, data) {
   }, 2000);
 }
 
-// ─── HOME ─────────────────────────────────────────────────
+// --- HOME ---
 function HomeTab({ D, loading }) {
   const day = dayN();
   const today = todayISO();
@@ -127,8 +127,12 @@ function HomeTab({ D, loading }) {
   const todayD = D[today] || {};
 
   const gv = latest.glucFast ? parseFloat(latest.glucFast) : NaN;
-  const tv = latest.triglycerides ? parseFloat(latest.triglycerides) : NaN;
-  const wv = latest.weight ? parseFloat(latest.weight) : NaN;
+  // Trig comes from lab data (lab_trig), not "triglycerides"
+  const tvFind = (() => { for (let i = dates.length - 1; i >= 0; i--) { const v = parseFloat(D[dates[i]]?.lab_trig); if (!isNaN(v)) return v; } return NaN; })();
+  const tv = tvFind;
+  // Weight comes from body data (body_weight), not "weight"
+  const wvFind = (() => { for (let i = dates.length - 1; i >= 0; i--) { const v = parseFloat(D[dates[i]]?.body_weight); if (!isNaN(v)) return v; } return NaN; })();
+  const wv = wvFind;
 
   let streak = 0;
   for (let i = dates.length - 1; i >= 0; i--) { const r = D[dates[i]]; if (r && (r.glucFast || r.berb || r.noSweet)) streak++; else break; }
@@ -239,7 +243,7 @@ function HomeTab({ D, loading }) {
   );
 }
 
-// ─── LOG ──────────────────────────────────────────────────
+// --- LOG ---
 function LogTab({ D, setD }) {
   const today = todayISO();
   const wd = D[today] || {};
@@ -252,7 +256,6 @@ function LogTab({ D, setD }) {
   const [saving, setSaving] = useState(false);
   const handleSave = async () => {
     setSaving(true);
-    // If no exercise selected, send "none"
     const payload = { ...(D[today] || {}) };
     if (!payload.act || payload.act === "") payload.act = "none";
     try { await fetch(API, { method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ action: "saveDay", date: today, data: payload }) }); setSaved(true); setTimeout(() => setSaved(false), 2500); } catch (e) { console.error(e); }
@@ -261,7 +264,6 @@ function LogTab({ D, setD }) {
 
   const sc = getDayScore(wd);
 
-  // Consistent input style for ALL 6 fields in the glucose card
   const cellStyle = {
     width: "100%", padding: "12px 6px", borderRadius: 12, border: "none",
     fontSize: 18, fontWeight: 300, textAlign: "center", color: t.text,
@@ -276,9 +278,8 @@ function LogTab({ D, setD }) {
         <span style={{ fontSize: 12, color: t.accent, fontWeight: 600 }}>Day {dayN()}</span>
       </div>
 
-      {/* Glucose + Meals + IF - consistent height inputs */}
+      {/* Glucose + Meals + IF */}
       <div style={{ background: t.card, borderRadius: 20, padding: 18, marginBottom: 10, boxShadow: t.csh }}>
-        {/* Row 1: 3 glucose inputs */}
         <div style={{ display: "flex", gap: 8, marginBottom: 14 }}>
           {[
             ["\uD83E\uDE78", "Fasting", "glucFast"],
@@ -291,7 +292,6 @@ function LogTab({ D, setD }) {
             </div>
           ))}
         </div>
-        {/* Row 2: 2 time inputs + IF display - same height */}
         <div style={{ display: "flex", gap: 8 }}>
           {[
             ["\uD83C\uDF73", "First meal", "m1t"],
@@ -338,7 +338,7 @@ function LogTab({ D, setD }) {
         </div>
       </div>
 
-      {/* Exercise pills: rest, walk, stretch, cardio, weights */}
+      {/* Exercise pills */}
       <div style={{ background: t.card, borderRadius: 20, padding: "14px 18px", marginBottom: 10, boxShadow: t.csh }}>
         <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
           <span style={{ fontSize: 18 }}>{"\uD83C\uDFCB\uFE0F"}</span>
@@ -359,7 +359,7 @@ function LogTab({ D, setD }) {
 
       {/* Notes */}
       <div style={{ background: t.card, borderRadius: 20, padding: "14px 18px", marginBottom: 10, boxShadow: t.csh }}>
-        <textarea placeholder="\uD83D\uDCDD Notes..." rows={2} value={wd.notes || ""} onChange={e => up("notes", e.target.value)}
+        <textarea placeholder={"\uD83D\uDCDD Notes..."} rows={2} value={wd.notes || ""} onChange={e => up("notes", e.target.value)}
           style={{ width: "100%", padding: "10px 12px", borderRadius: 12, border: "none", fontSize: 13, lineHeight: 1.5, color: t.text, fontFamily: "'DM Sans',sans-serif", background: t.tile, outline: "none", boxSizing: "border-box", boxShadow: t.sh, resize: "none" }} />
       </div>
 
@@ -385,18 +385,18 @@ function LogTab({ D, setD }) {
   );
 }
 
-// ─── JOURNEY ──────────────────────────────────────────────
+// --- JOURNEY ---
 function JourneyTab({ D, loading }) {
   const dates = Object.keys(D).sort();
   const find = (key) => { for (let i = dates.length - 1; i >= 0; i--) { const v = parseFloat(D[dates[i]]?.[key]); if (!isNaN(v)) return v; } return null; };
 
   const metrics = [
     { key: "glucose", cur: find("glucFast"), tgt: TARGETS.glucose, fb: null },
-    { key: "trig", cur: find("triglycerides"), tgt: TARGETS.trig, fb: null },
-    { key: "weight", cur: find("weight"), tgt: TARGETS.weight, fb: null },
-    { key: "bmi", cur: find("bmi"), tgt: TARGETS.bmi, fb: null },
-    { key: "hba1c", cur: find("hba1c"), tgt: TARGETS.hba1c, fb: "Next: Day 30" },
-    { key: "ggt", cur: find("ggt"), tgt: TARGETS.ggt, fb: "Next: end Mar" },
+    { key: "trig", cur: find("lab_trig"), tgt: TARGETS.trig, fb: null },
+    { key: "weight", cur: find("body_weight"), tgt: TARGETS.weight, fb: null },
+    { key: "bmi", cur: (() => { const w = find("body_weight"); return w ? parseFloat((w / ((1.67) ** 2)).toFixed(1)) : null; })(), tgt: TARGETS.bmi, fb: null },
+    { key: "hba1c", cur: find("lab_hba1c"), tgt: TARGETS.hba1c, fb: "Next: Day 30" },
+    { key: "ggt", cur: find("lab_ggt"), tgt: TARGETS.ggt, fb: "Next: end Mar" },
   ];
 
   return (
@@ -436,7 +436,7 @@ function JourneyTab({ D, loading }) {
   );
 }
 
-// ─── NAV ──────────────────────────────────────────────────
+// --- NAV ---
 function Nav({ tab, setTab }) {
   return (
     <div style={{
@@ -461,7 +461,7 @@ function Nav({ tab, setTab }) {
   );
 }
 
-// ─── MAIN ─────────────────────────────────────────────────
+// --- MAIN ---
 export default function GoldenEraMobile() {
   const [tab, setTab] = useState("home");
   const [D, setD] = useState({});
@@ -471,14 +471,38 @@ export default function GoldenEraMobile() {
     setLoading(true);
     const res = await apiLoad();
     if (res) {
-      if (res.tracker && typeof res.tracker === "object") setD(res.tracker);
-      else if (Array.isArray(res)) { const o = {}; res.forEach(r => { if (r.date) o[r.date] = r; }); setD(o); }
-      else if (res.data) { if (Array.isArray(res.data)) { const o = {}; res.data.forEach(r => { if (r.date) o[r.date] = r; }); setD(o); } else if (typeof res.data === "object") setD(res.data); }
-      else if (typeof res === "object" && !Array.isArray(res)) {
-        // Maybe the response itself is { "2026-03-10": {...}, ... }
-        const keys = Object.keys(res).filter(k => /^\d{4}-\d{2}-\d{2}$/.test(k));
-        if (keys.length > 0) setD(res);
+      let tracker = {};
+      if (res.tracker && typeof res.tracker === "object") tracker = res.tracker;
+      else if (Array.isArray(res)) { res.forEach(r => { if (r.date) tracker[r.date] = r; }); }
+
+      // Merge body measurements into tracker by date (e.g. "weight-2026-03-10" -> tracker["2026-03-10"].body_weight)
+      if (res.body && typeof res.body === "object") {
+        Object.entries(res.body).forEach(([k, v]) => {
+          const parts = k.split("-");
+          const field = parts[0];
+          const date = parts.slice(1).join("-");
+          if (date && field) {
+            if (!tracker[date]) tracker[date] = {};
+            tracker[date]["body_" + field] = v;
+          }
+        });
       }
+
+      // Merge lab markers into tracker by date (e.g. "lab_hba1c-2026-03-10" -> tracker["2026-03-10"].lab_hba1c)
+      if (res.lab && typeof res.lab === "object") {
+        Object.entries(res.lab).forEach(([k, v]) => {
+          const idx = k.indexOf("-2026-");
+          if (idx === -1) return;
+          const field = k.substring(0, idx);
+          const date = k.substring(idx + 1);
+          if (date && field) {
+            if (!tracker[date]) tracker[date] = {};
+            tracker[date][field] = v;
+          }
+        });
+      }
+
+      setD(tracker);
     }
     setLoading(false);
   }, []);
