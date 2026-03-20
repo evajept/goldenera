@@ -1,516 +1,454 @@
 import { useState, useEffect, useCallback } from "react";
 
 /* ═══════════════════════════════════════════════════════════════
-   Golden Era Mobile - Angkhana's 90-Day Metabolic Wellness Tracker
-   v2: data fixes, unlogged hint, week bars, backlog date picker
+   Golden Era Mobile v3
+   Bold metrics, gradient bars, M-S axis, body/lab in Log, Guide tab
    ═══════════════════════════════════════════════════════════════ */
 
 const API = "https://script.google.com/macros/s/AKfycbxWHehS2Drs5gXKPuNv1u173pLu7Mr8ZOJ7KX5pEOS4L5K-X7HOeHBN1Cw9pUt5Byf2Hw/exec";
 const DAY1 = new Date("2026-03-02");
-
 const t = {
-  bg: "#E8E4DE", card: "#FDFCF9", tile: "#E8E3DB", on: "#C8DFC9",
-  accent: "#4A7A50", dark: "#3D6842", text: "#1A1612", muted: "#8A7E72", light: "#B0A698",
-  warn: "#B8860B",
-  sh: "0 2px 8px rgba(0,0,0,0.10)", shOn: "0 3px 10px rgba(74,122,80,0.20)",
-  csh: "0 3px 16px rgba(0,0,0,0.08)", scoreBg: "rgba(74,122,80,0.6)",
-  dotFill: "#FDFCF9",
+  bg:"#E8E4DE",card:"#FDFCF9",tile:"#E8E3DB",on:"#C8DFC9",
+  accent:"#4A7A50",dark:"#3D6842",text:"#1A1612",muted:"#8A7E72",light:"#B0A698",
+  warn:"#B8860B",danger:"#C44",ok:"#4A7A50",
+  okBg:"#E8F0E8",warnBg:"#FDF6E8",dangerBg:"#FDF0EE",
+  sh:"0 2px 8px rgba(0,0,0,0.10)",shOn:"0 3px 10px rgba(74,122,80,0.20)",
+  csh:"0 3px 16px rgba(0,0,0,0.08)",dotFill:"#FDFCF9",
 };
+const TARGETS={glucose:{s:211,g:85,u:"mg/dL",l:"Fasting Glucose"},trig:{s:702,g:100,u:"mg/dL",l:"Triglycerides"},weight:{s:73.6,g:60,u:"kg",l:"Weight"},bmi:{s:26.4,g:22,u:"",l:"BMI"},hba1c:{s:9.4,g:5.5,u:"%",l:"HbA1C"},ggt:{s:184,g:25,u:"U/L",l:"GGT"}};
 
-const TARGETS = {
-  glucose: { s: 211, g: 85, u: "mg/dL", l: "Fasting Glucose" },
-  trig: { s: 702, g: 100, u: "mg/dL", l: "Triglycerides" },
-  weight: { s: 73.6, g: 60, u: "kg", l: "Weight" },
-  bmi: { s: 26.4, g: 22, u: "", l: "BMI" },
-  hba1c: { s: 9.4, g: 5.5, u: "%", l: "HbA1C" },
-  ggt: { s: 184, g: 25, u: "U/L", l: "GGT" },
-};
+const GRID=[
+  {id:"berb",icon:"\uD83C\uDF3F",l:"Berb",field:"berb",cycle:["0","x1","x2"]},
+  {id:"fish",icon:"\uD83D\uDC1F",l:"Fish",field:"fish",cycle:["0","x1","x2","x3"]},
+  {id:"mag",icon:"\uD83D\uDC8A",l:"Mag",field:"mag",cycle:["0","x1","x2","x3"]},
+  {id:"d3k2",icon:"\u2600\uFE0F",l:"D3K2",field:"d3k2",cycle:["0","x1","x2"]},
+  {id:"sleep",icon:"\uD83D\uDE34",l:"Sleep",field:"sleep",cycle:["","<6","<7","7+","8+"]},
+  {id:"move",icon:"\uD83D\uDEB6",l:"Walk",field:"moveAfter",cycle:["","x1","x2","x3"]},
+  {id:"fiber",icon:"\uD83E\uDD57",l:"Fiber",field:"fiberFirst",cycle:[false,true]},
+  {id:"sugar",icon:"\uD83D\uDEAB",l:"Sugar",field:"noSweet",cycle:[false,true]},
+  {id:"water",icon:"\uD83D\uDCA7",l:"Water",field:"water",cycle:[false,true]},
+  {id:"probio",icon:"\uD83E\uDDEB",l:"Probio",field:"probio",cycle:[false,true]},
+  {id:"basil",icon:"\uD83C\uDF31",l:"Basil",field:"basil",cycle:[false,true]},
+  {id:"brazil",icon:"\uD83E\uDD5C",l:"Brazil",field:"brazil",cycle:[false,true]},
+];
+const EXERCISES=["rest","walk","stretch","cardio","weights"];
 
-const GRID = [
-  { id: "berb", icon: "\uD83C\uDF3F", l: "Berb", field: "berb", cycle: ["0", "x1", "x2"] },
-  { id: "fish", icon: "\uD83D\uDC1F", l: "Fish", field: "fish", cycle: ["0", "x1", "x2", "x3"] },
-  { id: "mag", icon: "\uD83D\uDC8A", l: "Mag", field: "mag", cycle: ["0", "x1", "x2", "x3"] },
-  { id: "d3k2", icon: "\u2600\uFE0F", l: "D3K2", field: "d3k2", cycle: ["0", "x1", "x2"] },
-  { id: "sleep", icon: "\uD83D\uDE34", l: "Sleep", field: "sleep", cycle: ["", "<6", "<7", "7+", "8+"] },
-  { id: "move", icon: "\uD83D\uDEB6", l: "Walk", field: "moveAfter", cycle: ["", "x1", "x2", "x3"] },
-  { id: "fiber", icon: "\uD83E\uDD57", l: "Fiber", field: "fiberFirst", cycle: [false, true] },
-  { id: "sugar", icon: "\uD83D\uDEAB", l: "Sugar", field: "noSweet", cycle: [false, true] },
-  { id: "water", icon: "\uD83D\uDCA7", l: "Water", field: "water", cycle: [false, true] },
-  { id: "probio", icon: "\uD83E\uDDEB", l: "Probio", field: "probio", cycle: [false, true] },
-  { id: "basil", icon: "\uD83C\uDF31", l: "Basil", field: "basil", cycle: [false, true] },
-  { id: "brazil", icon: "\uD83E\uDD5C", l: "Brazil", field: "brazil", cycle: [false, true] },
+const BODY_ROWS=[
+  {label:"\u2696\uFE0F Weight",field:"body_weight",ph:"kg"},
+  {label:"\uD83D\uDCCF Neck",field:"body_neck",ph:"cm"},
+  {label:"\uD83D\uDCCF Waist",field:"body_waist",ph:"cm"},
+  {label:"\uD83D\uDCCF Hip",field:"body_hip",ph:"cm"},
+  {label:"\uD83D\uDCCF Chest",field:"body_chest",ph:"cm"},
+  {label:"\uD83D\uDCCF Belly",field:"body_belly",ph:"cm"},
+  {label:"\uD83D\uDCAA Arm",field:"body_arm",ph:"cm"},
+  {label:"\uD83E\uDDB5 Thigh",field:"body_thigh",ph:"cm"},
+];
+const LAB_ROWS=[
+  {label:"\uD83E\uDE78 HbA1C",field:"lab_hba1c",ph:"%"},
+  {label:"\uD83E\uDE78 Glucose",field:"lab_glucose",ph:"mg/dL"},
+  {label:"\uD83E\uDE78 Trig",field:"lab_trig",ph:"mg/dL"},
+  {label:"\uD83E\uDE78 GGT",field:"lab_ggt",ph:"U/L"},
+  {label:"\uD83E\uDE78 ALT",field:"lab_alt",ph:"U/L"},
+  {label:"\uD83E\uDE78 AST",field:"lab_ast",ph:"U/L"},
+  {label:"\u2764\uFE0F Chol",field:"lab_chol",ph:"mg/dL"},
+  {label:"\uD83D\uDD36 Uric",field:"lab_uric",ph:"mg/dL"},
+  {label:"\uD83D\uDC9A HDL",field:"lab_hdl",ph:"mg/dL"},
+  {label:"\u2764\uFE0F LDL",field:"lab_ldl",ph:"mg/dL"},
+  {label:"\uD83D\uDCA7 Creat",field:"lab_creat",ph:"mg/dL"},
+  {label:"\uD83D\uDCA7 eGFR",field:"lab_egfr",ph:"mL/min"},
 ];
 
-const EXERCISES = ["rest", "walk", "stretch", "cardio", "weights"];
-
 // --- Helpers ---
-const dayN = (d) => Math.max(1, Math.floor(((d || new Date()) - DAY1) / 864e5) + 1);
-const todayISO = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; };
-const dateISO = (d) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
-const fmtShort = (d) => (d || new Date()).toLocaleDateString("en-US", { day: "numeric", month: "short" });
-const pctCh = (s, c) => (c != null && s ? ((c - s) / Math.abs(s) * 100).toFixed(1) : null);
-const fmtPct = (v) => { if (v == null) return null; return `${parseFloat(v) > 0 ? "+" : ""}${v}%`; };
+const dayN=(d)=>Math.max(1,Math.floor(((d||new Date())-DAY1)/864e5)+1);
+const todayISO=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`};
+const dateISO=(d)=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+const fmtShort=(d)=>(d||new Date()).toLocaleDateString("en-US",{day:"numeric",month:"short"});
+const pctCh=(s,c)=>(c!=null&&s?((c-s)/Math.abs(s)*100).toFixed(1):null);
+const fmtPct=(v)=>{if(v==null)return null;return `${parseFloat(v)>0?"+":""}${v}%`};
 
-// Get current week's dates (Mon-Sun)
-function getWeekDates(refDate) {
-  const d = refDate ? new Date(refDate) : new Date();
-  const day = d.getDay();
-  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-  const mon = new Date(d);
-  mon.setDate(diff);
-  const dates = [];
-  for (let i = 0; i < 7; i++) {
-    const dd = new Date(mon);
-    dd.setDate(mon.getDate() + i);
-    dates.push(dateISO(dd));
-  }
-  return dates;
+function getWeekDates(ref){
+  const d=ref?new Date(ref):new Date();const dy=d.getDay();
+  const diff=d.getDate()-dy+(dy===0?-6:1);const mon=new Date(d);mon.setDate(diff);
+  const dates=[];for(let i=0;i<7;i++){const dd=new Date(mon);dd.setDate(mon.getDate()+i);dates.push(dateISO(dd))}return dates;
 }
+function calcIF(m1t,mLast){
+  if(!m1t||!mLast)return{display:"--:--",hours:0};
+  const[h1,mn1]=m1t.split(":").map(Number);const[h2,mn2]=mLast.split(":").map(Number);
+  if(isNaN(h1)||isNaN(h2))return{display:"--:--",hours:0};
+  const eat=(h2*60+(mn2||0))-(h1*60+(mn1||0));if(eat<=0)return{display:"--:--",hours:0};
+  const f=24-Math.round(eat/60);return{display:`${f}:${Math.round(eat/60)}`,hours:f};
+}
+function getDayScore(wd){
+  if(!wd)return null;
+  const has=wd.glucFast||wd.berb||wd.fish||wd.act||wd.moveAfter||wd.noSweet||wd.fiberFirst||wd.water||wd.sleep||wd.mag||wd.d3k2||wd.m1t||wd.mLast;
+  if(!has)return null;let b=0,x=0;
+  if(wd.noSweet)b+=18;if(wd.berb==="x2")b+=15;else if(wd.berb==="x1")b+=7;
+  if(wd.sleep==="7+"||wd.sleep==="8+")b+=14;else if(wd.sleep==="<7")b+=7;
+  if(wd.fish==="x3")b+=10;else if(wd.fish==="x2")b+=6;else if(wd.fish==="x1")b+=3;
+  if(wd.act&&wd.act!=="none"&&wd.act!=="0"&&wd.act!==""){b+=5;if(wd.act==="weights")x+=10;else if(wd.act==="cardio"||wd.act==="swim")x+=5;}
+  if(wd.moveAfter==="x3")b+=8;else if(wd.moveAfter==="x2")b+=6;else if(wd.moveAfter==="x1")b+=3;
+  if(wd.m1t&&wd.mLast){const{hours}=calcIF(wd.m1t,wd.mLast);if(hours>=16){b+=8;x+=5}else if(hours>=15){b+=8;x+=2}else if(hours>=14)b+=8;else if(hours>=13)b+=4}
+  if(wd.fiberFirst)b+=7;if(wd.water)b+=5;if(wd.mag&&wd.mag!=="0")b+=5;if(wd.d3k2&&wd.d3k2!=="0")b+=5;
+  if(wd.probio)x+=2;if(wd.brazil)x+=2;if(wd.basil)x+=2;
+  return{base:b,bonus:x,total:b+x};
+}
+function gridDisplay(f,v){if(["fiberFirst","noSweet","water","probio","basil","brazil"].includes(f))return v?"\u2713":"";if(f==="sleep")return v||"";if(!v||v==="0")return"";return v}
+function gridIsOn(f,v){if(["fiberFirst","noSweet","water","probio","basil","brazil"].includes(f))return!!v;if(f==="sleep")return!!v&&v!=="";return v&&v!=="0"&&v!==""}
 
-function calcIF(m1t, mLast) {
-  if (!m1t || !mLast) return { display: "--:--", hours: 0 };
-  const [h1, mn1] = m1t.split(":").map(Number);
-  const [h2, mn2] = mLast.split(":").map(Number);
-  if (isNaN(h1) || isNaN(h2)) return { display: "--:--", hours: 0 };
-  const eat = (h2 * 60 + (mn2 || 0)) - (h1 * 60 + (mn1 || 0));
-  if (eat <= 0) return { display: "--:--", hours: 0 };
-  const f = 24 - Math.round(eat / 60);
-  return { display: `${f}:${Math.round(eat / 60)}`, hours: f };
-}
-
-function getDayScore(wd) {
-  if (!wd) return null;
-  const has = wd.glucFast || wd.berb || wd.fish || wd.act || wd.moveAfter || wd.noSweet || wd.fiberFirst || wd.water || wd.sleep || wd.mag || wd.d3k2 || wd.m1t || wd.mLast;
-  if (!has) return null;
-  let b = 0, x = 0;
-  if (wd.noSweet) b += 18;
-  if (wd.berb === "x2") b += 15; else if (wd.berb === "x1") b += 7;
-  if (wd.sleep === "7+" || wd.sleep === "8+") b += 14; else if (wd.sleep === "<7") b += 7;
-  if (wd.fish === "x3") b += 10; else if (wd.fish === "x2") b += 6; else if (wd.fish === "x1") b += 3;
-  if (wd.act && wd.act !== "none" && wd.act !== "0" && wd.act !== "") { b += 5; if (wd.act === "weights") x += 10; else if (wd.act === "cardio" || wd.act === "swim") x += 5; }
-  if (wd.moveAfter === "x3") b += 8; else if (wd.moveAfter === "x2") b += 6; else if (wd.moveAfter === "x1") b += 3;
-  if (wd.m1t && wd.mLast) { const { hours } = calcIF(wd.m1t, wd.mLast); if (hours >= 16) { b += 8; x += 5; } else if (hours >= 15) { b += 8; x += 2; } else if (hours >= 14) b += 8; else if (hours >= 13) b += 4; }
-  if (wd.fiberFirst) b += 7;
-  if (wd.water) b += 5;
-  if (wd.mag && wd.mag !== "0") b += 5;
-  if (wd.d3k2 && wd.d3k2 !== "0") b += 5;
-  if (wd.probio) x += 2;
-  if (wd.brazil) x += 2;
-  if (wd.basil) x += 2;
-  return { base: b, bonus: x, total: b + x };
-}
-
-function gridDisplay(field, val) {
-  if (["fiberFirst", "noSweet", "water", "probio", "basil", "brazil"].includes(field)) return val ? "\u2713" : "";
-  if (field === "sleep") return val || "";
-  if (!val || val === "0") return "";
-  return val;
-}
-function gridIsOn(field, val) {
-  if (["fiberFirst", "noSweet", "water", "probio", "basil", "brazil"].includes(field)) return !!val;
-  if (field === "sleep") return !!val && val !== "";
-  return val && val !== "0" && val !== "";
+// Score bar color - gradient based on score
+function scoreBarColor(tot){
+  if(tot>=90)return t.accent;if(tot>=70)return"rgba(74,122,80,0.85)";if(tot>=50)return"rgba(74,122,80,0.6)";if(tot>=30)return"rgba(74,122,80,0.4)";if(tot>0)return"rgba(74,122,80,0.25)";return"transparent";
 }
 
 // --- API ---
-async function apiLoad() {
-  try { const r = await fetch(`${API}?action=load&t=${Date.now()}`); if (!r.ok) throw new Error(r.status); return await r.json(); } catch (e) { console.error("Load:", e); return null; }
-}
-let _saveTimer = null;
-function apiSave(date, data) {
-  clearTimeout(_saveTimer);
-  _saveTimer = setTimeout(async () => {
-    try { await fetch(API, { method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ action: "saveDay", date, data }) }); } catch (e) { console.error("Save:", e); }
-  }, 2000);
-}
+async function apiLoad(){try{const r=await fetch(`${API}?action=load&t=${Date.now()}`);if(!r.ok)throw new Error(r.status);return await r.json()}catch(e){console.error("Load:",e);return null}}
+let _st=null;
+function apiSave(date,data,action="saveDay"){clearTimeout(_st);_st=setTimeout(async()=>{try{await fetch(API,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({action,date,data})})}catch(e){console.error("Save:",e)}},2000)}
 
 // --- HOME ---
-function HomeTab({ D, loading, setTab }) {
-  const day = dayN();
-  const today = todayISO();
-  const dates = Object.keys(D).sort();
-  const todayD = D[today] || {};
-  const todayLogged = !!(todayD.glucFast || todayD.berb || todayD.fish || todayD.noSweet || todayD.moveAfter || todayD.act);
+function HomeTab({D,loading,setTab}){
+  const day=dayN();const today=todayISO();const dates=Object.keys(D).sort();
+  const todayD=D[today]||{};const todayLogged=!!(todayD.glucFast||todayD.berb||todayD.fish||todayD.noSweet||todayD.moveAfter||todayD.act);
+  const findLatest=(key)=>{for(let i=dates.length-1;i>=0;i--){const v=parseFloat(D[dates[i]]?.[key]);if(!isNaN(v))return v}return NaN};
+  const gv=findLatest("glucFast"),tv=findLatest("lab_trig"),wv=findLatest("body_weight");
+  let streak=0;for(let i=dates.length-1;i>=0;i--){const r=D[dates[i]];if(r&&(r.glucFast||r.berb||r.noSweet))streak++;else break}
+  const sc=getDayScore(todayD);const total=sc?sc.total:0;
+  const weekDates=getWeekDates();const dn=["M","T","W","T","F","S","S"];
+  const wkScores=weekDates.map(d=>getDayScore(D[d]));
+  // Glucose: build M-S axis, only plot days that have data
+  const gAll=weekDates.map((d,i)=>{const v=D[d]?.glucFast?parseFloat(D[d].glucFast):NaN;return{d:dn[i],v,idx:i,hasData:!isNaN(v)}});
+  const gEntries=gAll.filter(e=>e.hasData);
 
-  // Latest values (search backwards)
-  const findLatest = (key) => { for (let i = dates.length - 1; i >= 0; i--) { const v = parseFloat(D[dates[i]]?.[key]); if (!isNaN(v)) return v; } return NaN; };
-  const gv = findLatest("glucFast");
-  const tv = findLatest("lab_trig");
-  const wv = findLatest("body_weight");
-
-  let streak = 0;
-  for (let i = dates.length - 1; i >= 0; i--) { const r = D[dates[i]]; if (r && (r.glucFast || r.berb || r.noSweet)) streak++; else break; }
-
-  const sc = getDayScore(todayD);
-  const total = sc ? sc.total : 0;
-
-  // This week's dates (Mon-Sun) for bars and glucose
-  const weekDates = getWeekDates();
-  const dn = ["M", "T", "W", "T", "F", "S", "S"];
-  const wkScores = weekDates.map(d => getDayScore(D[d]));
-
-  // Glucose entries for this week (all days that have data, not just today)
-  const gEntries = weekDates.filter(d => D[d]?.glucFast).map(d => ({
-    v: parseFloat(D[d].glucFast),
-    d: dn[weekDates.indexOf(d)]
-  })).filter(e => !isNaN(e.v));
-
-  return (
-    <div style={{ padding: "14px 16px 90px", fontFamily: "'DM Sans',sans-serif" }}>
-      {/* Day + date + B3 log button */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-        <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
-          <span style={{ fontSize: 24, fontWeight: 300, color: t.text, letterSpacing: "-0.03em" }}>{loading ? "..." : `Day ${day}`}</span>
-          <span style={{ fontSize: 13, color: t.muted }}>{fmtShort()}</span>
+  return(
+    <div style={{padding:"14px 16px 90px",fontFamily:"'DM Sans',sans-serif"}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+        <div style={{display:"flex",alignItems:"baseline",gap:10}}>
+          <span style={{fontSize:24,fontWeight:300,color:t.text,letterSpacing:"-0.03em"}}>{loading?"...": `Day ${day}`}</span>
+          <span style={{fontSize:13,color:t.muted}}>{fmtShort()}</span>
         </div>
-        {!todayLogged && !loading ? (
-          <div onClick={() => setTab("log")} style={{ display: "flex", alignItems: "center", gap: 5, background: t.accent, color: "#fff", padding: "6px 14px", borderRadius: 50, fontSize: 11, fontWeight: 600, cursor: "pointer", boxShadow: t.shOn }}>
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
-            Log
+        {!todayLogged&&!loading?(
+          <div onClick={()=>setTab("log")} style={{display:"flex",alignItems:"center",gap:5,background:t.accent,color:"#fff",padding:"6px 14px",borderRadius:50,fontSize:11,fontWeight:600,cursor:"pointer",boxShadow:t.shOn}}>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Log
           </div>
-        ) : (
-          <span style={{ fontSize: 13, color: t.accent, fontWeight: 600 }}>{streak > 0 && `\uD83D\uDD25 ${streak}`}</span>
-        )}
+        ):(<span style={{fontSize:13,color:t.accent,fontWeight:600}}>{streak>0&&`\uD83D\uDD25 ${streak}`}</span>)}
       </div>
 
-      {/* 3 metric boxes with amber dot on empty */}
-      <div style={{ display: "flex", gap: 8, marginBottom: 14 }}>
-        {[
-          { label: "Glucose", value: !isNaN(gv) ? gv : "--", unit: "mg/dL", change: !isNaN(gv) ? fmtPct(pctCh(TARGETS.glucose.s, gv)) : null, empty: isNaN(gv) },
-          { label: "Trig", value: !isNaN(tv) ? tv : "--", unit: "mg/dL", change: !isNaN(tv) ? fmtPct(pctCh(TARGETS.trig.s, tv)) : null, empty: isNaN(tv) },
-          { label: "Weight", value: !isNaN(wv) ? wv : "--", unit: "kg", change: !isNaN(wv) ? fmtPct(pctCh(TARGETS.weight.s, wv)) : null, empty: isNaN(wv) },
-        ].map((m, i) => (
-          <div key={i} style={{ flex: 1, background: t.card, borderRadius: 16, padding: "14px 10px", boxShadow: t.csh, textAlign: "center", position: "relative" }}>
-            {m.empty && <div style={{ position: "absolute", top: 8, right: 8, width: 6, height: 6, borderRadius: "50%", background: t.warn }} />}
-            <div style={{ fontSize: 11, color: t.muted, marginBottom: 4 }}>{m.label}</div>
-            <div style={{ fontSize: 30, fontWeight: 200, color: m.empty ? t.light : t.text, letterSpacing: "-0.04em", lineHeight: 1 }}>{m.value}</div>
-            <div style={{ fontSize: 10, color: t.muted, marginTop: 3 }}>{m.unit}</div>
-            {m.change && <div style={{ fontSize: 11, color: t.accent, fontWeight: 600, marginTop: 4 }}>{m.change}</div>}
+      {/* Metric boxes - bold black */}
+      <div style={{display:"flex",gap:8,marginBottom:14}}>
+        {[{label:"Glucose",value:!isNaN(gv)?gv:"--",unit:"mg/dL",change:!isNaN(gv)?fmtPct(pctCh(TARGETS.glucose.s,gv)):null,empty:isNaN(gv)},{label:"Trig",value:!isNaN(tv)?tv:"--",unit:"mg/dL",change:!isNaN(tv)?fmtPct(pctCh(TARGETS.trig.s,tv)):null,empty:isNaN(tv)},{label:"Weight",value:!isNaN(wv)?wv:"--",unit:"kg",change:!isNaN(wv)?fmtPct(pctCh(TARGETS.weight.s,wv)):null,empty:isNaN(wv)}].map((m,i)=>(
+          <div key={i} style={{flex:1,background:t.card,borderRadius:16,padding:"14px 10px",boxShadow:t.csh,textAlign:"center",position:"relative"}}>
+            {m.empty&&<div style={{position:"absolute",top:8,right:8,width:6,height:6,borderRadius:"50%",background:t.warn}}/>}
+            <div style={{fontSize:11,color:t.muted,marginBottom:4}}>{m.label}</div>
+            <div style={{fontSize:28,fontWeight:700,color:m.empty?t.light:t.text,letterSpacing:"-0.04em",lineHeight:1}}>{m.value}</div>
+            <div style={{fontSize:10,color:t.muted,marginTop:3}}>{m.unit}</div>
+            {m.change&&<div style={{fontSize:11,color:t.accent,fontWeight:600,marginTop:4}}>{m.change}</div>}
           </div>
         ))}
       </div>
 
-      {/* Today Score + Week bars */}
-      <div style={{ background: t.card, borderRadius: 16, padding: "16px 18px", marginBottom: 14, boxShadow: t.csh }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 14 }}>
-          <div style={{ fontSize: 36, fontWeight: 200, color: sc ? t.text : t.light, letterSpacing: "-0.04em", lineHeight: 1 }}>{sc ? total : "--"}</div>
-          <div style={{ flex: 1 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
-              <span style={{ fontSize: 12, color: t.muted }}>Today Score</span>
-              <span style={{ fontSize: 12, color: t.accent, fontWeight: 600 }}>{total}/100+</span>
+      {/* Score + week bars with gradient */}
+      <div style={{background:t.card,borderRadius:16,padding:"16px 18px",marginBottom:14,boxShadow:t.csh}}>
+        <div style={{display:"flex",alignItems:"center",gap:14,marginBottom:14}}>
+          <div style={{fontSize:36,fontWeight:200,color:sc?t.text:t.light,letterSpacing:"-0.04em",lineHeight:1}}>{sc?total:"--"}</div>
+          <div style={{flex:1}}>
+            <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}>
+              <span style={{fontSize:12,color:t.muted}}>Today Score</span>
+              <span style={{fontSize:12,color:t.accent,fontWeight:600}}>{total}/100+</span>
             </div>
-            <div style={{ height: 5, borderRadius: 3, background: t.tile, overflow: "hidden" }}>
-              <div style={{ width: `${Math.min(100, total)}%`, height: "100%", borderRadius: 3, background: t.accent, transition: "width 0.4s" }} />
+            <div style={{height:5,borderRadius:3,background:t.tile,overflow:"hidden"}}>
+              <div style={{width:`${Math.min(100,total)}%`,height:"100%",borderRadius:3,background:t.accent,transition:"width 0.4s"}}/>
             </div>
           </div>
         </div>
-        {!todayLogged && !loading && <div style={{ fontSize: 11, color: t.warn, marginBottom: 10 }}>No data logged today</div>}
-        <div style={{ borderTop: `1px solid ${t.tile}`, paddingTop: 12 }}>
-          <div style={{ display: "flex", justifyContent: "space-between" }}>
-            {wkScores.map((s, i) => {
-              const tot = s ? s.total : 0;
-              const h = tot > 0 ? Math.max(8, Math.round(tot * 0.3)) : 5;
-              const isToday = weekDates[i] === today;
-              // Color density based on score
-              let col = "transparent";
-              if (tot >= 80) col = t.accent;
-              else if (tot >= 60) col = "rgba(74,122,80,0.7)";
-              else if (tot >= 40) col = "rgba(74,122,80,0.45)";
-              else if (tot > 0) col = "rgba(74,122,80,0.25)";
-              return (
-                <div key={i} style={{ textAlign: "center", flex: 1 }}>
-                  <div style={{ width: 24, height: 36, borderRadius: 7, margin: "0 auto 3px", background: t.tile, display: "flex", alignItems: "flex-end", justifyContent: "center", overflow: "hidden", boxShadow: tot > 0 ? t.sh : "none" }}>
-                    <div style={{ width: "100%", height: h, borderRadius: "4px 4px 0 0", background: col }} />
-                  </div>
-                  <div style={{ fontSize: 10, color: isToday ? t.accent : (tot > 0 ? t.muted : "#ccc"), fontWeight: isToday ? 700 : 400 }}>{dn[i]}</div>
+        {!todayLogged&&!loading&&<div style={{fontSize:11,color:t.warn,marginBottom:10}}>No data logged today</div>}
+        <div style={{borderTop:`1px solid ${t.tile}`,paddingTop:12}}>
+          <div style={{display:"flex",justifyContent:"space-between"}}>
+            {wkScores.map((s,i)=>{const tot=s?s.total:0;const h=tot>0?Math.max(8,Math.round(tot*0.3)):5;const isToday=weekDates[i]===today;
+              return(<div key={i} style={{textAlign:"center",flex:1}}>
+                <div style={{width:24,height:36,borderRadius:7,margin:"0 auto 3px",background:t.tile,display:"flex",alignItems:"flex-end",justifyContent:"center",overflow:"hidden",boxShadow:tot>0?t.sh:"none"}}>
+                  <div style={{width:"100%",height:h,borderRadius:"4px 4px 0 0",background:scoreBarColor(tot)}}/>
                 </div>
-              );
-            })}
+                <div style={{fontSize:10,color:isToday?t.accent:(tot>0?t.muted:"#ccc"),fontWeight:isToday?700:400}}>{dn[i]}</div>
+              </div>)})}
           </div>
         </div>
       </div>
 
-      {/* Glucose trend - this week's data */}
-      <div style={{ background: t.card, borderRadius: 16, padding: "16px 18px", boxShadow: t.csh }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8 }}>
-          <span style={{ fontSize: 12, color: t.muted }}>Fasting Glucose Trend</span>
-          <span style={{ fontSize: 11, color: t.accent, fontWeight: 600 }}>{gEntries.length >= 2 ? `This week` : "This week"}</span>
+      {/* Glucose trend with full M-S axis */}
+      <div style={{background:t.card,borderRadius:16,padding:"16px 18px",boxShadow:t.csh}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:8}}>
+          <span style={{fontSize:12,color:t.muted}}>Fasting Glucose Trend</span>
+          <span style={{fontSize:11,color:t.accent,fontWeight:600}}>This week</span>
         </div>
-        {gEntries.length >= 2 ? (() => {
-          const vals = gEntries.map(e => e.v);
-          const mn = Math.min(...vals) - 10, mx = Math.max(...vals) + 10, w = 260, h = 55;
-          const pts = vals.map((v, i) => ({ x: (i / (vals.length - 1)) * w, y: h - ((v - mn) / (mx - mn)) * h, v }));
-          const line = pts.map((p, i) => `${i === 0 ? "M" : "L"}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");
-          const area = `${line} L${w},${h} L0,${h} Z`;
-          return (
-            <div>
-              <svg width="100%" viewBox={`0 0 ${w} ${h + 12}`} style={{ display: "block", overflow: "visible" }}>
-                <defs><linearGradient id="gfill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={t.accent} stopOpacity="0.3" /><stop offset="100%" stopColor={t.accent} stopOpacity="0" /></linearGradient></defs>
-                <path d={area} fill="url(#gfill)" />
-                <path d={line} fill="none" stroke={t.accent} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                {pts.map((p, i) => (<circle key={i} cx={p.x} cy={p.y} r={i === vals.length - 1 ? 5 : 3} fill={i === vals.length - 1 ? t.accent : t.dotFill} stroke={t.accent} strokeWidth={i === vals.length - 1 ? 2.5 : 1.5} />))}
-                <text x={pts[pts.length - 1].x} y={pts[pts.length - 1].y - 9} textAnchor="middle" fontSize="11" fontWeight="700" fill={t.accent} fontFamily="DM Sans,sans-serif">{vals[vals.length - 1]}</text>
-              </svg>
-              <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4 }}>
-                {gEntries.map((e, i) => (<div key={i} style={{ flex: 1, textAlign: "center", fontSize: 10, color: i === gEntries.length - 1 ? t.accent : t.muted, fontWeight: i === gEntries.length - 1 ? 600 : 400 }}>{e.d}</div>))}
-              </div>
+        {gEntries.length>=2?(()=>{
+          const vals=gEntries.map(e=>e.v);const mn=Math.min(...vals)-10,mx=Math.max(...vals)+10;
+          const w=260,h=55;
+          // Map to x positions based on weekday index (0-6 for M-S)
+          const pts=gEntries.map(e=>({x:(e.idx/6)*w,y:h-((e.v-mn)/(mx-mn))*h,v:e.v}));
+          const line=pts.map((p,i)=>`${i===0?"M":"L"}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");
+          const area=`${line} L${pts[pts.length-1].x},${h} L${pts[0].x},${h} Z`;
+          return(<div>
+            <svg width="100%" viewBox={`0 0 ${w} ${h+12}`} style={{display:"block",overflow:"visible"}}>
+              <defs><linearGradient id="gfill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={t.accent} stopOpacity="0.3"/><stop offset="100%" stopColor={t.accent} stopOpacity="0"/></linearGradient></defs>
+              <path d={area} fill="url(#gfill)"/>
+              <path d={line} fill="none" stroke={t.accent} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+              {pts.map((p,i)=>(<circle key={i} cx={p.x} cy={p.y} r={i===pts.length-1?5:3} fill={i===pts.length-1?t.accent:t.dotFill} stroke={t.accent} strokeWidth={i===pts.length-1?2.5:1.5}/>))}
+              <text x={pts[pts.length-1].x} y={pts[pts.length-1].y-9} textAnchor="middle" fontSize="11" fontWeight="700" fill={t.accent} fontFamily="DM Sans,sans-serif">{vals[vals.length-1]}</text>
+            </svg>
+            <div style={{display:"flex",justifyContent:"space-between",marginTop:4}}>
+              {dn.map((d,i)=>{const hasData=gEntries.some(e=>e.idx===i);return(<div key={i} style={{flex:1,textAlign:"center",fontSize:10,color:hasData?t.accent:t.light,fontWeight:hasData?600:400}}>{d}</div>)})}
             </div>
-          );
-        })() : (
-          <div style={{ padding: "24px 0", textAlign: "center", fontSize: 13, color: t.muted }}>{loading ? "Loading..." : "Log glucose to see the trend"}</div>
+          </div>);
+        })():(
+          <div style={{padding:"24px 0",textAlign:"center",fontSize:13,color:t.muted}}>{loading?"Loading...":"Log glucose to see the trend"}</div>
         )}
       </div>
     </div>
   );
 }
 
-// --- LOG (with date picker for backlogging) ---
-function LogTab({ D, setD }) {
-  const [selDate, setSelDate] = useState(todayISO());
-  const today = todayISO();
-  const isToday = selDate === today;
-  const selDayNum = dayN(new Date(selDate + "T00:00:00"));
-  const wd = D[selDate] || {};
-
-  const up = (f, v) => {
-    setD(p => {
-      const u = { ...p, [selDate]: { ...(p[selDate] || {}), [f]: v } };
-      apiSave(selDate, u[selDate]);
-      return u;
-    });
+// --- LOG (with date picker, body, lab) ---
+function LogTab({D,setD}){
+  const[selDate,setSelDate]=useState(todayISO());
+  const[showBody,setShowBody]=useState(false);
+  const[showLab,setShowLab]=useState(false);
+  const today=todayISO();const isToday=selDate===today;
+  const selDayNum=dayN(new Date(selDate+"T00:00:00"));
+  const wd=D[selDate]||{};
+  const up=(f,v)=>{setD(p=>{const u={...p,[selDate]:{...(p[selDate]||{}),[f]:v}};apiSave(selDate,u[selDate]);return u})};
+  const upBody=(f,v)=>{
+    setD(p=>{const u={...p,[selDate]:{...(p[selDate]||{}),[f]:v}};return u});
+    // Collect all body_ fields for this date and save
+    setTimeout(()=>{
+      const bd={};BODY_ROWS.forEach(r=>{const val=D[selDate]?.[r.field]||(r.field===f?v:"");if(val)bd[r.field.replace("body_","")]=val});
+      apiSave(selDate,bd,"saveBody");
+    },100);
   };
-
-  // Date navigation
-  const shiftDate = (dir) => {
-    const d = new Date(selDate + "T00:00:00");
-    d.setDate(d.getDate() + dir);
-    const iso = dateISO(d);
-    // Don't go before Day 1 or after today
-    if (d < DAY1 || iso > today) return;
-    setSelDate(iso);
+  const upLab=(f,v)=>{
+    setD(p=>{const u={...p,[selDate]:{...(p[selDate]||{}),[f]:v}};return u});
+    setTimeout(()=>{
+      const ld={};LAB_ROWS.forEach(r=>{const val=D[selDate]?.[r.field]||(r.field===f?v:"");if(val)ld[r.field]=val});
+      apiSave(selDate,ld,"saveLab");
+    },100);
   };
+  const shiftDate=(dir)=>{const d=new Date(selDate+"T00:00:00");d.setDate(d.getDate()+dir);const iso=dateISO(d);if(d<DAY1||iso>today)return;setSelDate(iso)};
+  const{display:ifDisp}=calcIF(wd.m1t,wd.mLast);const ifOn=ifDisp!=="--:--";
+  const[saved,setSaved]=useState(false);const[saving,setSaving]=useState(false);
+  const handleSave=async()=>{setSaving(true);const payload={...(D[selDate]||{})};if(!payload.act||payload.act==="")payload.act="none";try{await fetch(API,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({action:"saveDay",date:selDate,data:payload})});setSaved(true);setTimeout(()=>setSaved(false),2500)}catch(e){console.error(e)}setSaving(false)};
+  const sc=getDayScore(wd);
+  const cellStyle={width:"100%",padding:"12px 6px",borderRadius:12,border:"none",fontSize:18,fontWeight:300,textAlign:"center",color:t.text,fontFamily:"'DM Sans',sans-serif",background:t.tile,outline:"none",boxSizing:"border-box",boxShadow:t.sh,height:48};
+  const miniInput={width:"100%",padding:"8px 4px",borderRadius:10,border:"none",fontSize:14,fontWeight:400,textAlign:"center",color:t.text,fontFamily:"'DM Sans',sans-serif",background:t.tile,outline:"none",boxSizing:"border-box",boxShadow:t.sh};
 
-  const { display: ifDisp, hours: ifH } = calcIF(wd.m1t, wd.mLast);
-  const ifOn = ifDisp !== "--:--";
-
-  const [saved, setSaved] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const handleSave = async () => {
-    setSaving(true);
-    const payload = { ...(D[selDate] || {}) };
-    if (!payload.act || payload.act === "") payload.act = "none";
-    try { await fetch(API, { method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ action: "saveDay", date: selDate, data: payload }) }); setSaved(true); setTimeout(() => setSaved(false), 2500); } catch (e) { console.error(e); }
-    setSaving(false);
-  };
-
-  const sc = getDayScore(wd);
-
-  const cellStyle = {
-    width: "100%", padding: "12px 6px", borderRadius: 12, border: "none",
-    fontSize: 18, fontWeight: 300, textAlign: "center", color: t.text,
-    fontFamily: "'DM Sans',sans-serif", background: t.tile, outline: "none",
-    boxSizing: "border-box", boxShadow: t.sh, height: 48,
-  };
-
-  return (
-    <div style={{ padding: "14px 14px 90px", fontFamily: "'DM Sans',sans-serif" }}>
-      {/* Date picker header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0 4px", marginBottom: 12 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div onClick={() => shiftDate(-1)} style={{ width: 30, height: 30, borderRadius: 50, background: t.tile, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: t.sh, fontSize: 14, color: t.text }}>
-            {"<"}
-          </div>
-          <div style={{ textAlign: "center" }}>
-            <span style={{ fontSize: 18, fontWeight: 300, color: t.text }}>{isToday ? "Today" : fmtShort(new Date(selDate + "T00:00:00"))}</span>
-            {!isToday && <div style={{ fontSize: 10, color: t.warn, fontWeight: 600 }}>Backlog</div>}
-          </div>
-          <div onClick={() => shiftDate(1)} style={{ width: 30, height: 30, borderRadius: 50, background: selDate >= today ? t.tile : t.tile, display: "flex", alignItems: "center", justifyContent: "center", cursor: selDate >= today ? "default" : "pointer", boxShadow: t.sh, fontSize: 14, color: selDate >= today ? t.light : t.text, opacity: selDate >= today ? 0.4 : 1 }}>
-            {">"}
-          </div>
+  return(
+    <div style={{padding:"14px 14px 90px",fontFamily:"'DM Sans',sans-serif"}}>
+      {/* Date picker */}
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"0 4px",marginBottom:12}}>
+        <div style={{display:"flex",alignItems:"center",gap:10}}>
+          <div onClick={()=>shiftDate(-1)} style={{width:30,height:30,borderRadius:50,background:t.tile,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",boxShadow:t.sh,fontSize:14,color:t.text}}>{"<"}</div>
+          <div style={{textAlign:"center"}}><span style={{fontSize:18,fontWeight:300,color:t.text}}>{isToday?"Today":fmtShort(new Date(selDate+"T00:00:00"))}</span>{!isToday&&<div style={{fontSize:10,color:t.warn,fontWeight:600}}>Backlog</div>}</div>
+          <div onClick={()=>shiftDate(1)} style={{width:30,height:30,borderRadius:50,background:t.tile,display:"flex",alignItems:"center",justifyContent:"center",cursor:selDate>=today?"default":"pointer",boxShadow:t.sh,fontSize:14,color:selDate>=today?t.light:t.text,opacity:selDate>=today?0.4:1}}>{">"}</div>
         </div>
-        <div style={{ textAlign: "right" }}>
-          <span style={{ fontSize: 12, color: t.accent, fontWeight: 600 }}>Day {selDayNum}</span>
-          {!isToday && <div onClick={() => setSelDate(today)} style={{ fontSize: 10, color: t.accent, cursor: "pointer", textDecoration: "underline" }}>Back to today</div>}
-        </div>
+        <div style={{textAlign:"right"}}><span style={{fontSize:12,color:t.accent,fontWeight:600}}>Day {selDayNum}</span>{!isToday&&<div onClick={()=>setSelDate(today)} style={{fontSize:10,color:t.accent,cursor:"pointer",textDecoration:"underline"}}>Back to today</div>}</div>
       </div>
 
       {/* Glucose + Meals + IF */}
-      <div style={{ background: t.card, borderRadius: 20, padding: 18, marginBottom: 10, boxShadow: t.csh }}>
-        <div style={{ display: "flex", gap: 8, marginBottom: 14 }}>
-          {[
-            ["\uD83E\uDE78", "Fasting", "glucFast"],
-            ["\uD83C\uDF7D\uFE0F", "Post-meal", "glucPost"],
-            ["\uD83C\uDF19", "Night", "glucNight"],
-          ].map(([icon, label, field], i) => (
-            <div key={i} style={{ flex: 1, textAlign: "center" }}>
-              <div style={{ fontSize: 10, color: t.muted, marginBottom: 4 }}>{icon} {label}</div>
-              <input inputMode="decimal" placeholder="-" value={wd[field] || ""} onChange={e => up(field, e.target.value)} style={cellStyle} />
-            </div>
+      <div style={{background:t.card,borderRadius:20,padding:18,marginBottom:10,boxShadow:t.csh}}>
+        <div style={{display:"flex",gap:8,marginBottom:14}}>
+          {[["\uD83E\uDE78","Fasting","glucFast"],["\uD83C\uDF7D\uFE0F","Post-meal","glucPost"],["\uD83C\uDF19","Night","glucNight"]].map(([icon,label,field],i)=>(
+            <div key={i} style={{flex:1,textAlign:"center"}}><div style={{fontSize:10,color:t.muted,marginBottom:4}}>{icon} {label}</div><input inputMode="decimal" placeholder="-" value={wd[field]||""} onChange={e=>up(field,e.target.value)} style={cellStyle}/></div>
           ))}
         </div>
-        <div style={{ display: "flex", gap: 8 }}>
-          {[
-            ["\uD83C\uDF73", "First meal", "m1t"],
-            ["\uD83C\uDF05", "Last meal", "mLast"],
-          ].map(([icon, label, field], i) => (
-            <div key={i} style={{ flex: 1, textAlign: "center" }}>
-              <div style={{ fontSize: 10, color: t.muted, marginBottom: 4 }}>{icon} {label}</div>
-              <input type="time" value={wd[field] || ""} onChange={e => up(field, e.target.value)} style={{ ...cellStyle, fontSize: 16 }} />
-            </div>
+        <div style={{display:"flex",gap:8}}>
+          {[["\uD83C\uDF73","First meal","m1t"],["\uD83C\uDF05","Last meal","mLast"]].map(([icon,label,field],i)=>(
+            <div key={i} style={{flex:1,textAlign:"center"}}><div style={{fontSize:10,color:t.muted,marginBottom:4}}>{icon} {label}</div><input type="time" value={wd[field]||""} onChange={e=>up(field,e.target.value)} style={{...cellStyle,fontSize:16}}/></div>
           ))}
-          <div style={{ flex: 1, textAlign: "center" }}>
-            <div style={{ fontSize: 10, color: t.muted, marginBottom: 4 }}>{"\u23F1\uFE0F"} IF ratio</div>
-            <div style={{
-              ...cellStyle, display: "flex", alignItems: "center", justifyContent: "center",
-              color: ifOn ? t.accent : t.muted,
-              background: ifOn ? t.on : t.tile,
-              boxShadow: ifOn ? t.shOn : t.sh,
-              fontWeight: ifOn ? 500 : 300,
-            }}>{ifDisp}</div>
-          </div>
+          <div style={{flex:1,textAlign:"center"}}><div style={{fontSize:10,color:t.muted,marginBottom:4}}>{"\u23F1\uFE0F"} IF</div><div style={{...cellStyle,display:"flex",alignItems:"center",justifyContent:"center",color:ifOn?t.accent:t.muted,background:ifOn?t.on:t.tile,boxShadow:ifOn?t.shOn:t.sh,fontWeight:ifOn?500:300}}>{ifDisp}</div></div>
         </div>
       </div>
 
-      {/* Cycling supplement grid */}
-      <div style={{ background: t.card, borderRadius: 20, padding: 18, marginBottom: 10, boxShadow: t.csh }}>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
-          {GRID.map(item => {
-            const val = wd[item.field];
-            const on = gridIsOn(item.field, val);
-            const disp = gridDisplay(item.field, val);
-            const tap = () => { const c = item.cycle; const idx = c.indexOf(val); up(item.field, c[(idx + 1) % c.length]); };
-            return (
-              <div key={item.id} onClick={tap} style={{
-                textAlign: "center", padding: "10px 4px 7px", borderRadius: 14, cursor: "pointer",
-                background: on ? t.on : t.tile, boxShadow: on ? t.shOn : t.sh,
-                transition: "all 0.15s", WebkitTapHighlightColor: "transparent",
-              }}>
-                <div style={{ fontSize: 22, marginBottom: 2 }}>{item.icon}</div>
-                <div style={{ fontSize: 10, color: on ? t.accent : t.muted, fontWeight: 600, lineHeight: 1.1 }}>{item.l}</div>
-                {disp && <div style={{ fontSize: 12, color: t.accent, fontWeight: 700, marginTop: 2, lineHeight: 1 }}>{disp}</div>}
-              </div>
-            );
-          })}
+      {/* Grid */}
+      <div style={{background:t.card,borderRadius:20,padding:18,marginBottom:10,boxShadow:t.csh}}>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(4, 1fr)",gap:8}}>
+          {GRID.map(item=>{const val=wd[item.field];const on=gridIsOn(item.field,val);const disp=gridDisplay(item.field,val);
+            return(<div key={item.id} onClick={()=>{const c=item.cycle;const idx=c.indexOf(val);up(item.field,c[(idx+1)%c.length])}} style={{textAlign:"center",padding:"10px 4px 7px",borderRadius:14,cursor:"pointer",background:on?t.on:t.tile,boxShadow:on?t.shOn:t.sh,transition:"all 0.15s",WebkitTapHighlightColor:"transparent"}}>
+              <div style={{fontSize:22,marginBottom:2}}>{item.icon}</div>
+              <div style={{fontSize:10,color:on?t.accent:t.muted,fontWeight:600,lineHeight:1.1}}>{item.l}</div>
+              {disp&&<div style={{fontSize:12,color:t.accent,fontWeight:700,marginTop:2,lineHeight:1}}>{disp}</div>}
+            </div>)})}
         </div>
       </div>
 
-      {/* Exercise pills */}
-      <div style={{ background: t.card, borderRadius: 20, padding: "14px 18px", marginBottom: 10, boxShadow: t.csh }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-          <span style={{ fontSize: 18 }}>{"\uD83C\uDFCB\uFE0F"}</span>
-          {EXERCISES.map(ex => {
-            const on = wd.act === ex;
-            return (
-              <div key={ex} onClick={() => up("act", on ? "" : ex)} style={{
-                padding: "7px 16px", borderRadius: 20, fontSize: 13, cursor: "pointer",
-                background: on ? t.accent : t.tile, color: on ? "#fff" : t.muted,
-                fontWeight: on ? 600 : 400, boxShadow: on ? t.shOn : t.sh,
-                transition: "all 0.15s", WebkitTapHighlightColor: "transparent",
-                textTransform: "capitalize",
-              }}>{ex}</div>
-            );
-          })}
+      {/* Exercise */}
+      <div style={{background:t.card,borderRadius:20,padding:"14px 18px",marginBottom:10,boxShadow:t.csh}}>
+        <div style={{display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}>
+          <span style={{fontSize:18}}>{"\uD83C\uDFCB\uFE0F"}</span>
+          {EXERCISES.map(ex=>{const on=wd.act===ex;return(<div key={ex} onClick={()=>up("act",on?"":ex)} style={{padding:"7px 16px",borderRadius:20,fontSize:13,cursor:"pointer",background:on?t.accent:t.tile,color:on?"#fff":t.muted,fontWeight:on?600:400,boxShadow:on?t.shOn:t.sh,transition:"all 0.15s",WebkitTapHighlightColor:"transparent",textTransform:"capitalize"}}>{ex}</div>)})}
         </div>
       </div>
 
       {/* Notes */}
-      <div style={{ background: t.card, borderRadius: 20, padding: "14px 18px", marginBottom: 10, boxShadow: t.csh }}>
-        <textarea placeholder={"\uD83D\uDCDD Notes..."} rows={2} value={wd.notes || ""} onChange={e => up("notes", e.target.value)}
-          style={{ width: "100%", padding: "10px 12px", borderRadius: 12, border: "none", fontSize: 13, lineHeight: 1.5, color: t.text, fontFamily: "'DM Sans',sans-serif", background: t.tile, outline: "none", boxSizing: "border-box", boxShadow: t.sh, resize: "none" }} />
+      <div style={{background:t.card,borderRadius:20,padding:"14px 18px",marginBottom:10,boxShadow:t.csh}}>
+        <textarea placeholder={"\uD83D\uDCDD Notes..."} rows={2} value={wd.notes||""} onChange={e=>up("notes",e.target.value)} style={{width:"100%",padding:"10px 12px",borderRadius:12,border:"none",fontSize:13,lineHeight:1.5,color:t.text,fontFamily:"'DM Sans',sans-serif",background:t.tile,outline:"none",boxSizing:"border-box",boxShadow:t.sh,resize:"none"}}/>
       </div>
 
-      {/* Score preview */}
-      {sc && (
-        <div style={{ textAlign: "center", marginBottom: 10, fontSize: 14, color: t.muted }}>
-          Score: <b style={{ color: t.accent, fontSize: 16 }}>{sc.total}</b>
-          <span style={{ fontSize: 11, marginLeft: 4 }}>({sc.base} + {sc.bonus})</span>
+      {/* Body Measurements - collapsible */}
+      <div onClick={()=>setShowBody(!showBody)} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 4px",cursor:"pointer",marginBottom:showBody?0:4}}>
+        <span style={{fontSize:14,fontWeight:600,color:t.text}}>{"\u2696\uFE0F"} Body Measurements</span>
+        <span style={{fontSize:11,color:t.muted,padding:"3px 10px",borderRadius:50,background:t.tile,boxShadow:t.sh}}>{showBody?"Hide":"Show"}</span>
+      </div>
+      {showBody&&<div style={{background:t.card,borderRadius:20,padding:16,marginBottom:10,boxShadow:t.csh}}>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+          {BODY_ROWS.map(r=>(<div key={r.field}><div style={{fontSize:10,color:t.muted,marginBottom:3}}>{r.label}</div><input inputMode="decimal" placeholder={r.ph} value={wd[r.field]||""} onChange={e=>upBody(r.field,e.target.value)} style={miniInput}/></div>))}
         </div>
-      )}
+      </div>}
+
+      {/* Lab Markers - collapsible */}
+      <div onClick={()=>setShowLab(!showLab)} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 4px",cursor:"pointer",marginBottom:showLab?0:4}}>
+        <span style={{fontSize:14,fontWeight:600,color:t.text}}>{"\uD83E\uDE78"} Lab Markers</span>
+        <span style={{fontSize:11,color:t.muted,padding:"3px 10px",borderRadius:50,background:t.tile,boxShadow:t.sh}}>{showLab?"Hide":"Show"}</span>
+      </div>
+      {showLab&&<div style={{background:t.card,borderRadius:20,padding:16,marginBottom:10,boxShadow:t.csh}}>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}}>
+          {LAB_ROWS.map(r=>(<div key={r.field}><div style={{fontSize:9,color:t.muted,marginBottom:3}}>{r.label}</div><input inputMode="decimal" placeholder={r.ph} value={wd[r.field]||""} onChange={e=>upLab(r.field,e.target.value)} style={{...miniInput,fontSize:13}}/></div>))}
+        </div>
+      </div>}
+
+      {/* Score */}
+      {sc&&(<div style={{textAlign:"center",marginBottom:10,fontSize:14,color:t.muted}}>Score: <b style={{color:t.accent,fontSize:16}}>{sc.total}</b><span style={{fontSize:11,marginLeft:4}}>({sc.base} + {sc.bonus})</span></div>)}
 
       {/* Save */}
-      <div onClick={!saving ? handleSave : undefined} style={{
-        padding: 14, borderRadius: 50, textAlign: "center",
-        background: saved ? t.on : `linear-gradient(135deg, ${t.accent}, ${t.dark})`,
-        color: saved ? t.accent : "#fff", fontSize: 15, fontWeight: 700,
-        cursor: saving ? "wait" : "pointer", boxShadow: `0 6px 20px ${t.accent}40`,
-        letterSpacing: "0.3px", opacity: saving ? 0.7 : 1, transition: "all 0.3s",
-      }}>
-        {saving ? "Saving..." : saved ? "\u2713 Saved!" : isToday ? "Save" : `Save ${fmtShort(new Date(selDate + "T00:00:00"))}`}
+      <div onClick={!saving?handleSave:undefined} style={{padding:14,borderRadius:50,textAlign:"center",background:saved?t.on:`linear-gradient(135deg, ${t.accent}, ${t.dark})`,color:saved?t.accent:"#fff",fontSize:15,fontWeight:700,cursor:saving?"wait":"pointer",boxShadow:`0 6px 20px ${t.accent}40`,letterSpacing:"0.3px",opacity:saving?0.7:1,transition:"all 0.3s"}}>
+        {saving?"Saving...":saved?"\u2713 Saved!":isToday?"Save":`Save ${fmtShort(new Date(selDate+"T00:00:00"))}`}
       </div>
     </div>
   );
 }
 
 // --- JOURNEY ---
-function JourneyTab({ D, loading }) {
-  const dates = Object.keys(D).sort();
-  const find = (key) => { for (let i = dates.length - 1; i >= 0; i--) { const v = parseFloat(D[dates[i]]?.[key]); if (!isNaN(v)) return v; } return null; };
-
-  const metrics = [
-    { key: "glucose", cur: find("glucFast"), tgt: TARGETS.glucose, fb: null },
-    { key: "trig", cur: find("lab_trig"), tgt: TARGETS.trig, fb: null },
-    { key: "weight", cur: find("body_weight"), tgt: TARGETS.weight, fb: null },
-    { key: "bmi", cur: (() => { const w = find("body_weight"); return w ? parseFloat((w / ((1.67) ** 2)).toFixed(1)) : null; })(), tgt: TARGETS.bmi, fb: null },
-    { key: "hba1c", cur: find("lab_hba1c"), tgt: TARGETS.hba1c, fb: "Next: Day 30" },
-    { key: "ggt", cur: find("lab_ggt"), tgt: TARGETS.ggt, fb: "Next: end Mar" },
+function JourneyTab({D,loading}){
+  const dates=Object.keys(D).sort();
+  const find=(key)=>{for(let i=dates.length-1;i>=0;i--){const v=parseFloat(D[dates[i]]?.[key]);if(!isNaN(v))return v}return null};
+  const metrics=[
+    {key:"glucose",cur:find("glucFast"),tgt:TARGETS.glucose,fb:null},
+    {key:"trig",cur:find("lab_trig"),tgt:TARGETS.trig,fb:null},
+    {key:"weight",cur:find("body_weight"),tgt:TARGETS.weight,fb:null},
+    {key:"bmi",cur:(()=>{const w=find("body_weight");return w?parseFloat((w/((1.67)**2)).toFixed(1)):null})(),tgt:TARGETS.bmi,fb:null},
+    {key:"hba1c",cur:find("lab_hba1c"),tgt:TARGETS.hba1c,fb:"Next: Day 30"},
+    {key:"ggt",cur:find("lab_ggt"),tgt:TARGETS.ggt,fb:"Next: end Mar"},
   ];
-
-  return (
-    <div style={{ padding: "14px 16px 90px", fontFamily: "'DM Sans',sans-serif" }}>
-      <div style={{ marginBottom: 16 }}>
-        <span style={{ fontSize: 24, fontWeight: 300, color: t.text, letterSpacing: "-0.03em" }}>Journey</span>
-      </div>
-      {metrics.map(({ key, cur, tgt, fb }) => {
-        const pct = cur != null ? Math.min(100, Math.max(0, ((tgt.s - cur) / (tgt.s - tgt.g)) * 100)) : 0;
-        const ch = cur != null ? fmtPct(pctCh(tgt.s, cur)) : null;
-        let note = fb;
-        if (cur != null) {
-          if (key === "glucose" && cur < 100) note = "Normal range!";
-          else if (key === "weight") note = `-${(tgt.s - cur).toFixed(1)} kg`;
-          else if (key === "trig" && cur <= 150) note = "Normal range!";
-          else if (ch) note = ch;
-        }
-        return (
-          <div key={key} style={{ background: t.card, borderRadius: 14, padding: "14px 16px", marginBottom: 8, boxShadow: t.csh }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 6 }}>
-              <span style={{ fontSize: 14, color: t.text, fontWeight: 500 }}>{tgt.l}</span>
-              <span style={{ fontSize: 16, fontWeight: 300, color: cur != null ? t.accent : t.muted }}>
-                {cur ?? "---"} <span style={{ fontSize: 11, color: t.muted }}>{tgt.u}</span>
-              </span>
-            </div>
-            <div style={{ height: 5, borderRadius: 3, background: t.tile, overflow: "hidden", marginBottom: 4 }}>
-              <div style={{ width: `${pct}%`, height: "100%", borderRadius: 3, background: cur != null ? t.accent : "transparent", transition: "width 0.5s" }} />
-            </div>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: t.muted }}>
-              <span>{tgt.s} {">"} {tgt.g}{tgt.u}</span>
-              {note && <span style={{ color: cur != null ? t.accent : t.muted, fontWeight: cur != null ? 600 : 400 }}>{note}</span>}
-            </div>
+  return(
+    <div style={{padding:"14px 16px 90px",fontFamily:"'DM Sans',sans-serif"}}>
+      <div style={{marginBottom:16}}><span style={{fontSize:24,fontWeight:300,color:t.text,letterSpacing:"-0.03em"}}>Journey</span></div>
+      {metrics.map(({key,cur,tgt,fb})=>{
+        const pct=cur!=null?Math.min(100,Math.max(0,((tgt.s-cur)/(tgt.s-tgt.g))*100)):0;
+        const ch=cur!=null?fmtPct(pctCh(tgt.s,cur)):null;
+        let note=fb;if(cur!=null){if(key==="glucose"&&cur<100)note="Normal range!";else if(key==="weight")note=`-${(tgt.s-cur).toFixed(1)} kg`;else if(key==="trig"&&cur<=150)note="Normal range!";else if(ch)note=ch}
+        return(<div key={key} style={{background:t.card,borderRadius:14,padding:"14px 16px",marginBottom:8,boxShadow:t.csh}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:6}}>
+            <span style={{fontSize:14,color:t.text,fontWeight:500}}>{tgt.l}</span>
+            <span style={{fontSize:16,fontWeight:700,color:cur!=null?t.text:t.muted}}>{cur??"---"} <span style={{fontSize:11,fontWeight:400,color:t.muted}}>{tgt.u}</span></span>
           </div>
-        );
-      })}
+          <div style={{height:5,borderRadius:3,background:t.tile,overflow:"hidden",marginBottom:4}}>
+            <div style={{width:`${pct}%`,height:"100%",borderRadius:3,background:cur!=null?t.accent:"transparent",transition:"width 0.5s"}}/>
+          </div>
+          <div style={{display:"flex",justifyContent:"space-between",fontSize:11,color:t.muted}}>
+            <span>{tgt.s} {">"} {tgt.g}{tgt.u}</span>
+            {note&&<span style={{color:cur!=null?t.accent:t.muted,fontWeight:cur!=null?600:400}}>{note}</span>}
+          </div>
+        </div>)})}
     </div>
   );
 }
 
-// --- NAV ---
-function Nav({ tab, setTab }) {
-  return (
-    <div style={{
-      position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)",
-      width: "100%", maxWidth: 430, height: 60,
-      background: t.card, display: "flex", justifyContent: "space-around", alignItems: "center",
-      boxShadow: "0 -2px 12px rgba(0,0,0,0.07)",
-      zIndex: 100, borderRadius: "20px 20px 0 0",
-      paddingBottom: "max(0px, env(safe-area-inset-bottom))",
-    }}>
+// --- GUIDE (mirrors desktop Lifestyle + Food + Science) ---
+function GuideTab(){
+  const[sec,setSec]=useState("lifestyle");
+  const[sciTopic,setSciTopic]=useState(null);
+  const Pill=({active,children,onClick})=>(<div onClick={onClick} style={{padding:"7px 14px",borderRadius:50,fontSize:12,fontWeight:active?700:500,cursor:"pointer",background:active?t.accent:t.tile,color:active?"#fff":t.muted,boxShadow:active?t.shOn:t.sh,transition:"all 0.15s",WebkitTapHighlightColor:"transparent"}}>{children}</div>);
+
+  const habits=[
+    {icon:"\u2600\uFE0F",step:"Wake: Water + sunlight + 5 breaths",impact:"Resets circadian rhythm"},
+    {icon:"\uD83C\uDF31",step:"Basil seeds 15 min before meal",impact:"Reduces spike 20-35%"},
+    {icon:"\uD83E\uDD57",step:"Fiber + protein FIRST, carbs LAST",impact:"Reduces spike up to 40%"},
+    {icon:"\uD83C\uDF3F",step:"Berberine 600mg with first bites",impact:"Works like metformin"},
+    {icon:"\uD83D\uDC1F",step:"Fish oil with meals (3-4g/day)",impact:"Lowers trig 25-50%"},
+    {icon:"\uD83D\uDEB6",step:"Walk 10-15 min after each meal",impact:"Drops glucose 20-40 pts"},
+    {icon:"\uD83D\uDEAB",step:"Zero sweet drinks",impact:"#1 trig driver"},
+    {icon:"\u23F0",step:"IF 14:10 window",impact:"Liver processes fat overnight"},
+    {icon:"\uD83D\uDCA7",step:"Water 2L+ daily",impact:"Flushes toxins"},
+    {icon:"\uD83D\uDC8A",step:"Bedtime: Mg + D3/K2",impact:"Improves sleep + fasting"},
+    {icon:"\uD83D\uDE34",step:"Sleep 7+ hours",impact:"Poor sleep = glucose +15-30"},
+  ];
+
+  const science={
+    spikes:[{h:"What is a spike?",p:"Carbs flood bloodstream. Healthy pancreas releases insulin in minutes. When impaired, glucose stays elevated."},{h:"Angkhana's data",p:"White rice: +97 (alarm). Low GI rice: +46 (moderate). Potatoes: +20 (ok). Chicken+veggies: negative delta."}],
+    pancreas:[{h:"Beta cell fatigue",p:"Not dead - exhausted. Remove fat + reduce demand = they recover."},{h:"Recovery",p:"1. Remove demand (no sugar). 2. Improve sensitivity (berberine, exercise). 3. Reduce visceral fat (IF). 4. Beta cells regenerate 4-12 weeks."}],
+    exercise:[{h:"Insulin bypass",p:"GLUT4 transporters open WITHOUT insulin. Angkhana's swim: 131 to 101."},{h:"48-hour effect",p:"After intense exercise, insulin sensitivity improves for 48 hours."}],
+    sleep:[{h:"Cortisol connection",p:"Poor sleep triggers cortisol. One night <6h = glucose +15-30."},{h:"Glucose-sleep cycle",p:"High evening glucose disrupts sleep. Break with: early dinner, magnesium."}],
+    food:[{h:"Fiber first, carbs last",p:"Same food, different order = 40% less spike."},{h:"IF mechanism",p:"Fasting window: insulin drops, fat-burning starts. 16:8 = 16h liver processing."}],
+  };
+
+  return(
+    <div style={{padding:"14px 16px 90px",fontFamily:"'DM Sans',sans-serif"}}>
+      <div style={{marginBottom:14}}><span style={{fontSize:24,fontWeight:300,color:t.text,letterSpacing:"-0.03em"}}>Guide</span></div>
+      <div style={{display:"flex",gap:4,flexWrap:"wrap",marginBottom:16}}>
+        {[["lifestyle","Lifestyle"],["food","Food"],["science","Science"]].map(([k,l])=>(<Pill key={k} active={sec===k} onClick={()=>setSec(k)}>{l}</Pill>))}
+      </div>
+
+      {sec==="lifestyle"&&<div>
+        {habits.map((h,i)=>(<div key={i} style={{background:t.card,borderRadius:14,padding:"12px 14px",marginBottom:6,boxShadow:t.csh,display:"flex",gap:10,alignItems:"flex-start"}}>
+          <span style={{fontSize:18,flexShrink:0}}>{h.icon}</span>
+          <div><div style={{fontSize:13,fontWeight:600,lineHeight:1.3}}>{h.step}</div><div style={{fontSize:11,color:t.muted,marginTop:2}}>{h.impact}</div></div>
+        </div>))}
+      </div>}
+
+      {sec==="food"&&<div>
+        {[["Carb Guide",[["Konjac rice","GI 0","ok"],["Sweet potato","GI 44","ok"],["Low GI rice","GI 54","ok"],["Brown rice","GI 68","warn"],["Sticky rice","GI 87","danger"],["Jasmine rice","GI 89","danger"]]],
+          ["Protein",[["Eggs, salmon, chicken","Safe","ok"],["Pork belly (small)","Limit","warn"],["Hotdog, KFC","Avoid","danger"]]],
+          ["Drinks",[["Water, green tea, black coffee","Safe","ok"],["Unsweetened soy milk","Limit","warn"],["Milk tea, soda, juice","Avoid","danger"]]],
+        ].map(([cat,items],ci)=>(<div key={ci} style={{marginBottom:16}}>
+          <div style={{fontSize:14,fontWeight:700,color:t.accent,marginBottom:8}}>{cat}</div>
+          {items.map(([name,tag,sev],i)=>{const bg=sev==="ok"?t.okBg:sev==="warn"?t.warnBg:t.dangerBg;const col=sev==="ok"?t.ok:sev==="warn"?t.warn:t.danger;
+            return(<div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 12px",marginBottom:4,background:bg,borderRadius:10}}>
+              <span style={{fontSize:13,fontWeight:500,color:t.text}}>{name}</span>
+              <span style={{fontSize:11,fontWeight:600,color:col}}>{tag}</span>
+            </div>)})}
+        </div>))}
+        <div style={{fontSize:14,fontWeight:700,color:t.accent,marginBottom:8}}>Supplements</div>
+        {[["Berberine","600mg x2 w/ meals","Trig -20-35%"],["Fish Oil","3-4g EPA+DHA","Trig -20-50%"],["Magnesium","200mg bedtime","Sleep + glucose"],["D3+K2","2000-5000 IU","Insulin receptors"]].map(([n,d,e],i)=>(
+          <div key={i} style={{background:t.card,borderRadius:10,padding:"10px 14px",marginBottom:4,boxShadow:t.csh,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+            <div><div style={{fontSize:13,fontWeight:600}}>{n}</div><div style={{fontSize:11,color:t.muted}}>{d}</div></div>
+            <span style={{fontSize:11,color:t.accent,fontWeight:600}}>{e}</span>
+          </div>
+        ))}
+      </div>}
+
+      {sec==="science"&&<div>
+        <div style={{display:"flex",gap:4,flexWrap:"wrap",marginBottom:12}}>
+          {[["spikes","Spikes"],["pancreas","Pancreas"],["exercise","Exercise"],["sleep","Sleep"],["food","Food"]].map(([k,l])=>(<Pill key={k} active={sciTopic===k} onClick={()=>setSciTopic(sciTopic===k?null:k)}>{l}</Pill>))}
+        </div>
+        {sciTopic&&science[sciTopic]?science[sciTopic].map((c,i)=>(<div key={i} style={{background:t.card,borderRadius:14,padding:"12px 16px",marginBottom:8,boxShadow:t.csh}}>
+          <div style={{fontSize:14,fontWeight:700,color:t.accent,marginBottom:4}}>{c.h}</div>
+          <div style={{fontSize:13,color:t.text,lineHeight:1.7}}>{c.p}</div>
+        </div>)):(!sciTopic&&<div style={{fontSize:13,color:t.muted,fontStyle:"italic"}}>Select a topic above</div>)}
+      </div>}
+    </div>
+  );
+}
+
+// --- NAV (4 tabs) ---
+function Nav({tab,setTab}){
+  return(
+    <div style={{position:"fixed",bottom:0,left:"50%",transform:"translateX(-50%)",width:"100%",maxWidth:430,height:60,background:t.card,display:"flex",justifyContent:"space-around",alignItems:"center",boxShadow:"0 -2px 12px rgba(0,0,0,0.07)",zIndex:100,borderRadius:"20px 20px 0 0",paddingBottom:"max(0px, env(safe-area-inset-bottom))"}}>
       {[
-        { key: "home", label: "Home", icon: (a) => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={a ? t.accent : t.muted} strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="3" /></svg> },
-        { key: "log", label: "Log", icon: (a) => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={a ? t.accent : t.muted} strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg> },
-        { key: "journey", label: "Journey", icon: (a) => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={a ? t.accent : t.muted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="7 17 17 7" /><polyline points="7 7 17 7 17 17" /></svg> },
-      ].map(({ key, label, icon }) => (
-        <div key={key} onClick={() => setTab(key)} style={{ textAlign: "center", cursor: "pointer", padding: "6px 16px", WebkitTapHighlightColor: "transparent" }}>
-          {icon(tab === key)}
-          <div style={{ fontSize: 11, marginTop: 2, color: tab === key ? t.accent : t.muted, fontWeight: tab === key ? 700 : 500 }}>{label}</div>
+        {key:"home",label:"Home",icon:(a)=><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={a?t.accent:t.muted} strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>},
+        {key:"log",label:"Log",icon:(a)=><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={a?t.accent:t.muted} strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>},
+        {key:"journey",label:"Journey",icon:(a)=><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={a?t.accent:t.muted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="7 17 17 7"/><polyline points="7 7 17 7 17 17"/></svg>},
+        {key:"guide",label:"More",icon:(a)=><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={a?t.accent:t.muted} strokeWidth="2.5" strokeLinecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>},
+      ].map(({key,label,icon})=>(
+        <div key={key} onClick={()=>setTab(key)} style={{textAlign:"center",cursor:"pointer",padding:"6px 14px",WebkitTapHighlightColor:"transparent"}}>
+          {icon(tab===key)}
+          <div style={{fontSize:11,marginTop:2,color:tab===key?t.accent:t.muted,fontWeight:tab===key?700:500}}>{label}</div>
         </div>
       ))}
     </div>
@@ -518,58 +456,29 @@ function Nav({ tab, setTab }) {
 }
 
 // --- MAIN ---
-export default function GoldenEraMobile() {
-  const [tab, setTab] = useState("home");
-  const [D, setD] = useState({});
-  const [loading, setLoading] = useState(true);
-
-  const load = useCallback(async () => {
-    setLoading(true);
-    const res = await apiLoad();
-    if (res) {
-      let tracker = {};
-      if (res.tracker && typeof res.tracker === "object") tracker = res.tracker;
-      else if (Array.isArray(res)) { res.forEach(r => { if (r.date) tracker[r.date] = r; }); }
-
-      if (res.body && typeof res.body === "object") {
-        Object.entries(res.body).forEach(([k, v]) => {
-          const parts = k.split("-");
-          const field = parts[0];
-          const date = parts.slice(1).join("-");
-          if (date && field) { if (!tracker[date]) tracker[date] = {}; tracker[date]["body_" + field] = v; }
-        });
-      }
-
-      if (res.lab && typeof res.lab === "object") {
-        Object.entries(res.lab).forEach(([k, v]) => {
-          const idx = k.indexOf("-2026-");
-          if (idx === -1) return;
-          const field = k.substring(0, idx);
-          const date = k.substring(idx + 1);
-          if (date && field) { if (!tracker[date]) tracker[date] = {}; tracker[date][field] = v; }
-        });
-      }
-
+export default function GoldenEraMobile(){
+  const[tab,setTab]=useState("home");const[D,setD]=useState({});const[loading,setLoading]=useState(true);
+  const load=useCallback(async()=>{
+    setLoading(true);const res=await apiLoad();
+    if(res){
+      let tracker={};if(res.tracker&&typeof res.tracker==="object")tracker=res.tracker;
+      if(res.body&&typeof res.body==="object"){Object.entries(res.body).forEach(([k,v])=>{const parts=k.split("-");const field=parts[0];const date=parts.slice(1).join("-");if(date&&field){if(!tracker[date])tracker[date]={};tracker[date]["body_"+field]=v}})}
+      if(res.lab&&typeof res.lab==="object"){Object.entries(res.lab).forEach(([k,v])=>{const idx=k.indexOf("-2026-");if(idx===-1)return;const field=k.substring(0,idx);const date=k.substring(idx+1);if(date&&field){if(!tracker[date])tracker[date]={};tracker[date][field]=v}})}
       setD(tracker);
     }
     setLoading(false);
-  }, []);
-
-  useEffect(() => { load(); }, [load]);
-
-  return (
-    <div style={{
-      fontFamily: "'DM Sans',sans-serif", background: t.bg, color: t.text,
-      minHeight: "100dvh", maxWidth: 430, margin: "0 auto", position: "relative",
-      overflowX: "hidden", WebkitFontSmoothing: "antialiased",
-    }}>
-      <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@200;300;400;500;600;700&display=swap" rel="stylesheet" />
-      <div style={{ minHeight: "calc(100dvh - 60px)" }}>
-        {tab === "home" && <HomeTab D={D} loading={loading} setTab={setTab} />}
-        {tab === "log" && <LogTab D={D} setD={setD} />}
-        {tab === "journey" && <JourneyTab D={D} loading={loading} />}
+  },[]);
+  useEffect(()=>{load()},[load]);
+  return(
+    <div style={{fontFamily:"'DM Sans',sans-serif",background:t.bg,color:t.text,minHeight:"100dvh",maxWidth:430,margin:"0 auto",position:"relative",overflowX:"hidden",WebkitFontSmoothing:"antialiased"}}>
+      <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+      <div style={{minHeight:"calc(100dvh - 60px)"}}>
+        {tab==="home"&&<HomeTab D={D} loading={loading} setTab={setTab}/>}
+        {tab==="log"&&<LogTab D={D} setD={setD}/>}
+        {tab==="journey"&&<JourneyTab D={D} loading={loading}/>}
+        {tab==="guide"&&<GuideTab/>}
       </div>
-      <Nav tab={tab} setTab={setTab} />
+      <Nav tab={tab} setTab={setTab}/>
     </div>
   );
 }
