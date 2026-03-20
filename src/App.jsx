@@ -76,7 +76,7 @@ const labMeanings={
 
 // ─── Chart data ───
 const chartData={
-  gluc:[{m:"26 Feb",v:211,c:true},{m:"2 Mar",v:180,c:true},{m:"3 Mar",v:170,c:true},{m:"4 Mar",v:160,c:true},{m:"5 Mar",v:142,c:true},{m:"6 Mar",v:140,c:true},{m:"7 Mar",v:147,c:true},{m:"8 Mar",v:150,c:true},{m:"9 Mar",v:150,c:true},{m:"10 Mar",v:123,c:true},{m:"11 Mar",v:120,c:true},{m:"12 Mar",v:123,c:true},{m:"13 Mar",v:115,c:true},{m:"14 Mar",v:118,c:true},{m:"15 Mar",v:108,c:true},{m:"D30",v:95},{m:"D60",v:85},{m:"D90",v:80}],
+  gluc:[{m:"26 Feb",v:211,c:true},{m:"2 Mar",v:180,c:true},{m:"3 Mar",v:170,c:true},{m:"4 Mar",v:160,c:true},{m:"5 Mar",v:142,c:true},{m:"6 Mar",v:140,c:true},{m:"7 Mar",v:147,c:true},{m:"8 Mar",v:150,c:true},{m:"9 Mar",v:150,c:true},{m:"10 Mar",v:123,c:true},{m:"11 Mar",v:120,c:true},{m:"12 Mar",v:123,c:true},{m:"13 Mar",v:115,c:true},{m:"14 Mar",v:118,c:true},{m:"15 Mar",v:108,c:true},{m:"16 Mar",v:95,c:true},{m:"17 Mar",v:80,c:true},{m:"18 Mar",v:101,c:true},{m:"19 Mar",v:104,c:true},{m:"D30",v:85},{m:"D60",v:80},{m:"D90",v:75}],
   hb:[{m:"26 Feb",v:9.4,c:true},{m:"D30",v:7.8},{m:"D60",v:6.5},{m:"D90",v:5.7}],
   trig:[{m:"26 Feb",v:702,c:true},{m:"16 Mar",v:231,c:true},{m:"D30",v:170},{m:"D60",v:125},{m:"D90",v:95}],
   wt:[{m:"26 Feb",v:73.6,c:true},{m:"8 Mar",v:71.8,c:true},{m:"15 Mar",v:70.9,c:true},{m:"D30",v:69},{m:"D60",v:65},{m:"D90",v:62}],
@@ -90,31 +90,49 @@ const cSets={
   wt:{data:chartData.wt,label:"Weight",ref:60,refL:"60kg",dom:[55,75]},
   ggt:{data:chartData.ggt,label:"GGT",ref:39,refL:"<39",dom:[0,200]},
   chol:{data:chartData.chol,label:"Cholesterol",ref:200,refL:"<200",dom:[150,240]},
-  gluc:{data:[chartData.gluc[0],chartData.gluc[14],chartData.gluc[15],chartData.gluc[16],chartData.gluc[17]],label:"Glucose",ref:99,refL:"<99",dom:[50,230]},
+  gluc:{data:[chartData.gluc[0],chartData.gluc[15],chartData.gluc[18],chartData.gluc[19],chartData.gluc[20]],label:"Glucose",ref:99,refL:"<99",dom:[50,230]},
   bmi:{data:chartData.bmi,label:"BMI",ref:23,refL:"<23",dom:[18,28]},
 };
 
 // ─── Clinical notes ───
 const clinicalNotes={
+  "19 Mar (Day 18)":[
+    {icon:"🧘",sev:"excellent",title:"Recalibrated after panic - fasting 104",text:"Reduced carbs, kept berberine x2 and fish oil x3. Numbers stabilized. Night glucose held at 104 - liver gap 0 (flat, stable)."},
+    {icon:"🧹",sev:"ontrack",title:"Housework as exercise",text:"Light activity day but still moved. Post-meal walks x3 maintained. Not every day needs to be cardio - consistency matters more."},
+    {icon:"🧠",sev:"excellent",title:"Mental reset complete",text:"Yesterday's panic taught a valuable lesson: the body was fine at 69 (no symptoms). Trust the protocol, don't feed the fear with sugar."},
+  ],
+  "18 Mar (Day 17)":[
+    {icon:"😰",sev:"grow",title:"PANIC DAY - glucose dropped to 69",text:"After breakfast + spirulina/cacao/chia snacks, glucose dropped to 69. No hunger, felt fine and stable - but panicked at the number. Ate candy, spiked to 130. Then ate more carbs, spiked to 174. Had to walk extensively to bring down."},
+    {icon:"📖",sev:"ontrack",title:"Key learning: 69 was safe",text:"No shaking, no sweating, no confusion = not a hypo emergency. The body was switching to fat-burning. The panic response (eating sugar) did more damage than the low number itself."},
+    {icon:"🔄",sev:"grow",title:"Reactive eating triggered a cascade",text:"One candy became more carbs became 174. This is the insulin-impaired pattern: once you spike, the system struggles to recover. Walking was the only fix."},
+  ],
+  "17 Mar (Day 16)":[
+    {icon:"⭐",sev:"excellent",title:"ALL-TIME LOW fasting 80 - first time in normal range",text:"Night 97 to fasting 80 = liver gap -17. Liver processed glucose beautifully overnight. Down 131 points from 211 (-62%)."},
+    {icon:"😴",sev:"excellent",title:"Rest day, appetite naturally reduced",text:"Later breakfast, not hungry at lunch or dinner. Body regulating hunger signals - a sign that insulin is normalizing. Rest days are part of the protocol."},
+    {icon:"📊",sev:"excellent",title:"Triglycerides 231 - lab confirmed",text:"702 to 231 in 15 days (-67%). Pancreatitis risk eliminated. Fish oil x3 + sugar elimination + IF driving this."},
+  ],
   "16 Mar (Day 15)":[
-    {icon:"🎉",sev:"excellent",title:"TRIGLYCERIDES 231 - down 67% from 702",text:"Lab confirmed: 702 to 231 in 15 days. Well below 500 pancreatitis threshold."},
-    {icon:"🐟",sev:"excellent",title:"Fish oil x3 validated",text:"Therapeutic-dose fish oil + sugar elimination + IF driving the 67% drop."},
-    {icon:"🎯",sev:"ontrack",title:"Next target: TG under 150",text:"Maintain fish oil x3, strict on refined carbs, swimming 3-4x/week."},
+    {icon:"🎉",sev:"excellent",title:"Fasting 95 - first time below 100",text:"Crossed into normal fasting range (<100). Down 116 from 211 (-55%) in 14 days. Night was 109 to fasting 95 = liver gap -14."},
+    {icon:"🍽️",sev:"excellent",title:"Breakfast: no spike. Protein meals confirmed safe",text:"Morning meal produced no glucose spike. Protein + fat meals are consistently the safest pattern."},
+    {icon:"🚴",sev:"ontrack",title:"Duck boat cycling + park walk in heat",text:"Glucose spiked slightly despite movement in the heat. Heat itself can raise cortisol and glucose. Not all spikes are food-related."},
+    {icon:"🍫",sev:"grow",title:"Mall dinner: cranberry soda + chocolate mousse = +37",text:"133 to 170 spike. Sugar hit even in dessert form. Walking the mall brought it back to 138. The pattern holds: sugar spikes, walking fixes."},
   ],
   "15 Mar (Day 14)":[
-    {icon:"🎉",sev:"excellent",title:"Fasting 108 - holding steady",text:"Liver gap -7. Third consecutive negative liver gap. Down 103 from 211 (-49%)."},
-    {icon:"🍵",sev:"excellent",title:"Stevia confirmed safe",text:"Thai tea + cola with stevia: no glucose spike."},
-    {icon:"🍫",sev:"grow",title:"No sugar broken",text:"Cranberry soda + chocolate mousse spiked 133 to 170 (+37)."},
+    {icon:"🎉",sev:"excellent",title:"Fasting 108, liver gap -7",text:"Third consecutive negative liver gap. Night 115 to fasting 108. Liver is now reliably processing glucose overnight."},
+    {icon:"🏊",sev:"excellent",title:"Post-swim glucose 92",text:"After cardio swim + 10 min stretching. First time approaching normal post-exercise range. Swimming remains the most powerful acute tool."},
+    {icon:"⏰",sev:"excellent",title:"IF 18:6 achieved (10:30-16:30)",text:"Best IF ratio yet. Only 2 meals, protein-heavy, Greek yogurt. Bloating noted but glucose controlled."},
+    {icon:"🍵",sev:"excellent",title:"Stevia confirmed safe",text:"Thai tea + cola flavor with stevia: no glucose spike. Opens up drink variety without sugar damage."},
   ],
   "14 Mar (Day 13)":[
-    {icon:"🫀",sev:"excellent",title:"Liver gap -2 (first negative)",text:"Night 120, fasting 118. Liver responding to insulin during sleep."},
-    {icon:"🏊",sev:"excellent",title:"Swimming: glucose to 92",text:"After cardio swim + stretching. First time approaching normal range."},
-    {icon:"⏰",sev:"excellent",title:"IF 18:6 achieved",text:"10:30-16:30 window. Best IF ratio yet."},
+    {icon:"🫀",sev:"excellent",title:"Liver gap -2 (first negative in protocol)",text:"Night 120, fasting 118. Liver is now responding to insulin during sleep - a turning point in metabolic recovery."},
+    {icon:"🏊",sev:"excellent",title:"Swimming: 131 to 101 (-30 pts)",text:"First reading approaching normal range through exercise alone. GLUT4 transporters bypassing insulin."},
+    {icon:"🍚",sev:"grow",title:"3 spoons low GI rice: +46 spike (117 to 163)",text:"Pancreas isn't ready for rice yet. But potato handful only +20 (120 to 140). And chicken + veggies = negative delta (148 to 134). The carb threshold is very low right now."},
+    {icon:"⏰",sev:"excellent",title:"IF 18:6 (10:30-16:30)",text:"Second consecutive 18:6 day. Extended fasting window giving liver maximum processing time."},
   ],
   "13 Mar (Day 12)":[
-    {icon:"📉",sev:"excellent",title:"Fasting 115, all-time low - Score 105",text:"Down 96 from 211 (-45%). Below pre-diabetic threshold."},
-    {icon:"🏊",sev:"excellent",title:"Swimming: 131 to 101",text:"First reading approaching normal. Exercise is most powerful acute tool."},
-    {icon:"🍚",sev:"grow",title:"3 spoons low GI rice: +46 spike",text:"117 to 163. Pancreas isn't ready for rice yet."},
+    {icon:"📉",sev:"excellent",title:"Fasting 115 - new low, Score 105",text:"Down 96 from 211 (-45%). Below pre-diabetic threshold for the first time."},
+    {icon:"🏊",sev:"excellent",title:"Swimming: 131 to 101",text:"Exercise-triggered GLUT4 glucose uptake. No insulin needed. The most powerful tool in the protocol."},
+    {icon:"🧠",sev:"ontrack",title:"Brain work raised glucose",text:"Meeting concentration pushed glucose from 120 to 143 - not stress, but cognitive demand. Glucose fuels the brain. Came back down to 116 after berberine kicked in."},
   ],
 };
 
@@ -215,7 +233,7 @@ export default function GoldenEra(){
   const[sheetStatus,setSS]=useState("idle");
   const[labChart,setLC]=useState("hb");
   const[trendChart,setTC]=useState("glucose");
-  const[noteTab,setNT]=useState("16 Mar (Day 15)");
+  const[noteTab,setNT]=useState("19 Mar (Day 18)");
   const[labMeanTab,setLMT]=useState(0);
   const[expandedLab,setEL]=useState(null);
   const[sciTopic,setSciTopic]=useState(null);
@@ -300,13 +318,13 @@ export default function GoldenEra(){
 
   // ─── Trend chart with multi-line support ───
   const TrendChart=({type})=>{
-    const labels=["D1","D2","D3","D4","D5","D6","D7","D8","D9","D10","D11","D12","D13","D14","D15"];
-    const fasting=[180,170,160,142,140,147,150,150,123,120,123,115,118,108,95];
-    const postMeal=[null,null,null,null,null,180,217,150,160,143,150,163,140,null,170];
-    const night=[null,null,null,null,null,null,140,137,131,127,137,120,115,109,null];
-    const scores=[33,40,60,67,73,67,61,85,89,93,91,105,106,108,96];
+    const labels=["D1","D2","D3","D4","D5","D6","D7","D8","D9","D10","D11","D12","D13","D14","D15","D16","D17","D18"];
+    const fasting=[180,170,160,142,140,147,150,150,123,120,123,115,118,108,95,80,101,104];
+    const postMeal=[null,null,null,null,null,180,217,150,160,143,150,163,140,170,148,174,127,135];
+    const night=[null,null,null,null,null,null,140,137,131,127,137,120,115,109,97,107,104,104];
+    const scores=[33,40,60,67,73,67,61,85,89,93,91,105,106,96,null,null,null,null];
     const wLabels=["Base","D7","D14"];const wData=[73.6,71.8,70.9];
-    const ifData=[14,12,14,15,15,15,12,15,15,15,14,15,18,null,18];
+    const ifData=[14,12,14,15,15,15,12,15,15,15,14,15,18,18,17,16,16,15];
 
     const W=380,H=100,P={t:16,b:20,l:30,r:10};
     const cw=W-P.l-P.r,ch=H-P.t-P.b;
