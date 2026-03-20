@@ -446,11 +446,14 @@ function JourneyTab({D,loading}){
   );
 }
 
-// --- GUIDE (mirrors desktop Lifestyle + Food + Science) ---
+// --- GUIDE (full content: Lifestyle + Food + Science) ---
 function GuideTab(){
   const[sec,setSec]=useState("lifestyle");
+  const[actTab,setActTab]=useState("activities");
   const[sciTopic,setSciTopic]=useState(null);
+  const[sciOpen,setSciOpen]=useState(null);
   const Pill=({active,children,onClick})=>(<div onClick={onClick} style={{padding:"7px 14px",borderRadius:50,fontSize:12,fontWeight:active?700:500,cursor:"pointer",background:active?t.accent:t.tile,color:active?"#fff":t.muted,boxShadow:active?t.shOn:t.sh,transition:"all 0.15s",WebkitTapHighlightColor:"transparent"}}>{children}</div>);
+  const Col=({title,color,bg,items})=>(<div style={{minWidth:180,background:bg,borderRadius:12,padding:"10px 12px",flexShrink:0}}><div style={{fontSize:11,fontWeight:700,color,textAlign:"center",marginBottom:6}}>{title}</div>{items.map((x,i)=>(<div key={i} style={{display:"flex",justifyContent:"space-between",padding:"4px 0",borderBottom:i<items.length-1?`1px solid ${color}22`:"none"}}><span style={{fontSize:12,fontWeight:500,color:t.text}}>{x[0]}</span>{x[1]&&<span style={{fontSize:11,fontWeight:600,color}}>{x[1]}</span>}</div>))}</div>);
 
   const habits=[
     {icon:"\u2600\uFE0F",step:"Wake: Water + sunlight + 5 breaths",impact:"Resets circadian rhythm"},
@@ -459,64 +462,178 @@ function GuideTab(){
     {icon:"\uD83C\uDF3F",step:"Berberine 600mg with first bites",impact:"Works like metformin"},
     {icon:"\uD83D\uDC1F",step:"Fish oil with meals (3-4g/day)",impact:"Lowers trig 25-50%"},
     {icon:"\uD83D\uDEB6",step:"Walk 10-15 min after each meal",impact:"Drops glucose 20-40 pts"},
+    {icon:"\uD83C\uDFCB\uFE0F",step:"Weight training 2x/week",impact:"Muscles absorb glucose 24-48hr"},
     {icon:"\uD83D\uDEAB",step:"Zero sweet drinks",impact:"#1 trig driver"},
     {icon:"\u23F0",step:"IF 14:10 window",impact:"Liver processes fat overnight"},
+    {icon:"\uD83E\uDD5C",step:"Brazil nuts x3 with last meal",impact:"Thyroid + immune"},
     {icon:"\uD83D\uDCA7",step:"Water 2L+ daily",impact:"Flushes toxins"},
     {icon:"\uD83D\uDC8A",step:"Bedtime: Mg + D3/K2",impact:"Improves sleep + fasting"},
     {icon:"\uD83D\uDE34",step:"Sleep 7+ hours",impact:"Poor sleep = glucose +15-30"},
   ];
+  const activities=[
+    {name:"Weight training",emoji:"\uD83C\uDFCB\uFE0F",pts:"-30-60 pts",note:"Muscles become glucose sponges for 24-48hr"},
+    {name:"HIIT / circuits",emoji:"\u26A1",pts:"-40-60 pts",note:"15 min = hours of benefit"},
+    {name:"Stairs climbing",emoji:"\uD83E\uDEDC",pts:"-25-40 pts",note:"Free, available everywhere"},
+    {name:"Long walk 30+ min",emoji:"\uD83D\uDEB6",pts:"-30-50 pts",note:"The #1 tool"},
+    {name:"Swimming",emoji:"\uD83C\uDFCA",pts:"-25-40 pts",note:"Low joint stress, full body"},
+    {name:"Dancing",emoji:"\uD83D\uDC83",pts:"-20-35 pts",note:"Fun, burns without feeling like exercise"},
+    {name:"Walk 10-15 min",emoji:"\uD83D\uDC5F",pts:"-20-40 pts",note:"Best ROI. After every meal"},
+    {name:"Housework",emoji:"\uD83E\uDDF9",pts:"-15-25 pts",note:"All count"},
+    {name:"Stretching / yoga",emoji:"\uD83E\uDDD8",pts:"-5-10 pts",note:"Flexibility + stress reduction"},
+  ];
+  const recovery=[
+    {name:"Infrared sauna",emoji:"\uD83E\uDDD6",pts:"-10-20 pts",note:"Improves insulin sensitivity"},
+    {name:"Deep tissue massage",emoji:"\uD83D\uDC86",pts:"-5-10 pts",note:"Lowers cortisol 30%"},
+    {name:"Cold shower (30s)",emoji:"\uD83E\uDDCA",pts:"-10-15 pts",note:"Activates brown fat"},
+    {name:"Legs up the wall",emoji:"\uD83E\uDDB5",pts:"Recovery",note:"Calms nervous system"},
+    {name:"Foam rolling",emoji:"\uD83E\uDDBD",pts:"Recovery",note:"Breaks up fascia"},
+    {name:"Breathing exercises",emoji:"\uD83C\uDF2C\uFE0F",pts:"-5-10 pts",note:"4-7-8 lowers cortisol"},
+  ];
+
+  const foodCats=[
+    ["Carb Guide (GI)",[["Konjac rice","GI 0"],["Shirataki noodle","GI 0"],["Cauliflower rice","GI 5"],["Glass noodle","GI 39"],["Oats","GI 40"],["Sweet potato","GI 44"],["Basmati rice","GI 50"],["Low GI rice","GI 54"]],[["Corn","GI 52"],["Taro","GI 53"],["Potato","GI 58"],["Oat milk","GI 60"],["Rice berry","GI 62"],["Pumpkin","GI 64"],["Brown rice","GI 68"]],[["Pastries","GI 70"],["Instant noodle","GI 73"],["White bread","GI 75"],["Mashed potato","GI 78"],["Rice porridge","GI 83"],["Sticky rice","GI 87"],["Jasmine rice","GI 89"]]],
+    ["Fruit Guide (GI)",[["Guava","GI 12"],["Cherries","GI 22"],["Strawberries","GI 25"],["Blueberries","GI 25"],["Grapefruit","GI 25"],["Apple","GI 36"],["Pear","GI 38"]],[["Orange","GI 43"],["Grapes","GI 46"],["Dragon fruit","GI 48"],["Kiwi","GI 50"],["Mango","GI 51"],["Banana","GI 51"],["Papaya","GI 56"]],[["Durian","GI 44*"],["Lychee","GI 57"],["Rambutan","GI 59"],["Pineapple","GI 66"],["Ripe banana","GI 70"],["Watermelon","GI 72"]]],
+    ["Protein",[["Eggs 2-3/meal"],["Salmon, sardines"],["Chicken breast/thigh"],["Pork tenderloin"],["Firm tofu"],["Greek yogurt"],["Shrimp, squid"]],[["Fried chicken (no batter)"],["Pork belly (small)"],["Duck"],["Beef (lean)"]],[["Hotdog, sausage"],["Processed ham"],["KFC / battered"],["Fish balls"]]],
+    ["Vegetables",[["Morning glory"],["Bitter gourd"],["Broccoli, cauliflower"],["Spinach, kale"],["Mushrooms"],["Cucumber, tomato"],["Cabbage, lettuce"],["Kimchi"]],[["Carrots (cooked)"],["Peas"],["Bell pepper"],["Beetroot"]],[["Corn (starch)"],["Potatoes / taro"],["Canned w/ sugar"]]],
+    ["Healthy Fats",[["Olive oil"],["Coconut oil"],["Avocado"],["Almonds, walnuts"],["Pumpkin seeds"],["Dark choc 85%+"]],[["Butter (small)"],["Cheese (small)"],["Coconut cream"],["Dark choc 70%"]],[["Canola / soybean oil"],["Margarine"],["Honey-roasted nuts"]]],
+    ["Drinks",[["Water 8-10 glasses"],["Green tea"],["Ginger tea"],["Black coffee"],["Almond milk"],["Chrysanthemum tea"]],[["Unsweetened soy milk"],["Coconut water (small)"],["Sparkling water"]],[["Milk tea / cha yen"],["Soda"],["3-in-1 coffee"],["Fruit juice"],["Energy drinks"],["Alcohol"]]],
+    ["Treats",[["Dark choc 85%+"],["Stevia"],["Monk fruit"],["Unsweetened cacao"]],[["Dark choc 70%"],["Coconut cream dessert"],["Yogurt + berries"]],[["Candy, ice cream"],["Honey, agave"],["Coconut sugar"],["Regular sugar"]]],
+  ];
 
   const science={
-    spikes:[{h:"What is a spike?",p:"Carbs flood bloodstream. Healthy pancreas releases insulin in minutes. When impaired, glucose stays elevated."},{h:"Angkhana's data",p:"White rice: +97 (alarm). Low GI rice: +46 (moderate). Potatoes: +20 (ok). Chicken+veggies: negative delta."}],
-    pancreas:[{h:"Beta cell fatigue",p:"Not dead - exhausted. Remove fat + reduce demand = they recover."},{h:"Recovery",p:"1. Remove demand (no sugar). 2. Improve sensitivity (berberine, exercise). 3. Reduce visceral fat (IF). 4. Beta cells regenerate 4-12 weeks."}],
-    exercise:[{h:"Insulin bypass",p:"GLUT4 transporters open WITHOUT insulin. Angkhana's swim: 131 to 101."},{h:"48-hour effect",p:"After intense exercise, insulin sensitivity improves for 48 hours."}],
-    sleep:[{h:"Cortisol connection",p:"Poor sleep triggers cortisol. One night <6h = glucose +15-30."},{h:"Glucose-sleep cycle",p:"High evening glucose disrupts sleep. Break with: early dinner, magnesium."}],
-    food:[{h:"Fiber first, carbs last",p:"Same food, different order = 40% less spike."},{h:"IF mechanism",p:"Fasting window: insulin drops, fat-burning starts. 16:8 = 16h liver processing."}],
+    spikes:[
+      {h:"What is a spike?",p:"When you eat carbs, glucose floods your bloodstream. A healthy pancreas releases insulin within minutes (first-phase response). When impaired, glucose stays elevated - that's a spike."},
+      {h:"Delta ranges",p:"Under +30: Excellent - pancreas responded on time.\n+30-50: Moderate - manageable but shouldn't be daily.\n+50-80: Poor - first-phase insulin didn't fire.\n+80+: Alarm - triggers inflammation cascades."},
+      {h:"Absolute ranges",p:"Under 140: Target - no damage.\n140-180: Damage zone - repairable if occasional.\n180-250: Active damage - glycation.\n250+: Emergency."},
+      {h:"Area under the curve",p:"Not just the peak - it's how LONG glucose stays high. 160 that drops in 30 min (post-walk) does far less damage than 160 for 3 hours (sitting)."},
+      {h:"Angkhana's data",p:"White rice: +97 (alarm). Low GI rice 3 spoons: +46 (moderate). Potatoes: +20 (ok). Chicken + veggies: negative delta (perfect)."},
+    ],
+    pancreas:[
+      {h:"How insulin works",p:"Beta cells produce insulin in two phases: quick burst (5 min) and sustained release (1-2 hrs). In Type 2, first-phase is impaired."},
+      {h:"Beta cell fatigue",p:"Not dead - exhausted and surrounded by fat. Remove fat + reduce demand = they recover."},
+      {h:"Insulin resistance",p:"Cells downregulate receptors when constantly flooded. Pancreas produces MORE insulin, exhausting beta cells. Breaking this cycle is the core goal."},
+      {h:"Recovery signs",p:"Fasting dropping = liver becoming insulin-sensitive. Spikes shrinking = beta cells recovering. Same meal smaller spike = peripheral sensitivity improving."},
+    ],
+    exercise:[
+      {h:"Insulin bypass",p:"GLUT4 transporters open WITHOUT insulin. Angkhana's swim: 131 to 101."},
+      {h:"Walking after meals",p:"10-15 min drops post-meal glucose 20-40 points. Leg muscles act as glucose sponges."},
+      {h:"Weight training",p:"Biggest unused lever. Micro-tears = muscles absorb glucose for 24-48 hours to repair. More muscle = more disposal 24/7."},
+      {h:"48-hour effect",p:"After intense exercise, insulin sensitivity improves for 48 hours. Cumulative."},
+    ],
+    supps:[
+      {h:"Berberine",p:"Works like metformin. Activates AMPK. Increases glucose uptake, reduces liver production. Takes 2-4 weeks. Must take WITH food."},
+      {h:"Fish Oil",p:"Omega-3s reduce liver triglyceride production. Anti-inflammatory for insulin receptors. 3-4g/day for therapeutic effect."},
+      {h:"Magnesium",p:"300+ enzyme reactions including insulin signaling. Glycinate absorbs best. Bedtime dosing improves sleep."},
+      {h:"D3 + K2",p:"Vitamin D receptors on beta cells and muscle cells. K2 directs calcium to bones. Always take with fat."},
+      {h:"Timing",p:"Berberine + Fish Oil WITH meals: work on the food you're eating.\nMg + D3/K2 at BEDTIME: Mg calms for sleep, D3 absorbs overnight."},
+    ],
+    sleep:[
+      {h:"Cortisol connection",p:"Poor sleep triggers cortisol. Cortisol tells liver to dump glucose. One night <6h = glucose +15-30 next morning."},
+      {h:"Sleep loss = insulin resistance",p:"One night of 4-5 hours reduces sensitivity by 25-30%. A week of <6h = pre-diabetic resistance levels."},
+      {h:"Growth hormone",p:"Deep sleep triggers growth hormone for muscle repair, fat metabolism, beta cell regeneration. Poor sleep = slower recovery."},
+      {h:"Glucose-sleep cycle",p:"High evening glucose disrupts sleep. Poor sleep raises morning glucose. Break with: early dinner, walk, dark room, magnesium."},
+    ],
+    food:[
+      {h:"Fiber first, carbs last",p:"Fiber creates a gel barrier. Carbs absorb slowly. Same meal, different order = 40% less spike."},
+      {h:"GI truth",p:"'Low GI' measured in healthy people. For impaired insulin, even low GI spikes significantly. Angkhana's low GI rice +46 proves this."},
+      {h:"Protein + fat = safe",p:"Protein: minimal insulin, zero spike. Fat: zero insulin. Combined: steady energy 4-6 hours."},
+      {h:"Carb threshold",p:"Everyone has a personal threshold. Angkhana's is very low now (3 spoons rice overwhelmed). Threshold rises as beta cells recover."},
+      {h:"IF mechanism",p:"Fasting: insulin drops, body switches to fat-burning. 16:8 = 16 hours liver fat-processing per day."},
+      {h:"Meal timing",p:"Insulin sensitivity highest in morning, drops through day. Same meal at 7am = smaller spike than 7pm."},
+    ],
   };
 
   return(
     <div style={{padding:"14px 16px 90px",fontFamily:"'DM Sans',sans-serif"}}>
       <div style={{marginBottom:14}}><span style={{fontSize:24,fontWeight:300,color:t.text,letterSpacing:"-0.03em"}}>Guide</span></div>
       <div style={{display:"flex",gap:4,flexWrap:"wrap",marginBottom:16}}>
-        {[["lifestyle","Lifestyle"],["food","Food"],["science","Science"]].map(([k,l])=>(<Pill key={k} active={sec===k} onClick={()=>setSec(k)}>{l}</Pill>))}
+        {[["lifestyle","Lifestyle"],["food","Food & Supps"],["science","Body Science"]].map(([k,l])=>(<Pill key={k} active={sec===k} onClick={()=>setSec(k)}>{l}</Pill>))}
       </div>
 
+      {/* LIFESTYLE */}
       {sec==="lifestyle"&&<div>
-        {habits.map((h,i)=>(<div key={i} style={{background:t.card,borderRadius:14,padding:"12px 14px",marginBottom:6,boxShadow:t.csh,display:"flex",gap:10,alignItems:"flex-start"}}>
+        <div style={{fontSize:14,fontWeight:700,marginBottom:10}}>Daily Habits</div>
+        {habits.map((h,i)=>(<div key={i} style={{background:t.card,borderRadius:14,padding:"10px 14px",marginBottom:5,boxShadow:t.csh,display:"flex",gap:10,alignItems:"flex-start"}}>
           <span style={{fontSize:18,flexShrink:0}}>{h.icon}</span>
           <div><div style={{fontSize:13,fontWeight:600,lineHeight:1.3}}>{h.step}</div><div style={{fontSize:11,color:t.muted,marginTop:2}}>{h.impact}</div></div>
         </div>))}
+        <div style={{fontSize:14,fontWeight:700,marginTop:16,marginBottom:6}}>Activity Ideas</div>
+        <div style={{display:"flex",gap:4,marginBottom:10}}>
+          <Pill active={actTab==="activities"} onClick={()=>setActTab("activities")}>Activities</Pill>
+          <Pill active={actTab==="recovery"} onClick={()=>setActTab("recovery")}>Recovery</Pill>
+        </div>
+        <div style={{background:t.card,borderRadius:14,overflow:"hidden",boxShadow:t.csh}}>
+          {(actTab==="activities"?activities:recovery).map((a,i,arr)=>(
+            <div key={i} style={{padding:"10px 14px",borderBottom:i<arr.length-1?`1px solid ${t.tile}`:"none",display:"flex",gap:10,alignItems:"flex-start"}}>
+              <span style={{fontSize:18,flexShrink:0}}>{a.emoji}</span>
+              <div style={{flex:1}}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                  <span style={{fontSize:13,fontWeight:600}}>{a.name}</span>
+                  <span style={{fontSize:11,color:t.ok,fontWeight:700}}>{a.pts}</span>
+                </div>
+                <div style={{fontSize:11,color:t.muted}}>{a.note}</div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>}
 
+      {/* FOOD - slidable 3-col grid per category */}
       {sec==="food"&&<div>
-        {[["Carb Guide",[["Konjac rice","GI 0","ok"],["Sweet potato","GI 44","ok"],["Low GI rice","GI 54","ok"],["Brown rice","GI 68","warn"],["Sticky rice","GI 87","danger"],["Jasmine rice","GI 89","danger"]]],
-          ["Protein",[["Eggs, salmon, chicken","Safe","ok"],["Pork belly (small)","Limit","warn"],["Hotdog, KFC","Avoid","danger"]]],
-          ["Drinks",[["Water, green tea, black coffee","Safe","ok"],["Unsweetened soy milk","Limit","warn"],["Milk tea, soda, juice","Avoid","danger"]]],
-        ].map(([cat,items],ci)=>(<div key={ci} style={{marginBottom:16}}>
+        {foodCats.map(([cat,safe,limit,avoid],ci)=>(<div key={ci} style={{marginBottom:16}}>
           <div style={{fontSize:14,fontWeight:700,color:t.accent,marginBottom:8}}>{cat}</div>
-          {items.map(([name,tag,sev],i)=>{const bg=sev==="ok"?t.okBg:sev==="warn"?t.warnBg:t.dangerBg;const col=sev==="ok"?t.ok:sev==="warn"?t.warn:t.danger;
-            return(<div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 12px",marginBottom:4,background:bg,borderRadius:10}}>
-              <span style={{fontSize:13,fontWeight:500,color:t.text}}>{name}</span>
-              <span style={{fontSize:11,fontWeight:600,color:col}}>{tag}</span>
-            </div>)})}
+          <div style={{overflowX:"auto",WebkitOverflowScrolling:"touch",marginLeft:-4,marginRight:-4,paddingLeft:4,paddingRight:4}}>
+            <div style={{display:"flex",gap:8,minWidth:540}}>
+              <Col title="SAFE" color={t.ok} bg={t.okBg} items={safe}/>
+              <Col title="LIMIT" color={t.warn} bg={t.warnBg} items={limit}/>
+              <Col title="AVOID" color={t.danger} bg={t.dangerBg} items={avoid}/>
+            </div>
+          </div>
         </div>))}
-        <div style={{fontSize:14,fontWeight:700,color:t.accent,marginBottom:8}}>Supplements</div>
-        {[["Berberine","600mg x2 w/ meals","Trig -20-35%"],["Fish Oil","3-4g EPA+DHA","Trig -20-50%"],["Magnesium","200mg bedtime","Sleep + glucose"],["D3+K2","2000-5000 IU","Insulin receptors"]].map(([n,d,e],i)=>(
-          <div key={i} style={{background:t.card,borderRadius:10,padding:"10px 14px",marginBottom:4,boxShadow:t.csh,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-            <div><div style={{fontSize:13,fontWeight:600}}>{n}</div><div style={{fontSize:11,color:t.muted}}>{d}</div></div>
-            <span style={{fontSize:11,color:t.accent,fontWeight:600}}>{e}</span>
+        <div style={{fontSize:14,fontWeight:700,color:t.accent,marginBottom:8,marginTop:8}}>Supplements</div>
+        {[
+          ["\uD83C\uDF3F","Berberine","600mg x2 w/ meals","Trig -20-35%, A1C -0.9-2%"],
+          ["\uD83D\uDC1F","Fish Oil","3-4g EPA+DHA split","Trig -20-50%"],
+          ["\uD83D\uDC8E","Magnesium","200mg+ bedtime","A1C -0.3-0.5%"],
+          ["\u2600\uFE0F","D3 + K2","2000-5000 IU + 100mcg","Insulin receptor support"],
+        ].map(([icon,n,d,e],i)=>(
+          <div key={i} style={{background:t.card,borderRadius:12,padding:"10px 14px",marginBottom:5,boxShadow:t.csh,display:"flex",gap:10,alignItems:"center"}}>
+            <span style={{fontSize:18}}>{icon}</span>
+            <div style={{flex:1}}><div style={{fontSize:13,fontWeight:600}}>{n}</div><div style={{fontSize:11,color:t.muted}}>{d}</div></div>
+            <span style={{fontSize:10,color:t.accent,fontWeight:600,textAlign:"right",maxWidth:80}}>{e}</span>
+          </div>
+        ))}
+        <div style={{fontSize:13,fontWeight:600,color:t.accent,marginTop:12,marginBottom:6}}>Quick Rules</div>
+        {[
+          ["\uD83E\uDD57","Eating order matters","Fiber/veggies first, then protein, then fat, carbs LAST."],
+          ["\uD83C\uDF72","Soup = secret weapon","Tom jeud, bone broth. Fills stomach, very low calorie."],
+          ["\uD83D\uDEAB","Added sugar limit","Day 1-30: 0g. Day 31-60: max 10g. Day 61-90: max 15g."],
+        ].map(([icon,tip,detail],i)=>(
+          <div key={i} style={{background:t.card,borderRadius:10,padding:"10px 14px",marginBottom:4,boxShadow:t.csh}}>
+            <div style={{fontSize:12,fontWeight:700,color:t.text}}>{icon} {tip}</div>
+            <div style={{fontSize:11,color:t.muted,marginTop:2}}>{detail}</div>
           </div>
         ))}
       </div>}
 
+      {/* SCIENCE - S2 accordion */}
       {sec==="science"&&<div>
         <div style={{display:"flex",gap:4,flexWrap:"wrap",marginBottom:12}}>
-          {[["spikes","Spikes"],["pancreas","Pancreas"],["exercise","Exercise"],["sleep","Sleep"],["food","Food"]].map(([k,l])=>(<Pill key={k} active={sciTopic===k} onClick={()=>setSciTopic(sciTopic===k?null:k)}>{l}</Pill>))}
+          {[["spikes","Spikes"],["pancreas","Pancreas"],["exercise","Exercise"],["supps","Supplements"],["sleep","Sleep"],["food","Food"]].map(([k,l])=>(<Pill key={k} active={sciTopic===k} onClick={()=>{setSciTopic(sciTopic===k?null:k);setSciOpen(null)}}>{l}</Pill>))}
         </div>
-        {sciTopic&&science[sciTopic]?science[sciTopic].map((c,i)=>(<div key={i} style={{background:t.card,borderRadius:14,padding:"12px 16px",marginBottom:8,boxShadow:t.csh}}>
-          <div style={{fontSize:14,fontWeight:700,color:t.accent,marginBottom:4}}>{c.h}</div>
-          <div style={{fontSize:13,color:t.text,lineHeight:1.7}}>{c.p}</div>
-        </div>)):(!sciTopic&&<div style={{fontSize:13,color:t.muted,fontStyle:"italic"}}>Select a topic above</div>)}
+        {sciTopic&&science[sciTopic]?(<div style={{background:t.card,borderRadius:14,overflow:"hidden",boxShadow:t.csh}}>
+          {science[sciTopic].map((c,i,arr)=>(
+            <React.Fragment key={i}>
+              <div onClick={()=>setSciOpen(sciOpen===i?null:i)} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"12px 14px",cursor:"pointer",borderBottom:sciOpen===i||i<arr.length-1?`1px solid ${t.tile}`:"none"}}>
+                <span style={{fontSize:13,fontWeight:600,color:t.accent}}>{c.h}</span>
+                <span style={{fontSize:10,color:t.light}}>{sciOpen===i?"\u25B2":"\u25BC"}</span>
+              </div>
+              {sciOpen===i&&<div style={{padding:"8px 14px 14px",background:"#F9F8F5",borderBottom:i<arr.length-1?`1px solid ${t.tile}`:"none"}}>
+                {c.p.split("\n").map((line,li)=>(<div key={li} style={{fontSize:12,color:t.text,lineHeight:1.7,marginBottom:li>0?2:0}}>{line}</div>))}
+              </div>}
+            </React.Fragment>
+          ))}
+        </div>):(!sciTopic&&<div style={{fontSize:13,color:t.muted,fontStyle:"italic"}}>Select a topic above</div>)}
       </div>}
     </div>
   );
