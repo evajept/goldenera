@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 
 /* ═══════════════════════════════════════════════════════════════
    Golden Era Mobile v3
@@ -326,6 +326,8 @@ function LogTab({D,setD}){
 
 // --- JOURNEY ---
 function JourneyTab({D,loading}){
+  const[showLabs,setShowLabs]=useState(false);
+  const[expandedLab,setExpandedLab]=useState(null);
   const dates=Object.keys(D).sort();
   const find=(key)=>{for(let i=dates.length-1;i>=0;i--){const v=parseFloat(D[dates[i]]?.[key]);if(!isNaN(v))return v}return null};
   const metrics=[
@@ -336,9 +338,29 @@ function JourneyTab({D,loading}){
     {key:"hba1c",cur:find("lab_hba1c"),tgt:TARGETS.hba1c,fb:"Next: Day 30"},
     {key:"ggt",cur:find("lab_ggt"),tgt:TARGETS.ggt,fb:"Next: end Mar"},
   ];
+
+  // Lab data with confirmed + predictions (matching desktop)
+  const labMarkers=[
+    {marker:"HbA1C",field:"lab_hba1c",confirmed:"9.4%",normal:"<5.7%",status:"critical",s30:"8.2-8.5%",s60:"7.0-7.5%",s90:"5.8-6.3%"},
+    {marker:"Fasting Glucose",field:"lab_glucose",confirmed:"211",normal:"70-99",status:"critical",s30:"140-160",s60:"110-125",s90:"85-100"},
+    {marker:"Triglycerides",field:"lab_trig",confirmed:"702",normal:"<160",status:"critical",s30:"160-180",s60:"120-140",s90:"90-110",day15:"231"},
+    {marker:"GGT",field:"lab_ggt",confirmed:"184",normal:"9-39",status:"critical",s30:"100-130",s60:"50-70",s90:"25-40"},
+    {marker:"SGPT (ALT)",field:"lab_alt",confirmed:"50",normal:"<35",status:"warning",s30:"35-40",s60:"25-30",s90:"18-25"},
+    {marker:"SGOT (AST)",field:"lab_ast",confirmed:"31",normal:"<32",status:"ok",s30:"26-30",s60:"22-26",s90:"18-22"},
+    {marker:"Cholesterol",field:"lab_chol",confirmed:"220",normal:"<200",status:"warning",s30:"200-210",s60:"190-200",s90:"180-195"},
+    {marker:"Uric Acid",field:"lab_uric",confirmed:"7.2",normal:"2.3-6.1",status:"warning",s30:"6.2-6.5",s60:"5.5-6.0",s90:"5.0-5.5"},
+    {marker:"HDL-C",field:"lab_hdl",confirmed:"45",normal:">44",status:"ok",s30:"46-48",s60:"48-52",s90:"52-58"},
+    {marker:"LDL-C",field:"lab_ldl",confirmed:"109",normal:"<130",status:"ok",s30:"105-110",s60:"100-108",s90:"95-105"},
+    {marker:"Creatinine",field:"lab_creat",confirmed:"0.52",normal:"0.5-0.9",status:"ok",s30:"0.52",s60:"0.52",s90:"0.52"},
+    {marker:"eGFR",field:"lab_egfr",confirmed:"130",normal:">90",status:"ok",s30:"130",s60:"130",s90:"128"},
+  ];
+  const stC={critical:{bg:t.dangerBg,tx:t.danger},warning:{bg:t.warnBg,tx:t.warn},ok:{bg:t.okBg,tx:t.ok}};
+
   return(
     <div style={{padding:"14px 16px 90px",fontFamily:"'DM Sans',sans-serif"}}>
       <div style={{marginBottom:16}}><span style={{fontSize:24,fontWeight:300,color:t.text,letterSpacing:"-0.03em"}}>Journey</span></div>
+
+      {/* Progress bars */}
       {metrics.map(({key,cur,tgt,fb})=>{
         const pct=cur!=null?Math.min(100,Math.max(0,((tgt.s-cur)/(tgt.s-tgt.g))*100)):0;
         const ch=cur!=null?fmtPct(pctCh(tgt.s,cur)):null;
@@ -356,6 +378,70 @@ function JourneyTab({D,loading}){
             {note&&<span style={{color:cur!=null?t.accent:t.muted,fontWeight:cur!=null?600:400}}>{note}</span>}
           </div>
         </div>)})}
+
+      {/* Lab Data & Prediction - hideable scroll table */}
+      <div onClick={()=>setShowLabs(!showLabs)} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 4px",cursor:"pointer",marginTop:8}}>
+        <span style={{fontSize:16,fontWeight:600,color:t.text}}>{"\uD83E\uDE78"} Lab Data & Prediction</span>
+        <span style={{fontSize:11,color:t.muted,padding:"3px 10px",borderRadius:50,background:t.tile,boxShadow:t.sh}}>{showLabs?"Hide":"Show"}</span>
+      </div>
+      {showLabs&&(()=>{
+        const labMeanings={
+          "HbA1C":{what:"Average blood sugar over 3 months",why:"9.4% = uncontrolled diabetes.",risk:"Nerve/kidney/vision damage if above 8%.",fix:"Berberine, low-carb, walking, sleep 7+"},
+          "Fasting Glucose":{what:"Blood sugar after 8+ hours fasting",why:"211 = severely elevated. Normal 70-99.",risk:"Damages blood vessels, nerves.",fix:"Berberine, fiber first, zero sweet drinks, IF 14:10"},
+          "Triglycerides":{what:"Fat in blood from food and liver",why:"702 (4x limit). Day 15: 231 (-67%).",risk:"Pancreatitis risk cleared. Target <150.",fix:"Fish oil 3-4g/day, zero sweet drinks"},
+          "GGT":{what:"Liver enzyme for damage/inflammation",why:"184 = 4.7x upper limit. Fatty liver.",risk:"Liver scarring if untreated.",fix:"Liver regenerates in 6-8 weeks. Remove sugar"},
+          "SGPT (ALT)":{what:"Liver cell damage marker",why:"50 = slightly above 35 limit.",risk:"Mild. Will normalize with fatty liver resolution.",fix:"Same as GGT"},
+          "SGOT (AST)":{what:"Enzyme in liver, heart, muscles",why:"31 = within normal (<32).",risk:"OK. Monitor alongside ALT.",fix:"No action needed"},
+          "Cholesterol":{what:"Total LDL + HDL + VLDL",why:"220 = mildly elevated.",risk:"Will drop as trig normalizes.",fix:"Fish oil, fiber, walking"},
+          "Uric Acid":{what:"Waste from breaking down purines",why:"7.2 = above 6.1 limit.",risk:"Gout flares, kidney stones.",fix:"Hydration 2L+, reduce organ meats"},
+          "HDL-C":{what:"Good cholesterol",why:"45 = borderline (min 44). Target 50+.",risk:"Low HDL = higher cardio risk.",fix:"Exercise, olive oil, nuts"},
+          "LDL-C":{what:"Bad cholesterol",why:"109 = within normal (<130).",risk:"OK for now.",fix:"Focus on trig and glucose first"},
+          "Creatinine":{what:"Kidney waste product",why:"0.52 = perfect.",risk:"None. Kidneys healthy.",fix:"Stay hydrated"},
+          "eGFR":{what:"Kidney filtration rate",why:"130 = excellent (>90 normal).",risk:"None.",fix:"Maintain hydration"},
+        };
+        return(<div style={{background:t.card,borderRadius:14,overflow:"hidden",boxShadow:t.csh}}>
+          <div style={{overflowX:"auto",WebkitOverflowScrolling:"touch"}}>
+            <table style={{width:"100%",borderCollapse:"collapse",minWidth:520,fontSize:12}}>
+              <thead><tr style={{background:t.tile}}>
+                <th style={{padding:"8px 10px",textAlign:"left",fontWeight:600,color:t.muted,minWidth:100}}>Marker</th>
+                <th style={{padding:"8px 8px",textAlign:"center",color:t.light,fontWeight:600,minWidth:50,fontSize:11}}>Normal</th>
+                <th style={{padding:"8px 6px",textAlign:"center",color:t.muted,fontWeight:700,minWidth:50}}>Base</th>
+                <th style={{padding:"8px 6px",textAlign:"center",color:t.muted,fontWeight:600,minWidth:55}}>D30</th>
+                <th style={{padding:"8px 6px",textAlign:"center",color:t.muted,fontWeight:600,minWidth:55}}>D60</th>
+                <th style={{padding:"8px 6px",textAlign:"center",color:t.accent,fontWeight:700,minWidth:55}}>D90</th>
+                <th style={{padding:"8px 4px",minWidth:20}}></th>
+              </tr></thead>
+              <tbody>{labMarkers.map((r,ri)=>{
+                const sc=stC[r.status];const bg=ri%2===0?t.card:"#F5F2ED";
+                const meaning=labMeanings[r.marker];
+                const isOpen=expandedLab===ri;
+                return(<React.Fragment key={r.marker}>
+                  <tr style={{background:bg,cursor:"pointer"}} onClick={()=>setExpandedLab(isOpen?null:ri)}>
+                    <td style={{padding:"8px 10px",fontWeight:600,fontSize:13}}>
+                      <div style={{display:"flex",alignItems:"center",gap:5}}>
+                        <div style={{width:6,height:6,borderRadius:"50%",background:sc.tx,flexShrink:0}}/>
+                        {r.marker}
+                      </div>
+                    </td>
+                    <td style={{padding:"8px 8px",textAlign:"center",fontSize:10,color:t.light}}>{r.normal}</td>
+                    <td style={{padding:"8px 6px",textAlign:"center",fontSize:14,fontWeight:700,color:sc.tx}}>{r.confirmed}</td>
+                    <td style={{padding:"8px 6px",textAlign:"center",color:t.muted,fontSize:12}}>{r.s30}</td>
+                    <td style={{padding:"8px 6px",textAlign:"center",color:t.muted,fontSize:12}}>{r.s60}</td>
+                    <td style={{padding:"8px 6px",textAlign:"center",fontWeight:700,color:t.accent,fontSize:13}}>{r.s90}</td>
+                    <td style={{padding:"8px 4px",textAlign:"center",fontSize:10,color:t.light}}>{isOpen?"\u25B2":"\u25BC"}</td>
+                  </tr>
+                  {isOpen&&meaning&&<tr><td colSpan={7} style={{padding:"10px 14px 12px",background:"#F9F8F5",borderBottom:`1px solid ${t.tile}`}}>
+                    <div style={{fontSize:12,color:t.text,lineHeight:1.6}}>{meaning.what}</div>
+                    <div style={{fontSize:12,color:t.text,lineHeight:1.6}}>{meaning.why}</div>
+                    <div style={{fontSize:12,color:t.danger,lineHeight:1.6}}>{meaning.risk}</div>
+                    <div style={{fontSize:12,color:t.ok,lineHeight:1.6}}>Fix: {meaning.fix}</div>
+                  </td></tr>}
+                </React.Fragment>);
+              })}</tbody>
+            </table>
+          </div>
+        </div>);
+      })()}
     </div>
   );
 }
