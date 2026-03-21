@@ -51,7 +51,7 @@ const cSets={
   wt:{data:chartData.wt,label:"Weight",ref:60,refL:"60kg",dom:[55,75]},
   ggt:{data:chartData.ggt,label:"GGT",ref:39,refL:"<39",dom:[0,200]},
   chol:{data:chartData.chol,label:"Cholesterol",ref:200,refL:"<200",dom:[150,240]},
-  gluc:{data:[chartData.gluc[0],chartData.gluc[15],chartData.gluc[18],chartData.gluc[19],chartData.gluc[20]],label:"Glucose",ref:99,refL:"<99",dom:[50,230]},
+  gluc:{data:[chartData.gluc[0],chartData.gluc[15],chartData.gluc[19],chartData.gluc[20],chartData.gluc[21],chartData.gluc[22]],label:"Glucose",ref:99,refL:"<99",dom:[50,230]},
   bmi:{data:chartData.bmi,label:"BMI",ref:23,refL:"<23",dom:[18,28]},
 };
 
