@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { clinicalNotes as CLINICAL_NOTES, labMarkers as SHARED_LAB_MARKERS, labMeanings as SHARED_LAB_MEANINGS, TARGETS, SHEET_API } from "./shared/data";
 
 /* ═══════════════════════════════════════════════════════════════
    Golden Era Mobile v3
-   Bold metrics, gradient bars, M-S axis, body/lab in Log, Guide tab
+   Imports shared data from ./shared/data.js
    ═══════════════════════════════════════════════════════════════ */
 
-const API = "https://script.google.com/macros/s/AKfycbxWHehS2Drs5gXKPuNv1u173pLu7Mr8ZOJ7KX5pEOS4L5K-X7HOeHBN1Cw9pUt5Byf2Hw/exec";
+const API = SHEET_API;
 const DAY1 = new Date("2026-03-02");
 const t = {
   bg:"#E8E4DE",card:"#FDFCF9",tile:"#E8E3DB",on:"#C8DFC9",
@@ -15,7 +16,7 @@ const t = {
   sh:"0 2px 8px rgba(0,0,0,0.10)",shOn:"0 3px 10px rgba(74,122,80,0.20)",
   csh:"0 3px 16px rgba(0,0,0,0.08)",dotFill:"#FDFCF9",
 };
-const TARGETS={glucose:{s:211,g:85,u:"mg/dL",l:"Fasting Glucose"},trig:{s:702,g:100,u:"mg/dL",l:"Triglycerides"},weight:{s:73.6,g:60,u:"kg",l:"Weight"},bmi:{s:26.4,g:22,u:"",l:"BMI"},hba1c:{s:9.4,g:5.5,u:"%",l:"HbA1C"},ggt:{s:184,g:25,u:"U/L",l:"GGT"}};
+// TARGETS imported from shared/data.js
 
 const GRID=[
   {id:"berb",icon:"\uD83C\uDF3F",l:"Berb",field:"berb",cycle:["0","x1","x2"]},
@@ -32,6 +33,10 @@ const GRID=[
   {id:"brazil",icon:"\uD83E\uDD5C",l:"Brazil",field:"brazil",cycle:[false,true]},
 ];
 const EXERCISES=["rest","walk","stretch","cardio","weights"];
+
+// ─── Clinical Notes (shared with desktop - update in one place) ───
+// CLINICAL_NOTES imported from shared/data.js
+
 
 const BODY_ROWS=[
   {label:"\u2696\uFE0F Weight",field:"body_weight",ph:"kg"},
@@ -203,11 +208,30 @@ function HomeTab({D,loading,setTab}){
           <div style={{padding:"24px 0",textAlign:"center",fontSize:13,color:t.muted}}>{loading?"Loading...":"Log glucose to see the trend"}</div>
         )}
       </div>
+
+      {/* Latest insight teaser - P3 */}
+      {(()=>{
+        const keys=Object.keys(CLINICAL_NOTES).sort((a,b)=>{const dA=parseInt(a.match(/Day (\d+)/)?.[1]||"0");const dB=parseInt(b.match(/Day (\d+)/)?.[1]||"0");return dB-dA});
+        if(keys.length===0)return null;
+        const latestKey=keys[0];const notes=CLINICAL_NOTES[latestKey];const first=notes[0];if(!first)return null;
+        const sevCol={excellent:t.ok,ontrack:t.warn,grow:t.danger}[first.sev]||t.muted;
+        return(
+          <div onClick={()=>setTab("journey")} style={{background:t.card,borderRadius:16,padding:"12px 16px",marginTop:12,boxShadow:t.csh,cursor:"pointer"}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+              <div style={{flex:1}}>
+                <div style={{fontSize:10,color:t.muted,marginBottom:3}}>{latestKey}</div>
+                <div style={{fontSize:13,fontWeight:600,color:sevCol,lineHeight:1.3}}>{first.icon} {first.title}</div>
+                <div style={{fontSize:11,color:t.muted,marginTop:3,lineHeight:1.4,display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical",overflow:"hidden"}}>{first.text}</div>
+              </div>
+              <div style={{fontSize:16,color:t.light,marginLeft:10,flexShrink:0}}>{">"}</div>
+            </div>
+            <div style={{textAlign:"center",fontSize:10,color:t.accent,fontWeight:600,marginTop:8,paddingTop:6,borderTop:`1px solid ${t.tile}`}}>View full insights in Journey</div>
+          </div>
+        );
+      })()}
     </div>
   );
 }
-
-// --- LOG (with date picker, body, lab) ---
 function LogTab({D,setD}){
   const[selDate,setSelDate]=useState(todayISO());
   const[showBody,setShowBody]=useState(false);
@@ -328,6 +352,9 @@ function LogTab({D,setD}){
 function JourneyTab({D,loading}){
   const[showLabs,setShowLabs]=useState(false);
   const[expandedLab,setExpandedLab]=useState(null);
+  const[showInsight,setShowInsight]=useState(true);
+  const[showNotes,setShowNotes]=useState(false);
+  const[noteDay,setNoteDay]=useState(()=>{const keys=Object.keys(CLINICAL_NOTES).sort((a,b)=>{const dA=parseInt(a.match(/Day (\d+)/)?.[1]||"0");const dB=parseInt(b.match(/Day (\d+)/)?.[1]||"0");return dB-dA});return keys[0]||null});
   const dates=Object.keys(D).sort();
   const find=(key)=>{for(let i=dates.length-1;i>=0;i--){const v=parseFloat(D[dates[i]]?.[key]);if(!isNaN(v))return v}return null};
   const metrics=[
@@ -340,20 +367,7 @@ function JourneyTab({D,loading}){
   ];
 
   // Lab data with confirmed + predictions (matching desktop)
-  const labMarkers=[
-    {marker:"HbA1C",field:"lab_hba1c",confirmed:"9.4%",normal:"<5.7%",status:"critical",s30:"8.2-8.5%",s60:"7.0-7.5%",s90:"5.8-6.3%"},
-    {marker:"Fasting Glucose",field:"lab_glucose",confirmed:"211",normal:"70-99",status:"critical",s30:"140-160",s60:"110-125",s90:"85-100"},
-    {marker:"Triglycerides",field:"lab_trig",confirmed:"702",normal:"<160",status:"critical",s30:"160-180",s60:"120-140",s90:"90-110",day15:"231"},
-    {marker:"GGT",field:"lab_ggt",confirmed:"184",normal:"9-39",status:"critical",s30:"100-130",s60:"50-70",s90:"25-40"},
-    {marker:"SGPT (ALT)",field:"lab_alt",confirmed:"50",normal:"<35",status:"warning",s30:"35-40",s60:"25-30",s90:"18-25"},
-    {marker:"SGOT (AST)",field:"lab_ast",confirmed:"31",normal:"<32",status:"ok",s30:"26-30",s60:"22-26",s90:"18-22"},
-    {marker:"Cholesterol",field:"lab_chol",confirmed:"220",normal:"<200",status:"warning",s30:"200-210",s60:"190-200",s90:"180-195"},
-    {marker:"Uric Acid",field:"lab_uric",confirmed:"7.2",normal:"2.3-6.1",status:"warning",s30:"6.2-6.5",s60:"5.5-6.0",s90:"5.0-5.5"},
-    {marker:"HDL-C",field:"lab_hdl",confirmed:"45",normal:">44",status:"ok",s30:"46-48",s60:"48-52",s90:"52-58"},
-    {marker:"LDL-C",field:"lab_ldl",confirmed:"109",normal:"<130",status:"ok",s30:"105-110",s60:"100-108",s90:"95-105"},
-    {marker:"Creatinine",field:"lab_creat",confirmed:"0.52",normal:"0.5-0.9",status:"ok",s30:"0.52",s60:"0.52",s90:"0.52"},
-    {marker:"eGFR",field:"lab_egfr",confirmed:"130",normal:">90",status:"ok",s30:"130",s60:"130",s90:"128"},
-  ];
+  const labMarkers=SHARED_LAB_MARKERS;
   const stC={critical:{bg:t.dangerBg,tx:t.danger},warning:{bg:t.warnBg,tx:t.warn},ok:{bg:t.okBg,tx:t.ok}};
 
   return(
@@ -379,26 +393,83 @@ function JourneyTab({D,loading}){
           </div>
         </div>)})}
 
+      {/* Weekly Insight - collapsible */}
+      <div onClick={()=>setShowInsight(!showInsight)} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 4px",cursor:"pointer",marginTop:8}}>
+        <span style={{fontSize:16,fontWeight:600,color:t.text}}>{"\uD83D\uDCA1"} Weekly Insight</span>
+        <span style={{fontSize:11,color:t.muted,padding:"3px 10px",borderRadius:50,background:t.tile,boxShadow:t.sh}}>{showInsight?"Hide":"Show"}</span>
+      </div>
+      {showInsight&&(()=>{
+        // Compute week metrics from data
+        const today=new Date();const dy=today.getDay();const diff=today.getDate()-dy+(dy===0?-6:1);
+        const mon=new Date(today);mon.setDate(diff);const weekDates=[];
+        for(let i=0;i<7;i++){const dd=new Date(mon);dd.setDate(mon.getDate()+i);weekDates.push(`${dd.getFullYear()}-${String(dd.getMonth()+1).padStart(2,"0")}-${String(dd.getDate()).padStart(2,"0")}`);}
+        const glucVals=weekDates.map(d=>{const v=D[d]?.glucFast;return v?parseFloat(v):null}).filter(v=>v&&!isNaN(v));
+        const glucAvg=glucVals.length?Math.round(glucVals.reduce((a,b)=>a+b,0)/glucVals.length):null;
+        const postVals=weekDates.map(d=>{const v=D[d]?.glucPost;return v?parseFloat(v):null}).filter(v=>v&&!isNaN(v));
+        const postAvg=postVals.length?Math.round(postVals.reduce((a,b)=>a+b,0)/postVals.length):null;
+        let sleepGood=0,sleepTotal=0;
+        weekDates.forEach(d=>{const s=D[d]?.sleep;if(s){sleepTotal++;if(s==="7+"||s==="8+")sleepGood++}});
+
+        return(<div>
+          {/* Key highlights */}
+          {glucAvg&&<div style={{display:"flex",gap:6,marginBottom:10}}>
+            {[
+              {label:"Fasting",val:glucAvg,color:glucAvg<=99?t.ok:glucAvg<=140?t.warn:t.danger},
+              postAvg&&{label:"Post-meal",val:postAvg,color:postAvg<=140?t.ok:postAvg<=180?t.warn:t.danger},
+              sleepTotal>0&&{label:"Sleep",val:`${sleepGood}/${sleepTotal}`,sub:"nights 7+",color:sleepGood>=sleepTotal*0.7?t.ok:t.warn},
+            ].filter(Boolean).map((m,i)=>(
+              <div key={i} style={{flex:1,textAlign:"center",background:t.card,borderRadius:12,padding:"8px 4px",boxShadow:t.csh}}>
+                <div style={{fontSize:9,color:t.muted,textTransform:"uppercase"}}>{m.label}</div>
+                <div style={{fontSize:18,fontWeight:700,color:m.color}}>{m.val}</div>
+                {m.sub&&<div style={{fontSize:9,color:t.muted}}>{m.sub}</div>}
+              </div>
+            ))}
+          </div>}
+
+          {/* Key learnings + Next week focus */}
+          <div style={{background:t.okBg,borderRadius:12,padding:"10px 14px",marginBottom:6}}>
+            <div style={{fontSize:10,fontWeight:700,color:t.ok,textTransform:"uppercase",marginBottom:4}}>Key Learnings</div>
+            {glucVals.length>=2&&glucVals[glucVals.length-1]<glucVals[0]&&<div style={{fontSize:12,color:t.ok,fontWeight:600,lineHeight:1.6}}>{"\u2713"} Fasting trending down this week</div>}
+            {glucAvg&&glucAvg<=100&&<div style={{fontSize:12,color:t.ok,fontWeight:600,lineHeight:1.6}}>{"\u2713"} Fasting avg in normal range ({glucAvg})</div>}
+            {sleepGood>=4&&<div style={{fontSize:12,color:t.ok,fontWeight:600,lineHeight:1.6}}>{"\u2713"} {sleepGood}/{sleepTotal} nights 7+ hours sleep</div>}
+          </div>
+          <div style={{background:"#dde8f5",borderRadius:12,padding:"10px 14px",marginBottom:10}}>
+            <div style={{fontSize:10,fontWeight:700,color:"#185fa5",textTransform:"uppercase",marginBottom:4}}>Next Week Focus</div>
+            <div style={{fontSize:12,color:t.text,fontWeight:600,lineHeight:1.6}}>{"\uD83D\uDE34"} Maintain sleep 7+ streak</div>
+            <div style={{fontSize:12,color:t.text,fontWeight:600,lineHeight:1.6}}>{"\uD83C\uDFCA"} Resume swimming / cardio</div>
+            <div style={{fontSize:12,color:t.text,fontWeight:600,lineHeight:1.6}}>{"\uD83E\uDDE0"} Trust low readings - don't panic eat</div>
+          </div>
+        </div>);
+      })()}
+
+      {/* Daily Notes - collapsible */}
+      <div onClick={()=>setShowNotes(!showNotes)} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 4px",cursor:"pointer"}}>
+        <span style={{fontSize:16,fontWeight:600,color:t.text}}>{"\uD83D\uDCDD"} Daily Notes</span>
+        <span style={{fontSize:11,color:t.muted,padding:"3px 10px",borderRadius:50,background:t.tile,boxShadow:t.sh}}>{showNotes?"Hide":"Show"}</span>
+      </div>
+      {showNotes&&<div>
+        <div style={{display:"flex",gap:4,flexWrap:"wrap",marginBottom:10}}>
+          {Object.keys(CLINICAL_NOTES).sort((a,b)=>{const dA=parseInt(a.match(/Day (\d+)/)?.[1]||"0");const dB=parseInt(b.match(/Day (\d+)/)?.[1]||"0");return dB-dA}).map(k=>{
+            const active=noteDay===k;
+            return(<div key={k} onClick={()=>setNoteDay(k)} style={{padding:"5px 12px",borderRadius:50,fontSize:11,fontWeight:active?700:500,cursor:"pointer",background:active?t.accent:t.tile,color:active?"#fff":t.muted,boxShadow:active?t.shOn:t.sh}}>{k.replace(/\s*\(Day\s*\d+\)/,"")}</div>);
+          })}
+        </div>
+        {noteDay&&CLINICAL_NOTES[noteDay]&&CLINICAL_NOTES[noteDay].map((n,i)=>{
+          const col={excellent:t.ok,ontrack:t.warn,grow:t.danger}[n.sev]||t.muted;
+          return(<div key={i} style={{display:"flex",gap:10,marginBottom:10,padding:"0 4px"}}>
+            <span style={{fontSize:16,flexShrink:0}}>{n.icon}</span>
+            <div><div style={{fontSize:13,fontWeight:700,color:col,marginBottom:2}}>{n.title}</div><div style={{fontSize:12,color:t.muted,lineHeight:1.5}}>{n.text}</div></div>
+          </div>);
+        })}
+      </div>}
+
       {/* Lab Data & Prediction - hideable scroll table */}
       <div onClick={()=>setShowLabs(!showLabs)} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 4px",cursor:"pointer",marginTop:8}}>
         <span style={{fontSize:16,fontWeight:600,color:t.text}}>{"\uD83E\uDE78"} Lab Data & Prediction</span>
         <span style={{fontSize:11,color:t.muted,padding:"3px 10px",borderRadius:50,background:t.tile,boxShadow:t.sh}}>{showLabs?"Hide":"Show"}</span>
       </div>
       {showLabs&&(()=>{
-        const labMeanings={
-          "HbA1C":{what:"Average blood sugar over 3 months",why:"9.4% = uncontrolled diabetes.",risk:"Nerve/kidney/vision damage if above 8%.",fix:"Berberine, low-carb, walking, sleep 7+"},
-          "Fasting Glucose":{what:"Blood sugar after 8+ hours fasting",why:"211 = severely elevated. Normal 70-99.",risk:"Damages blood vessels, nerves.",fix:"Berberine, fiber first, zero sweet drinks, IF 14:10"},
-          "Triglycerides":{what:"Fat in blood from food and liver",why:"702 (4x limit). Day 15: 231 (-67%).",risk:"Pancreatitis risk cleared. Target <150.",fix:"Fish oil 3-4g/day, zero sweet drinks"},
-          "GGT":{what:"Liver enzyme for damage/inflammation",why:"184 = 4.7x upper limit. Fatty liver.",risk:"Liver scarring if untreated.",fix:"Liver regenerates in 6-8 weeks. Remove sugar"},
-          "SGPT (ALT)":{what:"Liver cell damage marker",why:"50 = slightly above 35 limit.",risk:"Mild. Will normalize with fatty liver resolution.",fix:"Same as GGT"},
-          "SGOT (AST)":{what:"Enzyme in liver, heart, muscles",why:"31 = within normal (<32).",risk:"OK. Monitor alongside ALT.",fix:"No action needed"},
-          "Cholesterol":{what:"Total LDL + HDL + VLDL",why:"220 = mildly elevated.",risk:"Will drop as trig normalizes.",fix:"Fish oil, fiber, walking"},
-          "Uric Acid":{what:"Waste from breaking down purines",why:"7.2 = above 6.1 limit.",risk:"Gout flares, kidney stones.",fix:"Hydration 2L+, reduce organ meats"},
-          "HDL-C":{what:"Good cholesterol",why:"45 = borderline (min 44). Target 50+.",risk:"Low HDL = higher cardio risk.",fix:"Exercise, olive oil, nuts"},
-          "LDL-C":{what:"Bad cholesterol",why:"109 = within normal (<130).",risk:"OK for now.",fix:"Focus on trig and glucose first"},
-          "Creatinine":{what:"Kidney waste product",why:"0.52 = perfect.",risk:"None. Kidneys healthy.",fix:"Stay hydrated"},
-          "eGFR":{what:"Kidney filtration rate",why:"130 = excellent (>90 normal).",risk:"None.",fix:"Maintain hydration"},
-        };
+        const labMeanings=SHARED_LAB_MEANINGS;
         return(<div style={{background:t.card,borderRadius:14,overflow:"hidden",boxShadow:t.csh}}>
           <div style={{overflowX:"auto",WebkitOverflowScrolling:"touch"}}>
             <table style={{width:"100%",borderCollapse:"collapse",minWidth:520,fontSize:12}}>
