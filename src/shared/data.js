@@ -18,6 +18,16 @@ export const TARGETS = {
 
 // ─── Clinical Notes (update this section with new days) ───
 export const clinicalNotes = {
+  "21 Mar (Day 20)": [
+    { icon: "\uD83E\uDD27", sev: "ontrack", title: "Sick day 2 - fasting 88 again (2 days in normal!)", text: "Congested, exhausted, cold symptoms continue. But fasting held at 88 for the second day. Liver gap -11 (night 99 to fasting 88). The body's metabolic progress isn't lost to illness." },
+    { icon: "\uD83C\uDF56", sev: "grow", title: "Comfort food test: BBQ + coke zero + candy + KOI milk tea", text: "Ate what the body craved while sick. Spiked 88 to 131 (+43) - a moderate spike, not a disaster. Walking continuously brought it back to ~110. Important: even on a bad food day, the spike was manageable." },
+    { icon: "\uD83D\uDCA1", sev: "ontrack", title: "Late first meal 12:00 - natural IF while sick", text: "Slept in, no appetite in morning. Body chose rest over eating. Unintentional IF that let the liver keep processing. Sometimes illness aligns with the protocol." },
+  ],
+  "20 Mar (Day 19)": [
+    { icon: "\u2B50", sev: "excellent", title: "Fasting 88 - back in normal range!", text: "Night 104 (Day 18) to fasting 88 = liver gap -16. After the panic bounce (101, 104), the system corrected itself. Down 123 from 211 (-58%)." },
+    { icon: "\uD83E\uDD12", sev: "ontrack", title: "Sick but still consistent", text: "Fever, cold symptoms, runny nose. Took Vit C. Despite feeling unwell, maintained walks x3, berberine x2, fish oil x3, 16:8 IF. Discipline through discomfort." },
+    { icon: "\uD83D\uDCC9", sev: "excellent", title: "Post-meal 109, night 99 - all in normal range", text: "Every reading today was under 110. First day where fasting, post-meal, AND night glucose were all in normal range. This is what recovery looks like." },
+  ],
   "19 Mar (Day 18)": [
     { icon: "\uD83E\uDDD8", sev: "excellent", title: "Recalibrated after panic - fasting 104", text: "Reduced carbs, kept berberine x2 and fish oil x3. Numbers stabilized. Night glucose held at 104 - liver gap 0 (flat, stable)." },
     { icon: "\uD83E\uDDF9", sev: "ontrack", title: "Housework as exercise", text: "Light activity day but still moved. Post-meal walks x3 maintained. Not every day needs to be cardio - consistency matters more." },
@@ -109,7 +119,8 @@ export const chartData = {
     { m: "10 Mar", v: 123, c: true }, { m: "11 Mar", v: 120, c: true }, { m: "12 Mar", v: 123, c: true },
     { m: "13 Mar", v: 115, c: true }, { m: "14 Mar", v: 118, c: true }, { m: "15 Mar", v: 108, c: true },
     { m: "16 Mar", v: 95, c: true }, { m: "17 Mar", v: 80, c: true }, { m: "18 Mar", v: 101, c: true },
-    { m: "19 Mar", v: 104, c: true }, { m: "D30", v: 85 }, { m: "D60", v: 80 }, { m: "D90", v: 75 },
+    { m: "19 Mar", v: 104, c: true }, { m: "20 Mar", v: 88, c: true }, { m: "21 Mar", v: 88, c: true },
+    { m: "D30", v: 85 }, { m: "D60", v: 80 }, { m: "D90", v: 75 },
   ],
   hb: [{ m: "26 Feb", v: 9.4, c: true }, { m: "D30", v: 7.8 }, { m: "D60", v: 6.5 }, { m: "D90", v: 5.7 }],
   trig: [{ m: "26 Feb", v: 702, c: true }, { m: "16 Mar", v: 231, c: true }, { m: "D30", v: 170 }, { m: "D60", v: 125 }, { m: "D90", v: 95 }],
@@ -121,13 +132,13 @@ export const chartData = {
 
 // ─── Trend data (daily tracking for charts) ───
 export const trendData = {
-  labels: ["D1","D2","D3","D4","D5","D6","D7","D8","D9","D10","D11","D12","D13","D14","D15","D16","D17","D18"],
-  fasting: [180,170,160,142,140,147,150,150,123,120,123,115,118,108,95,80,101,104],
-  postMeal: [null,null,null,null,null,180,217,150,160,143,150,163,140,170,148,174,127,135],
-  night: [null,null,null,null,null,null,140,137,131,127,137,120,115,109,97,107,104,104],
-  scores: [33,40,60,67,73,67,61,85,89,93,91,105,106,96,null,null,null,null],
+  labels: ["D1","D2","D3","D4","D5","D6","D7","D8","D9","D10","D11","D12","D13","D14","D15","D16","D17","D18","D19","D20"],
+  fasting: [180,170,160,142,140,147,150,150,123,120,123,115,118,108,95,80,101,104,88,88],
+  postMeal: [null,null,null,null,null,180,217,150,160,143,150,163,140,170,148,174,127,135,109,131],
+  night: [null,null,null,null,null,null,140,137,131,127,137,120,115,109,97,107,104,104,99,null],
+  scores: [33,40,60,67,73,67,61,85,89,93,91,105,106,96,null,null,null,null,null,null],
   weight: { labels: ["Base","D7","D14"], data: [73.6,71.8,70.9] },
-  ifHours: [14,12,14,15,15,15,12,15,15,15,14,15,18,18,17,16,16,15],
+  ifHours: [14,12,14,15,15,15,12,15,15,15,14,15,18,18,17,16,16,15,16,null],
 };
 
 // ─── Helper: get latest insight (for mobile teaser) ───
