@@ -1,18 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Golden Era</title>
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="Golden Era">
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: Georgia, serif; background: #faf8f5; }
-  </style>
-</head>
-<body>
-  <div id="root"></div>
-  <script type="module" src="/src/main.jsx"></script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Golden Era</title>
+
+    <!-- PWA: makes it full screen like a real app -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#4A7A50" />
+
+    <!-- iOS: full screen when added to home screen -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Golden Era" />
+    <link rel="apple-touch-icon" href="/icon-192.png" />
+
+    <!-- Android: full screen -->
+    <meta name="mobile-web-app-capable" content="yes" />
+
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { height: 100%; overflow: hidden; }
+      #root { height: 100%; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
 </html>
