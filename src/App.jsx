@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { clinicalNotes, labMarkers, labMeanings, chartData, trendData, journeyData, TARGETS, SHEET_API as API_URL } from "./shared/data";
+import React, { useState, useEffect, useCallback } from "react";
+import { clinicalNotes as staticNotes, labMarkers, labMeanings, chartData, trendData, journeyData, TARGETS, SHEET_API as API_URL, buildInsightPrompt } from "./shared/data";
 
 /* ═══════════════════════════════════════════════════════════════
    Golden Era Desktop - Angkhana's 90-Day Metabolic Wellness Tracker
@@ -193,9 +193,69 @@ export default function GoldenEra(){
       }
       if(d.body&&Object.keys(d.body).length>0)setBM(p=>({...p,...d.body}));
       if(d.lab&&Object.keys(d.lab).length>0)setLabData(p=>({...p,...d.lab}));
+      if(d.insights&&Object.keys(d.insights).length>0)setAiNotes(d.insights);
       setSS("synced");
     }).catch(()=>setSS("error"));
   },[]);
+
+  // Merge static + AI-generated notes (AI takes precedence for same date)
+  const clinicalNotes={...staticNotes,...aiNotes};
+
+  // Generate insight via Claude API
+  const generateInsight=async(targetDate)=>{
+    setAnalyzing(true);
+    try{
+      const td=targetDate||new Date().toISOString().split("T")[0];
+      const dn2=Math.max(1,Math.floor((new Date(td)-new Date("2026-03-02"))/864e5)+1);
+      const dateObj=new Date(td+"T00:00:00");
+      const dateStr=dateObj.toLocaleDateString("en-US",{day:"numeric",month:"short"});
+
+      // Collect this day's data
+      const dayD=weekData[td]||{};
+
+      // Collect week history (7 days before)
+      const hist={};
+      for(let i=1;i<=7;i++){
+        const d2=new Date(dateObj);d2.setDate(d2.getDate()-i);
+        const k=d2.toISOString().split("T")[0];
+        if(weekData[k])hist[k]=weekData[k];
+      }
+
+      // Previous day insights for continuity
+      const prevKey=Object.keys(clinicalNotes).sort((a,b)=>{
+        const dA=parseInt(a.match(/Day (\d+)/)?.[1]||"0");
+        const dB=parseInt(b.match(/Day (\d+)/)?.[1]||"0");
+        return dB-dA;
+      })[0];
+      const prevText=prevKey?JSON.stringify(clinicalNotes[prevKey]):"";
+
+      const prompt=buildInsightPrompt(dayD,dn2,dateStr,hist,prevText);
+
+      const resp=await fetch("https://api.anthropic.com/v1/messages",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,messages:[{role:"user",content:prompt}]})
+      });
+      const data=await resp.json();
+      const text=data.content?.map(c=>c.text||"").join("")||"";
+      const clean=text.replace(/```json|```/g,"").trim();
+      const insights=JSON.parse(clean);
+
+      // Build the date key
+      const dateKey=`${dateStr} (Day ${dn2})`;
+
+      // Save to Sheet
+      await fetch(API,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({action:"saveInsight",dateKey,insights})});
+
+      // Update local state
+      setAiNotes(p=>({...p,[dateKey]:insights}));
+      setNT(dateKey);
+    }catch(err){
+      console.error("Insight generation failed:",err);
+      alert("Failed to generate insight. Check console for details.");
+    }
+    setAnalyzing(false);
+  };
 
   // Week score
   const getWeekScore=()=>{let tb=0,tx=0,n=0;weekDates.forEach(d=>{const s=getDayScore(weekData[d]||{});if(s){tb+=s.base;tx+=s.bonus;n++}});return n>0?{score:Math.round(tb/n),bonus:Math.round(tx/n),total:Math.round((tb+tx)/n),days:n}:{score:0,bonus:0,total:0,days:0}};
@@ -535,7 +595,12 @@ export default function GoldenEra(){
           })()}
 
           {/* Daily Notes */}
-          <div style={{fontSize:16,fontWeight:700,marginBottom:10}}>Daily Notes</div>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+            <div style={{fontSize:16,fontWeight:700}}>Daily Notes</div>
+            <div onClick={()=>!analyzing&&generateInsight()} style={{padding:"6px 16px",borderRadius:50,fontSize:12,fontWeight:600,cursor:analyzing?"wait":"pointer",background:analyzing?t.tile:`linear-gradient(135deg, ${t.accent}, ${t.dark})`,color:analyzing?t.muted:"#fff",boxShadow:t.shOn,opacity:analyzing?0.7:1,display:"flex",alignItems:"center",gap:5}}>
+              {analyzing?<>{"\u23F3"} Analyzing...</>:<>{"\u2728"} Generate Today</>}
+            </div>
+          </div>
           <div style={{display:"flex",gap:4,flexWrap:"wrap",marginBottom:12}}>
             {Object.keys(clinicalNotes).reverse().map(k=>(<Pill key={k} active={noteTab===k} onClick={()=>setNT(k)}>{k.replace(/\s*\(Day\s*\d+\)/,"")}</Pill>))}
           </div>
