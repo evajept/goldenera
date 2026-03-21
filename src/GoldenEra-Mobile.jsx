@@ -717,31 +717,62 @@ function GuideTab(){
 
 // --- NAV (4 tabs) ---
 function Nav({tab,setTab}){
+  const tabs=[
+    {key:"home",label:"Home",icon:(a)=><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={a?t.accent:t.muted} strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>},
+    {key:"log",label:"Log",icon:(a)=><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={a?t.accent:t.muted} strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>},
+    {key:"journey",label:"Journey",icon:(a)=><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={a?t.accent:t.muted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="7 17 17 7"/><polyline points="7 7 17 7 17 17"/></svg>},
+    {key:"guide",label:"More",icon:(a)=><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={a?t.accent:t.muted} strokeWidth="2.5" strokeLinecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>},
+  ];
   return(
-    <div style={{position:"fixed",bottom:0,left:"50%",transform:"translateX(-50%)",width:"100%",maxWidth:430,height:60,background:t.card,display:"flex",justifyContent:"space-around",alignItems:"center",boxShadow:"0 -2px 12px rgba(0,0,0,0.07)",zIndex:100,borderRadius:"20px 20px 0 0",paddingBottom:"max(0px, env(safe-area-inset-bottom))"}}>
-      {[
-        {key:"home",label:"Home",icon:(a)=><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={a?t.accent:t.muted} strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>},
-        {key:"log",label:"Log",icon:(a)=><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={a?t.accent:t.muted} strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>},
-        {key:"journey",label:"Journey",icon:(a)=><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={a?t.accent:t.muted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="7 17 17 7"/><polyline points="7 7 17 7 17 17"/></svg>},
-        {key:"guide",label:"More",icon:(a)=><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={a?t.accent:t.muted} strokeWidth="2.5" strokeLinecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>},
-      ].map(({key,label,icon})=>(
-        <div key={key} onClick={()=>setTab(key)} style={{textAlign:"center",cursor:"pointer",padding:"6px 14px",WebkitTapHighlightColor:"transparent"}}>
-          {icon(tab===key)}
-          <div style={{fontSize:11,marginTop:2,color:tab===key?t.accent:t.muted,fontWeight:tab===key?700:500}}>{label}</div>
-        </div>
-      ))}
+    <div style={{position:"fixed",bottom:0,left:0,right:0,zIndex:100,background:t.card,boxShadow:"0 -2px 12px rgba(0,0,0,0.07)",borderRadius:"20px 20px 0 0",paddingBottom:"env(safe-area-inset-bottom, 0px)"}}>
+      <div style={{display:"flex",justifyContent:"space-around",alignItems:"center",maxWidth:430,margin:"0 auto",height:56}}>
+        {tabs.map(({key,label,icon})=>(
+          <div key={key} onClick={()=>setTab(key)} style={{textAlign:"center",cursor:"pointer",padding:"8px 16px",WebkitTapHighlightColor:"transparent",minWidth:60}}>
+            {icon(tab===key)}
+            <div style={{fontSize:10,marginTop:1,color:tab===key?t.accent:t.muted,fontWeight:tab===key?700:500}}>{label}</div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
 
+// --- Swipe hook ---
+function useSwipe(onSwipeLeft,onSwipeRight){
+  const ref=React.useRef(null);
+  React.useEffect(()=>{
+    const el=ref.current;if(!el)return;
+    let sx=0,sy=0,tracking=false;
+    const ts=(e)=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;tracking=true};
+    const te=(e)=>{
+      if(!tracking)return;tracking=false;
+      const dx=e.changedTouches[0].clientX-sx;
+      const dy=e.changedTouches[0].clientY-sy;
+      if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>60){
+        if(dx<0)onSwipeLeft();else onSwipeRight();
+      }
+    };
+    el.addEventListener("touchstart",ts,{passive:true});
+    el.addEventListener("touchend",te,{passive:true});
+    return()=>{el.removeEventListener("touchstart",ts);el.removeEventListener("touchend",te)};
+  },[onSwipeLeft,onSwipeRight]);
+  return ref;
+}
+
 // --- MAIN ---
 export default function GoldenEraMobile(){
+  const TABS=["home","log","journey","guide"];
   const[tab,setTab]=useState("home");const[D,setD]=useState({});const[loading,setLoading]=useState(true);
   const[aiNotes,setAiNotes]=useState({});
   const[analyzing,setAnalyzing]=useState(false);
 
   // Merge static + AI notes
   const CLINICAL_NOTES={...STATIC_NOTES,...aiNotes};
+
+  // Swipe between tabs
+  const swipeLeft=useCallback(()=>{const i=TABS.indexOf(tab);if(i<TABS.length-1)setTab(TABS[i+1])},[tab]);
+  const swipeRight=useCallback(()=>{const i=TABS.indexOf(tab);if(i>0)setTab(TABS[i-1])},[tab]);
+  const swipeRef=useSwipe(swipeLeft,swipeRight);
 
   const load=useCallback(async()=>{
     setLoading(true);const res=await apiLoad();
@@ -781,10 +812,14 @@ export default function GoldenEraMobile(){
   };
 
   useEffect(()=>{load()},[load]);
+
+  // Calculate safe area for nav bar
+  const navH=76; // 56px nav + ~20px safe area
+
   return(
-    <div style={{fontFamily:"'DM Sans',sans-serif",background:t.bg,color:t.text,minHeight:"100dvh",maxWidth:430,margin:"0 auto",position:"relative",overflowX:"hidden",WebkitFontSmoothing:"antialiased"}}>
+    <div ref={swipeRef} style={{fontFamily:"'DM Sans',sans-serif",background:t.bg,color:t.text,minHeight:"100dvh",maxWidth:430,margin:"0 auto",position:"relative",overflowX:"hidden",WebkitFontSmoothing:"antialiased",paddingTop:"env(safe-area-inset-top, 0px)"}}>
       <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet"/>
-      <div style={{minHeight:"calc(100dvh - 60px)"}}>
+      <div style={{minHeight:`calc(100dvh - ${navH}px)`,paddingBottom:navH}}>
         {tab==="home"&&<HomeTab D={D} loading={loading} setTab={setTab} notes={CLINICAL_NOTES}/>}
         {tab==="log"&&<LogTab D={D} setD={setD}/>}
         {tab==="journey"&&<JourneyTab D={D} loading={loading} notes={CLINICAL_NOTES} generateInsight={generateInsight} analyzing={analyzing}/>}
