@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { clinicalNotes as CLINICAL_NOTES, labMarkers as SHARED_LAB_MARKERS, labMeanings as SHARED_LAB_MEANINGS, TARGETS, SHEET_API } from "./shared/data";
+import { clinicalNotes as STATIC_NOTES, labMarkers as SHARED_LAB_MARKERS, labMeanings as SHARED_LAB_MEANINGS, TARGETS, SHEET_API, buildInsightPrompt } from "./shared/data";
 
 /* ═══════════════════════════════════════════════════════════════
    Golden Era Mobile v3
@@ -111,7 +111,7 @@ let _st=null;
 function apiSave(date,data,action="saveDay"){clearTimeout(_st);_st=setTimeout(async()=>{try{await fetch(API,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({action,date,data})})}catch(e){console.error("Save:",e)}},2000)}
 
 // --- HOME ---
-function HomeTab({D,loading,setTab}){
+function HomeTab({D,loading,setTab,notes}){
   const day=dayN();const today=todayISO();const dates=Object.keys(D).sort();
   const todayD=D[today]||{};const todayLogged=!!(todayD.glucFast||todayD.berb||todayD.fish||todayD.noSweet||todayD.moveAfter||todayD.act);
   const findLatest=(key)=>{for(let i=dates.length-1;i>=0;i--){const v=parseFloat(D[dates[i]]?.[key]);if(!isNaN(v))return v}return NaN};
@@ -211,9 +211,9 @@ function HomeTab({D,loading,setTab}){
 
       {/* Latest insight teaser - P3 */}
       {(()=>{
-        const keys=Object.keys(CLINICAL_NOTES).sort((a,b)=>{const dA=parseInt(a.match(/Day (\d+)/)?.[1]||"0");const dB=parseInt(b.match(/Day (\d+)/)?.[1]||"0");return dB-dA});
+        const keys=Object.keys(notes||{}).sort((a,b)=>{const dA=parseInt(a.match(/Day (\d+)/)?.[1]||"0");const dB=parseInt(b.match(/Day (\d+)/)?.[1]||"0");return dB-dA});
         if(keys.length===0)return null;
-        const latestKey=keys[0];const notes=CLINICAL_NOTES[latestKey];const first=notes[0];if(!first)return null;
+        const latestKey=keys[0];const latestNotes=(notes||{})[latestKey];const first=latestNotes?latestNotes[0]:null;if(!first)return null;
         const sevCol={excellent:t.ok,ontrack:t.warn,grow:t.danger}[first.sev]||t.muted;
         return(
           <div onClick={()=>setTab("journey")} style={{background:t.card,borderRadius:16,padding:"12px 16px",marginTop:12,boxShadow:t.csh,cursor:"pointer"}}>
@@ -349,7 +349,7 @@ function LogTab({D,setD}){
 }
 
 // --- JOURNEY ---
-function JourneyTab({D,loading}){
+function JourneyTab({D,loading,notes:CLINICAL_NOTES,generateInsight,analyzing}){
   const[showLabs,setShowLabs]=useState(false);
   const[expandedLab,setExpandedLab]=useState(null);
   const[showInsight,setShowInsight]=useState(true);
@@ -448,6 +448,11 @@ function JourneyTab({D,loading}){
         <span style={{fontSize:11,color:t.muted,padding:"3px 10px",borderRadius:50,background:t.tile,boxShadow:t.sh}}>{showNotes?"Hide":"Show"}</span>
       </div>
       {showNotes&&<div>
+        <div onClick={(e)=>{e.stopPropagation();if(!analyzing)generateInsight()}} style={{textAlign:"center",padding:"10px 0",marginBottom:10}}>
+          <span style={{padding:"8px 20px",borderRadius:50,fontSize:12,fontWeight:600,cursor:analyzing?"wait":"pointer",background:analyzing?t.tile:`linear-gradient(135deg, ${t.accent}, ${t.dark})`,color:analyzing?t.muted:"#fff",boxShadow:t.shOn,display:"inline-flex",alignItems:"center",gap:5}}>
+            {analyzing?<>{"\u23F3"} Analyzing...</>:<>{"\u2728"} Generate Today's Insight</>}
+          </span>
+        </div>
         <div style={{display:"flex",gap:4,flexWrap:"wrap",marginBottom:10}}>
           {Object.keys(CLINICAL_NOTES).sort((a,b)=>{const dA=parseInt(a.match(/Day (\d+)/)?.[1]||"0");const dB=parseInt(b.match(/Day (\d+)/)?.[1]||"0");return dB-dA}).map(k=>{
             const active=noteDay===k;
@@ -732,24 +737,57 @@ function Nav({tab,setTab}){
 // --- MAIN ---
 export default function GoldenEraMobile(){
   const[tab,setTab]=useState("home");const[D,setD]=useState({});const[loading,setLoading]=useState(true);
+  const[aiNotes,setAiNotes]=useState({});
+  const[analyzing,setAnalyzing]=useState(false);
+
+  // Merge static + AI notes
+  const CLINICAL_NOTES={...STATIC_NOTES,...aiNotes};
+
   const load=useCallback(async()=>{
     setLoading(true);const res=await apiLoad();
     if(res){
       let tracker={};if(res.tracker&&typeof res.tracker==="object")tracker=res.tracker;
       if(res.body&&typeof res.body==="object"){Object.entries(res.body).forEach(([k,v])=>{const parts=k.split("-");const field=parts[0];const date=parts.slice(1).join("-");if(date&&field){if(!tracker[date])tracker[date]={};tracker[date]["body_"+field]=v}})}
       if(res.lab&&typeof res.lab==="object"){Object.entries(res.lab).forEach(([k,v])=>{const idx=k.indexOf("-2026-");if(idx===-1)return;const field=k.substring(0,idx);const date=k.substring(idx+1);if(date&&field){if(!tracker[date])tracker[date]={};tracker[date][field]=v}})}
+      if(res.insights&&Object.keys(res.insights).length>0)setAiNotes(res.insights);
       setD(tracker);
     }
     setLoading(false);
   },[]);
+
+  const generateInsight=async(targetDate)=>{
+    setAnalyzing(true);
+    try{
+      const td=targetDate||new Date().toISOString().split("T")[0];
+      const dn2=Math.max(1,Math.floor((new Date(td)-new Date("2026-03-02"))/864e5)+1);
+      const dateObj=new Date(td+"T00:00:00");
+      const dateStr=dateObj.toLocaleDateString("en-US",{day:"numeric",month:"short"});
+      const dayD=D[td]||{};
+      const hist={};
+      for(let i=1;i<=7;i++){const d2=new Date(dateObj);d2.setDate(d2.getDate()-i);const k=d2.toISOString().split("T")[0];if(D[k])hist[k]=D[k]}
+      const prevKey=Object.keys(CLINICAL_NOTES).sort((a,b)=>{const dA=parseInt(a.match(/Day (\d+)/)?.[1]||"0");const dB=parseInt(b.match(/Day (\d+)/)?.[1]||"0");return dB-dA})[0];
+      const prevText=prevKey?JSON.stringify(CLINICAL_NOTES[prevKey]):"";
+      const prompt=buildInsightPrompt(dayD,dn2,dateStr,hist,prevText);
+      const resp=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,messages:[{role:"user",content:prompt}]})});
+      const data=await resp.json();
+      const text=data.content?.map(c=>c.text||"").join("")||"";
+      const clean=text.replace(/```json|```/g,"").trim();
+      const insights=JSON.parse(clean);
+      const dateKey=`${dateStr} (Day ${dn2})`;
+      await fetch(API,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({action:"saveInsight",dateKey,insights})});
+      setAiNotes(p=>({...p,[dateKey]:insights}));
+    }catch(err){console.error("Insight generation failed:",err)}
+    setAnalyzing(false);
+  };
+
   useEffect(()=>{load()},[load]);
   return(
     <div style={{fontFamily:"'DM Sans',sans-serif",background:t.bg,color:t.text,minHeight:"100dvh",maxWidth:430,margin:"0 auto",position:"relative",overflowX:"hidden",WebkitFontSmoothing:"antialiased"}}>
       <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet"/>
       <div style={{minHeight:"calc(100dvh - 60px)"}}>
-        {tab==="home"&&<HomeTab D={D} loading={loading} setTab={setTab}/>}
+        {tab==="home"&&<HomeTab D={D} loading={loading} setTab={setTab} notes={CLINICAL_NOTES}/>}
         {tab==="log"&&<LogTab D={D} setD={setD}/>}
-        {tab==="journey"&&<JourneyTab D={D} loading={loading}/>}
+        {tab==="journey"&&<JourneyTab D={D} loading={loading} notes={CLINICAL_NOTES} generateInsight={generateInsight} analyzing={analyzing}/>}
         {tab==="guide"&&<GuideTab/>}
       </div>
       <Nav tab={tab} setTab={setTab}/>
