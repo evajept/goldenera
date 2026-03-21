@@ -7,7 +7,7 @@
 
     <!-- PWA: makes it full screen like a real app -->
     <link rel="manifest" href="/manifest.json" />
-    <meta name="theme-color" content="#4A7A50" />
+    <!-- No theme-color: let status bar be transparent/default -->
 
     <!-- iOS: full screen when added to home screen -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -20,7 +20,7 @@
 
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
-      html, body { height: 100%; overflow: hidden; }
+      html, body { height: 100%; overflow: hidden; background-color: #E8E4DE; }
       #root { height: 100%; overflow-y: auto; -webkit-overflow-scrolling: touch; }
     </style>
   </head>
