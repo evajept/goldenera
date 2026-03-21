@@ -153,3 +153,57 @@ export function getLatestInsight() {
   const notes = clinicalNotes[latestKey];
   return { date: latestKey, notes };
 }
+
+// ─── Insight Generation System Prompt ───
+export function buildInsightPrompt(dayData, dayNum, dateStr, weekHistory, prevInsights) {
+  return `You are an analyst for a 90-day metabolic wellness protocol for Angkhana, a Thai woman.
+
+BASELINES (Feb 26, 2026):
+- Fasting glucose: 211 mg/dL (critical - uncontrolled diabetes)
+- Triglycerides: 702 mg/dL (critical - pancreatitis risk)
+- HbA1C: 9.4% (critical)
+- GGT: 184 U/L (liver damage)
+- Weight: 73.6 kg, BMI: 26.4
+- Height: 167 cm
+
+PROTOCOL: Berberine 600mg x2 with meals, fish oil 3-4g/day, magnesium bedtime, D3+K2, fiber first/carbs last, after-meal walks, IF 14:10+, zero sugar, sleep 7+.
+
+SCORING (100 base + bonus): no sugar=18, berb x2=15, sleep 7+=14, fish x3=10, walk x3=8, IF 14h+=8, fiber first=7, exercise=5, water=5, mag=5, d3k2=5. Bonus: weights=+10, cardio=+5, IF 16:8+=+5.
+
+KEY MILESTONES SO FAR:
+- Day 12: Fasting 115 (first sub-120), swimming 131>101
+- Day 13: First negative liver gap (-2)
+- Day 14: Post-swim glucose 92, IF 18:6
+- Day 15: Fasting 95 (first sub-100), TG confirmed 231 (-67%)
+- Day 16: ALL-TIME LOW fasting 80, liver gap -17
+- Day 17: Panic day - glucose 69 (safe) but panic-ate to 174
+- Day 18: Recalibrated, fasting 104 stable
+- Day 19: Fasting 88, ALL readings normal (88/109/99). Sick with fever/cold.
+- Day 20: Fasting 88 again. Sick day 2. BBQ+coke+milk tea spiked to 131, walked back to 110.
+
+TODAY'S DATA (Day ${dayNum}, ${dateStr}):
+${JSON.stringify(dayData, null, 2)}
+
+WEEK HISTORY (last 7 days):
+${JSON.stringify(weekHistory, null, 2)}
+
+${prevInsights ? `PREVIOUS DAY'S INSIGHTS (for continuity):\n${prevInsights}\n` : ""}
+
+TASK: Generate 2-3 insight cards for today. Each must be specific to today's actual numbers.
+
+RULES:
+- Use exact numbers from the data (don't approximate)
+- Calculate liver gap = today's fasting minus yesterday's night glucose
+- Note % change from baseline where relevant
+- Be direct and specific, not generic health advice
+- Flag concerning patterns (missed supps, sugar slips, poor sleep)
+- Celebrate genuine milestones
+- Connect dots to previous days when patterns emerge
+- If sick/unwell, note how illness affects glucose
+- Use severity: "excellent" (green), "ontrack" (amber), "grow" (red/learning moment)
+
+OUTPUT FORMAT (JSON only, no markdown):
+[
+  {"sev": "excellent|ontrack|grow", "title": "Short bold headline with key number", "text": "2-3 sentences of specific analysis."}
+]`;
+}
