@@ -277,16 +277,16 @@ function LogTab({D,setD}){
 
       {/* Glucose + Meals + IF */}
       <div style={{background:t.card,borderRadius:20,padding:18,marginBottom:10,boxShadow:t.csh}}>
-        <div style={{display:"flex",gap:8,marginBottom:14}}>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:14}}>
           {[["\uD83E\uDE78","Fasting","glucFast"],["\uD83C\uDF7D\uFE0F","Post-meal","glucPost"],["\uD83C\uDF19","Night","glucNight"]].map(([icon,label,field],i)=>(
-            <div key={i} style={{flex:1,textAlign:"center"}}><div style={{fontSize:10,color:t.muted,marginBottom:4}}>{icon} {label}</div><input inputMode="decimal" placeholder="-" value={wd[field]||""} onChange={e=>up(field,e.target.value)} style={cellStyle}/></div>
+            <div key={i} style={{textAlign:"center"}}><div style={{fontSize:10,color:t.muted,marginBottom:4}}>{icon} {label}</div><input inputMode="decimal" placeholder="-" value={wd[field]||""} onChange={e=>up(field,e.target.value)} style={cellStyle}/></div>
           ))}
         </div>
-        <div style={{display:"flex",gap:8}}>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}}>
           {[["\uD83C\uDF73","First meal","m1t"],["\uD83C\uDF05","Last meal","mLast"]].map(([icon,label,field],i)=>(
-            <div key={i} style={{flex:1,textAlign:"center"}}><div style={{fontSize:10,color:t.muted,marginBottom:4}}>{icon} {label}</div><input type="time" value={wd[field]||""} onChange={e=>up(field,e.target.value)} style={{...cellStyle,fontSize:16}}/></div>
+            <div key={i} style={{textAlign:"center"}}><div style={{fontSize:10,color:t.muted,marginBottom:4}}>{icon} {label}</div><input type="time" value={wd[field]||""} onChange={e=>up(field,e.target.value)} style={{...cellStyle,fontSize:14}}/></div>
           ))}
-          <div style={{flex:1,textAlign:"center"}}><div style={{fontSize:10,color:t.muted,marginBottom:4}}>{"\u23F1\uFE0F"} IF</div><div style={{...cellStyle,display:"flex",alignItems:"center",justifyContent:"center",color:ifOn?t.accent:t.muted,background:ifOn?t.on:t.tile,boxShadow:ifOn?t.shOn:t.sh,fontWeight:ifOn?500:300}}>{ifDisp}</div></div>
+          <div style={{textAlign:"center"}}><div style={{fontSize:10,color:t.muted,marginBottom:4}}>{"\u23F1\uFE0F"} IF</div><div style={{...cellStyle,display:"flex",alignItems:"center",justifyContent:"center",color:ifOn?t.accent:t.muted,background:ifOn?t.on:t.tile,boxShadow:ifOn?t.shOn:t.sh,fontWeight:ifOn?500:300}}>{ifDisp}</div></div>
         </div>
       </div>
 
