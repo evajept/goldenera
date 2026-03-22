@@ -213,44 +213,8 @@ function HomeTab({D,loading,setTab,notes}){
         )}
       </div>
 
-      {/* Latest insight - expandable in place */}
+      {/* Weekly Insight - show Key Learnings preview, collapsible for full */}
       {(()=>{
-        const keys=Object.keys(notes||{}).sort((a,b)=>{const dA=parseInt(a.match(/Day (\d+)/)?.[1]||"0");const dB=parseInt(b.match(/Day (\d+)/)?.[1]||"0");return dB-dA});
-        if(keys.length===0)return null;
-        const latestKey=keys[0];const latestNotes=(notes||{})[latestKey];if(!latestNotes||!latestNotes.length)return null;
-        const first=latestNotes[0];
-        const sevCol={excellent:t.ok,ontrack:t.warn,grow:t.danger}[first.sev]||t.muted;
-        return(
-          <div style={{background:t.card,borderRadius:16,padding:"12px 16px",marginTop:12,boxShadow:t.csh}}>
-            <div style={{fontSize:10,color:t.muted,marginBottom:3}}>{latestKey}</div>
-            {!showLatest?(
-              <div onClick={()=>setShowLatest(true)} style={{cursor:"pointer"}}>
-                <div style={{fontSize:13,fontWeight:600,color:sevCol,lineHeight:1.3}}>{first.icon} {first.title}</div>
-                <div style={{fontSize:11,color:t.muted,marginTop:3,lineHeight:1.4,display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical",overflow:"hidden"}}>{first.text}</div>
-                <div style={{textAlign:"center",fontSize:11,color:t.accent,fontWeight:600,marginTop:8,paddingTop:6,borderTop:`1px solid ${t.tile}`}}>Show more {"\u25BC"}</div>
-              </div>
-            ):(
-              <div>
-                {latestNotes.map((n,i)=>{
-                  const col={excellent:t.ok,ontrack:t.warn,grow:t.danger}[n.sev]||t.muted;
-                  return(<div key={i} style={{display:"flex",gap:10,marginBottom:i<latestNotes.length-1?10:0,padding:"0 2px"}}>
-                    <span style={{fontSize:16,flexShrink:0}}>{n.icon}</span>
-                    <div><div style={{fontSize:13,fontWeight:700,color:col,marginBottom:2}}>{n.title}</div><div style={{fontSize:12,color:t.muted,lineHeight:1.5}}>{n.text}</div></div>
-                  </div>);
-                })}
-                <div onClick={()=>setShowLatest(false)} style={{textAlign:"center",fontSize:11,color:t.accent,fontWeight:600,marginTop:8,paddingTop:6,borderTop:`1px solid ${t.tile}`,cursor:"pointer"}}>Show less {"\u25B2"}</div>
-              </div>
-            )}
-          </div>
-        );
-      })()}
-
-      {/* Weekly Insight - collapsible */}
-      <div onClick={()=>setShowInsight(!showInsight)} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 4px",cursor:"pointer",marginTop:12}}>
-        <span style={{fontSize:16,fontWeight:600,color:t.text}}>{"\uD83D\uDCA1"} Weekly Insight</span>
-        <span style={{fontSize:12,color:t.muted}}>{showInsight?"\u25B2":"\u25BC"}</span>
-      </div>
-      {showInsight&&(()=>{
         const weekDt=getWeekDates();
         const glucVals=weekDt.map(d=>{const v=D[d]?.glucFast;return v?parseFloat(v):null}).filter(v=>v&&!isNaN(v));
         const glucAvg=glucVals.length?Math.round(glucVals.reduce((a,b)=>a+b,0)/glucVals.length):null;
@@ -258,32 +222,46 @@ function HomeTab({D,loading,setTab,notes}){
         const postAvg=postVals.length?Math.round(postVals.reduce((a,b)=>a+b,0)/postVals.length):null;
         let sleepGood=0,sleepTotal=0;
         weekDt.forEach(d=>{const s=D[d]?.sleep;if(s){sleepTotal++;if(s==="7+"||s==="8+")sleepGood++}});
-        return(<div>
-          {glucAvg&&<div style={{display:"flex",gap:6,marginBottom:10}}>
-            {[
-              {label:"Fasting",val:glucAvg,color:glucAvg<=99?t.ok:glucAvg<=140?t.warn:t.danger},
-              postAvg&&{label:"Post-meal",val:postAvg,color:postAvg<=140?t.ok:postAvg<=180?t.warn:t.danger},
-              sleepTotal>0&&{label:"Sleep",val:`${sleepGood}/${sleepTotal}`,sub:"nights 7+",color:sleepGood>=sleepTotal*0.7?t.ok:t.warn},
-            ].filter(Boolean).map((m,i)=>(
-              <div key={i} style={{flex:1,textAlign:"center",background:t.card,borderRadius:12,padding:"8px 4px",boxShadow:t.csh}}>
-                <div style={{fontSize:9,color:t.muted,textTransform:"uppercase"}}>{m.label}</div>
-                <div style={{fontSize:18,fontWeight:700,color:m.color}}>{m.val}</div>
-                {m.sub&&<div style={{fontSize:9,color:t.muted}}>{m.sub}</div>}
-              </div>
-            ))}
-          </div>}
-          <div style={{background:t.okBg,borderRadius:12,padding:"10px 14px",marginBottom:6}}>
+
+        // Build learnings
+        const learnings=[];
+        if(glucVals.length>=2&&glucVals[glucVals.length-1]<glucVals[0])learnings.push("Fasting trending down this week");
+        if(glucAvg&&glucAvg<=100)learnings.push(`Fasting avg in normal range (${glucAvg})`);
+        if(sleepGood>=4)learnings.push(`${sleepGood}/${sleepTotal} nights 7+ hours sleep`);
+
+        return(<div style={{marginTop:12}}>
+          {/* Key Learnings preview - always visible */}
+          {learnings.length>0&&<div style={{background:t.okBg,borderRadius:12,padding:"10px 14px",marginBottom:6}}>
             <div style={{fontSize:10,fontWeight:700,color:t.ok,textTransform:"uppercase",marginBottom:4}}>Key Learnings</div>
-            {glucVals.length>=2&&glucVals[glucVals.length-1]<glucVals[0]&&<div style={{fontSize:12,color:t.ok,fontWeight:600,lineHeight:1.6}}>{"\u2713"} Fasting trending down this week</div>}
-            {glucAvg&&glucAvg<=100&&<div style={{fontSize:12,color:t.ok,fontWeight:600,lineHeight:1.6}}>{"\u2713"} Fasting avg in normal range ({glucAvg})</div>}
-            {sleepGood>=4&&<div style={{fontSize:12,color:t.ok,fontWeight:600,lineHeight:1.6}}>{"\u2713"} {sleepGood}/{sleepTotal} nights 7+ hours sleep</div>}
+            {learnings.map((l,i)=>(<div key={i} style={{fontSize:12,color:t.ok,fontWeight:600,lineHeight:1.6}}>{"\u2713"} {l}</div>))}
+          </div>}
+
+          {/* Expand for full insight */}
+          <div onClick={()=>setShowInsight(!showInsight)} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 4px",cursor:"pointer"}}>
+            <span style={{fontSize:14,fontWeight:600,color:t.text}}>{"\uD83D\uDCA1"} Weekly Insight</span>
+            <span style={{fontSize:12,color:t.muted}}>{showInsight?"\u25B2":"\u25BC"}</span>
           </div>
-          <div style={{background:"#dde8f5",borderRadius:12,padding:"10px 14px"}}>
-            <div style={{fontSize:10,fontWeight:700,color:"#185fa5",textTransform:"uppercase",marginBottom:4}}>Next Week Focus</div>
-            <div style={{fontSize:12,color:t.text,fontWeight:600,lineHeight:1.6}}>{"\uD83D\uDE34"} Maintain sleep 7+ streak</div>
-            <div style={{fontSize:12,color:t.text,fontWeight:600,lineHeight:1.6}}>{"\uD83C\uDFCA"} Resume swimming / cardio</div>
-            <div style={{fontSize:12,color:t.text,fontWeight:600,lineHeight:1.6}}>{"\uD83E\uDDE0"} Trust low readings - don't panic eat</div>
-          </div>
+          {showInsight&&<div>
+            {glucAvg&&<div style={{display:"flex",gap:6,marginBottom:10}}>
+              {[
+                {label:"Avg Fasting Glucose",val:glucAvg,color:glucAvg<=99?t.ok:glucAvg<=140?t.warn:t.danger},
+                postAvg&&{label:"Avg Post-meal Glucose",val:postAvg,color:postAvg<=140?t.ok:postAvg<=180?t.warn:t.danger},
+                sleepTotal>0&&{label:"Sleep",val:`${sleepGood}/${sleepTotal}`,sub:"nights 7+",color:sleepGood>=sleepTotal*0.7?t.ok:t.warn},
+              ].filter(Boolean).map((m,i)=>(
+                <div key={i} style={{flex:1,textAlign:"center",background:t.card,borderRadius:12,padding:"8px 4px",boxShadow:t.csh}}>
+                  <div style={{fontSize:8,color:t.muted,textTransform:"uppercase",lineHeight:1.2}}>{m.label}</div>
+                  <div style={{fontSize:18,fontWeight:700,color:m.color,marginTop:2}}>{m.val}</div>
+                  {m.sub&&<div style={{fontSize:9,color:t.muted}}>{m.sub}</div>}
+                </div>
+              ))}
+            </div>}
+            <div style={{background:"#dde8f5",borderRadius:12,padding:"10px 14px"}}>
+              <div style={{fontSize:10,fontWeight:700,color:"#185fa5",textTransform:"uppercase",marginBottom:4}}>Next Week Focus</div>
+              <div style={{fontSize:12,color:t.text,fontWeight:600,lineHeight:1.6}}>{"\uD83D\uDE34"} Maintain sleep 7+ streak</div>
+              <div style={{fontSize:12,color:t.text,fontWeight:600,lineHeight:1.6}}>{"\uD83C\uDFCA"} Resume swimming / cardio</div>
+              <div style={{fontSize:12,color:t.text,fontWeight:600,lineHeight:1.6}}>{"\uD83E\uDDE0"} Trust low readings - don't panic eat</div>
+            </div>
+          </div>}
         </div>);
       })()}
 
