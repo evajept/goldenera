@@ -255,36 +255,31 @@ function HomeTab({D,loading,setTab,notes}){
                 </div>
               ))}
             </div>}
-            <div style={{background:"#dde8f5",borderRadius:12,padding:"10px 14px"}}>
+            <div style={{background:"#dde8f5",borderRadius:12,padding:"10px 14px",marginBottom:10}}>
               <div style={{fontSize:10,fontWeight:700,color:"#185fa5",textTransform:"uppercase",marginBottom:4}}>Next Week Focus</div>
               <div style={{fontSize:12,color:t.text,fontWeight:600,lineHeight:1.6}}>{"\uD83D\uDE34"} Maintain sleep 7+ streak</div>
               <div style={{fontSize:12,color:t.text,fontWeight:600,lineHeight:1.6}}>{"\uD83C\uDFCA"} Resume swimming / cardio</div>
               <div style={{fontSize:12,color:t.text,fontWeight:600,lineHeight:1.6}}>{"\uD83E\uDDE0"} Trust low readings - don't panic eat</div>
             </div>
+
+            {/* Daily Notes - inside weekly insight */}
+            <div style={{fontSize:14,fontWeight:600,color:t.text,marginBottom:8}}>{"\uD83D\uDCDD"} Daily Notes</div>
+            <div style={{display:"flex",gap:4,flexWrap:"wrap",marginBottom:10}}>
+              {Object.keys(notes||{}).sort((a,b)=>{const dA=parseInt(a.match(/Day (\d+)/)?.[1]||"0");const dB=parseInt(b.match(/Day (\d+)/)?.[1]||"0");return dB-dA}).map(k=>{
+                const active=noteDay===k;
+                return(<div key={k} onClick={()=>setNoteDay(k)} style={{padding:"5px 12px",borderRadius:50,fontSize:11,fontWeight:active?700:500,cursor:"pointer",background:active?t.accent:t.tile,color:active?"#fff":t.muted,boxShadow:active?t.shOn:t.sh}}>{k.replace(/\s*\(Day\s*\d+\)/,"")}</div>);
+              })}
+            </div>
+            {noteDay&&(notes||{})[noteDay]&&(notes||{})[noteDay].map((n,i)=>{
+              const col={excellent:t.ok,ontrack:t.warn,grow:t.danger}[n.sev]||t.muted;
+              return(<div key={i} style={{display:"flex",gap:10,marginBottom:10,padding:"0 2px"}}>
+                <span style={{fontSize:14,flexShrink:0}}>{n.icon}</span>
+                <div><div style={{fontSize:12,fontWeight:700,color:col,marginBottom:2}}>{n.title}</div><div style={{fontSize:11,color:t.muted,lineHeight:1.5}}>{n.text}</div></div>
+              </div>);
+            })}
           </div>}
         </div>);
       })()}
-
-      {/* Daily Notes - collapsible */}
-      <div onClick={()=>setShowNotes(!showNotes)} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 4px",cursor:"pointer"}}>
-        <span style={{fontSize:16,fontWeight:600,color:t.text}}>{"\uD83D\uDCDD"} Daily Notes</span>
-        <span style={{fontSize:12,color:t.muted}}>{showNotes?"\u25B2":"\u25BC"}</span>
-      </div>
-      {showNotes&&<div>
-        <div style={{display:"flex",gap:4,flexWrap:"wrap",marginBottom:10}}>
-          {Object.keys(notes||{}).sort((a,b)=>{const dA=parseInt(a.match(/Day (\d+)/)?.[1]||"0");const dB=parseInt(b.match(/Day (\d+)/)?.[1]||"0");return dB-dA}).map(k=>{
-            const active=noteDay===k;
-            return(<div key={k} onClick={()=>setNoteDay(k)} style={{padding:"5px 12px",borderRadius:50,fontSize:11,fontWeight:active?700:500,cursor:"pointer",background:active?t.accent:t.tile,color:active?"#fff":t.muted,boxShadow:active?t.shOn:t.sh}}>{k.replace(/\s*\(Day\s*\d+\)/,"")}</div>);
-          })}
-        </div>
-        {noteDay&&(notes||{})[noteDay]&&(notes||{})[noteDay].map((n,i)=>{
-          const col={excellent:t.ok,ontrack:t.warn,grow:t.danger}[n.sev]||t.muted;
-          return(<div key={i} style={{display:"flex",gap:10,marginBottom:10,padding:"0 4px"}}>
-            <span style={{fontSize:16,flexShrink:0}}>{n.icon}</span>
-            <div><div style={{fontSize:13,fontWeight:700,color:col,marginBottom:2}}>{n.title}</div><div style={{fontSize:12,color:t.muted,lineHeight:1.5}}>{n.text}</div></div>
-          </div>);
-        })}
-      </div>}
     </div>
   );
 }
