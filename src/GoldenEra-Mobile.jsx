@@ -19,18 +19,18 @@ const t = {
 // TARGETS imported from shared/data.js
 
 const GRID=[
-  {id:"berb",icon:"\uD83C\uDF3F",l:"Berb",field:"berb",cycle:["0","x1","x2"]},
-  {id:"fish",icon:"\uD83D\uDC1F",l:"Fish",field:"fish",cycle:["0","x1","x2","x3"]},
-  {id:"mag",icon:"\uD83D\uDC8A",l:"Mag",field:"mag",cycle:["0","x1","x2","x3"]},
+  {id:"berb",icon:"\uD83C\uDF3F",l:"Berberine",field:"berb",cycle:["0","x1","x2"]},
+  {id:"fish",icon:"\uD83D\uDC1F",l:"Fish oil",field:"fish",cycle:["0","x1","x2","x3"]},
+  {id:"mag",icon:"\uD83D\uDC8A",l:"Magnesium",field:"mag",cycle:["0","x1","x2","x3"]},
   {id:"d3k2",icon:"\u2600\uFE0F",l:"D3K2",field:"d3k2",cycle:["0","x1","x2"]},
   {id:"sleep",icon:"\uD83D\uDE34",l:"Sleep",field:"sleep",cycle:["","<6","<7","7+","8+"]},
   {id:"move",icon:"\uD83D\uDEB6",l:"Walk",field:"moveAfter",cycle:["","x1","x2","x3"]},
-  {id:"fiber",icon:"\uD83E\uDD57",l:"Fiber",field:"fiberFirst",cycle:[false,true]},
-  {id:"sugar",icon:"\uD83D\uDEAB",l:"Sugar",field:"noSweet",cycle:[false,true]},
+  {id:"fiber",icon:"\uD83E\uDD57",l:"Fiber first",field:"fiberFirst",cycle:[false,true]},
+  {id:"sugar",icon:"\uD83D\uDEAB",l:"No sugar",field:"noSweet",cycle:[false,true]},
   {id:"water",icon:"\uD83D\uDCA7",l:"Water",field:"water",cycle:[false,true]},
   {id:"probio",icon:"\uD83E\uDDEB",l:"Probio",field:"probio",cycle:[false,true]},
-  {id:"basil",icon:"\uD83C\uDF31",l:"Basil",field:"basil",cycle:[false,true]},
-  {id:"brazil",icon:"\uD83E\uDD5C",l:"Brazil",field:"brazil",cycle:[false,true]},
+  {id:"basil",icon:"\uD83C\uDF31",l:"Basil/Chia",field:"basil",cycle:[false,true]},
+  {id:"brazil",icon:"\uD83E\uDD5C",l:"Bz nuts",field:"brazil",cycle:[false,true]},
 ];
 const EXERCISES=["rest","walk","stretch","cardio","weights"];
 
@@ -112,6 +112,9 @@ function apiSave(date,data,action="saveDay"){clearTimeout(_st);_st=setTimeout(as
 
 // --- HOME ---
 function HomeTab({D,loading,setTab,notes}){
+  const[showInsight,setShowInsight]=useState(false);
+  const[showNotes,setShowNotes]=useState(false);
+  const[noteDay,setNoteDay]=useState(()=>{const keys=Object.keys(notes||{}).sort((a,b)=>{const dA=parseInt(a.match(/Day (\d+)/)?.[1]||"0");const dB=parseInt(b.match(/Day (\d+)/)?.[1]||"0");return dB-dA});return keys[0]||null});
   const day=dayN();const today=todayISO();const dates=Object.keys(D).sort();
   const todayD=D[today]||{};const todayLogged=!!(todayD.glucFast||todayD.berb||todayD.fish||todayD.noSweet||todayD.moveAfter||todayD.act);
   const findLatest=(key)=>{for(let i=dates.length-1;i>=0;i--){const v=parseFloat(D[dates[i]]?.[key]);if(!isNaN(v))return v}return NaN};
@@ -229,6 +232,69 @@ function HomeTab({D,loading,setTab,notes}){
           </div>
         );
       })()}
+
+      {/* Weekly Insight - collapsible */}
+      <div onClick={()=>setShowInsight(!showInsight)} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 4px",cursor:"pointer",marginTop:12}}>
+        <span style={{fontSize:16,fontWeight:600,color:t.text}}>{"\uD83D\uDCA1"} Weekly Insight</span>
+        <span style={{fontSize:11,color:t.muted,padding:"3px 10px",borderRadius:50,background:t.tile,boxShadow:t.sh}}>{showInsight?"Hide":"Show"}</span>
+      </div>
+      {showInsight&&(()=>{
+        const weekDt=getWeekDates();
+        const glucVals=weekDt.map(d=>{const v=D[d]?.glucFast;return v?parseFloat(v):null}).filter(v=>v&&!isNaN(v));
+        const glucAvg=glucVals.length?Math.round(glucVals.reduce((a,b)=>a+b,0)/glucVals.length):null;
+        const postVals=weekDt.map(d=>{const v=D[d]?.glucPost;return v?parseFloat(v):null}).filter(v=>v&&!isNaN(v));
+        const postAvg=postVals.length?Math.round(postVals.reduce((a,b)=>a+b,0)/postVals.length):null;
+        let sleepGood=0,sleepTotal=0;
+        weekDt.forEach(d=>{const s=D[d]?.sleep;if(s){sleepTotal++;if(s==="7+"||s==="8+")sleepGood++}});
+        return(<div>
+          {glucAvg&&<div style={{display:"flex",gap:6,marginBottom:10}}>
+            {[
+              {label:"Fasting",val:glucAvg,color:glucAvg<=99?t.ok:glucAvg<=140?t.warn:t.danger},
+              postAvg&&{label:"Post-meal",val:postAvg,color:postAvg<=140?t.ok:postAvg<=180?t.warn:t.danger},
+              sleepTotal>0&&{label:"Sleep",val:`${sleepGood}/${sleepTotal}`,sub:"nights 7+",color:sleepGood>=sleepTotal*0.7?t.ok:t.warn},
+            ].filter(Boolean).map((m,i)=>(
+              <div key={i} style={{flex:1,textAlign:"center",background:t.card,borderRadius:12,padding:"8px 4px",boxShadow:t.csh}}>
+                <div style={{fontSize:9,color:t.muted,textTransform:"uppercase"}}>{m.label}</div>
+                <div style={{fontSize:18,fontWeight:700,color:m.color}}>{m.val}</div>
+                {m.sub&&<div style={{fontSize:9,color:t.muted}}>{m.sub}</div>}
+              </div>
+            ))}
+          </div>}
+          <div style={{background:t.okBg,borderRadius:12,padding:"10px 14px",marginBottom:6}}>
+            <div style={{fontSize:10,fontWeight:700,color:t.ok,textTransform:"uppercase",marginBottom:4}}>Key Learnings</div>
+            {glucVals.length>=2&&glucVals[glucVals.length-1]<glucVals[0]&&<div style={{fontSize:12,color:t.ok,fontWeight:600,lineHeight:1.6}}>{"\u2713"} Fasting trending down this week</div>}
+            {glucAvg&&glucAvg<=100&&<div style={{fontSize:12,color:t.ok,fontWeight:600,lineHeight:1.6}}>{"\u2713"} Fasting avg in normal range ({glucAvg})</div>}
+            {sleepGood>=4&&<div style={{fontSize:12,color:t.ok,fontWeight:600,lineHeight:1.6}}>{"\u2713"} {sleepGood}/{sleepTotal} nights 7+ hours sleep</div>}
+          </div>
+          <div style={{background:"#dde8f5",borderRadius:12,padding:"10px 14px"}}>
+            <div style={{fontSize:10,fontWeight:700,color:"#185fa5",textTransform:"uppercase",marginBottom:4}}>Next Week Focus</div>
+            <div style={{fontSize:12,color:t.text,fontWeight:600,lineHeight:1.6}}>{"\uD83D\uDE34"} Maintain sleep 7+ streak</div>
+            <div style={{fontSize:12,color:t.text,fontWeight:600,lineHeight:1.6}}>{"\uD83C\uDFCA"} Resume swimming / cardio</div>
+            <div style={{fontSize:12,color:t.text,fontWeight:600,lineHeight:1.6}}>{"\uD83E\uDDE0"} Trust low readings - don't panic eat</div>
+          </div>
+        </div>);
+      })()}
+
+      {/* Daily Notes - collapsible */}
+      <div onClick={()=>setShowNotes(!showNotes)} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 4px",cursor:"pointer"}}>
+        <span style={{fontSize:16,fontWeight:600,color:t.text}}>{"\uD83D\uDCDD"} Daily Notes</span>
+        <span style={{fontSize:11,color:t.muted,padding:"3px 10px",borderRadius:50,background:t.tile,boxShadow:t.sh}}>{showNotes?"Hide":"Show"}</span>
+      </div>
+      {showNotes&&<div>
+        <div style={{display:"flex",gap:4,flexWrap:"wrap",marginBottom:10}}>
+          {Object.keys(notes||{}).sort((a,b)=>{const dA=parseInt(a.match(/Day (\d+)/)?.[1]||"0");const dB=parseInt(b.match(/Day (\d+)/)?.[1]||"0");return dB-dA}).map(k=>{
+            const active=noteDay===k;
+            return(<div key={k} onClick={()=>setNoteDay(k)} style={{padding:"5px 12px",borderRadius:50,fontSize:11,fontWeight:active?700:500,cursor:"pointer",background:active?t.accent:t.tile,color:active?"#fff":t.muted,boxShadow:active?t.shOn:t.sh}}>{k.replace(/\s*\(Day\s*\d+\)/,"")}</div>);
+          })}
+        </div>
+        {noteDay&&(notes||{})[noteDay]&&(notes||{})[noteDay].map((n,i)=>{
+          const col={excellent:t.ok,ontrack:t.warn,grow:t.danger}[n.sev]||t.muted;
+          return(<div key={i} style={{display:"flex",gap:10,marginBottom:10,padding:"0 4px"}}>
+            <span style={{fontSize:16,flexShrink:0}}>{n.icon}</span>
+            <div><div style={{fontSize:13,fontWeight:700,color:col,marginBottom:2}}>{n.title}</div><div style={{fontSize:12,color:t.muted,lineHeight:1.5}}>{n.text}</div></div>
+          </div>);
+        })}
+      </div>}
     </div>
   );
 }
@@ -352,9 +418,6 @@ function LogTab({D,setD}){
 function JourneyTab({D,loading,notes:CLINICAL_NOTES,generateInsight,analyzing}){
   const[showLabs,setShowLabs]=useState(false);
   const[expandedLab,setExpandedLab]=useState(null);
-  const[showInsight,setShowInsight]=useState(true);
-  const[showNotes,setShowNotes]=useState(false);
-  const[noteDay,setNoteDay]=useState(()=>{const keys=Object.keys(CLINICAL_NOTES).sort((a,b)=>{const dA=parseInt(a.match(/Day (\d+)/)?.[1]||"0");const dB=parseInt(b.match(/Day (\d+)/)?.[1]||"0");return dB-dA});return keys[0]||null});
   const dates=Object.keys(D).sort();
   const find=(key)=>{for(let i=dates.length-1;i>=0;i--){const v=parseFloat(D[dates[i]]?.[key]);if(!isNaN(v))return v}return null};
   const metrics=[
@@ -392,81 +455,6 @@ function JourneyTab({D,loading,notes:CLINICAL_NOTES,generateInsight,analyzing}){
             {note&&<span style={{color:cur!=null?t.accent:t.muted,fontWeight:cur!=null?600:400}}>{note}</span>}
           </div>
         </div>)})}
-
-      {/* Weekly Insight - collapsible */}
-      <div onClick={()=>setShowInsight(!showInsight)} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 4px",cursor:"pointer",marginTop:8}}>
-        <span style={{fontSize:16,fontWeight:600,color:t.text}}>{"\uD83D\uDCA1"} Weekly Insight</span>
-        <span style={{fontSize:11,color:t.muted,padding:"3px 10px",borderRadius:50,background:t.tile,boxShadow:t.sh}}>{showInsight?"Hide":"Show"}</span>
-      </div>
-      {showInsight&&(()=>{
-        // Compute week metrics from data
-        const today=new Date();const dy=today.getDay();const diff=today.getDate()-dy+(dy===0?-6:1);
-        const mon=new Date(today);mon.setDate(diff);const weekDates=[];
-        for(let i=0;i<7;i++){const dd=new Date(mon);dd.setDate(mon.getDate()+i);weekDates.push(`${dd.getFullYear()}-${String(dd.getMonth()+1).padStart(2,"0")}-${String(dd.getDate()).padStart(2,"0")}`);}
-        const glucVals=weekDates.map(d=>{const v=D[d]?.glucFast;return v?parseFloat(v):null}).filter(v=>v&&!isNaN(v));
-        const glucAvg=glucVals.length?Math.round(glucVals.reduce((a,b)=>a+b,0)/glucVals.length):null;
-        const postVals=weekDates.map(d=>{const v=D[d]?.glucPost;return v?parseFloat(v):null}).filter(v=>v&&!isNaN(v));
-        const postAvg=postVals.length?Math.round(postVals.reduce((a,b)=>a+b,0)/postVals.length):null;
-        let sleepGood=0,sleepTotal=0;
-        weekDates.forEach(d=>{const s=D[d]?.sleep;if(s){sleepTotal++;if(s==="7+"||s==="8+")sleepGood++}});
-
-        return(<div>
-          {/* Key highlights */}
-          {glucAvg&&<div style={{display:"flex",gap:6,marginBottom:10}}>
-            {[
-              {label:"Fasting",val:glucAvg,color:glucAvg<=99?t.ok:glucAvg<=140?t.warn:t.danger},
-              postAvg&&{label:"Post-meal",val:postAvg,color:postAvg<=140?t.ok:postAvg<=180?t.warn:t.danger},
-              sleepTotal>0&&{label:"Sleep",val:`${sleepGood}/${sleepTotal}`,sub:"nights 7+",color:sleepGood>=sleepTotal*0.7?t.ok:t.warn},
-            ].filter(Boolean).map((m,i)=>(
-              <div key={i} style={{flex:1,textAlign:"center",background:t.card,borderRadius:12,padding:"8px 4px",boxShadow:t.csh}}>
-                <div style={{fontSize:9,color:t.muted,textTransform:"uppercase"}}>{m.label}</div>
-                <div style={{fontSize:18,fontWeight:700,color:m.color}}>{m.val}</div>
-                {m.sub&&<div style={{fontSize:9,color:t.muted}}>{m.sub}</div>}
-              </div>
-            ))}
-          </div>}
-
-          {/* Key learnings + Next week focus */}
-          <div style={{background:t.okBg,borderRadius:12,padding:"10px 14px",marginBottom:6}}>
-            <div style={{fontSize:10,fontWeight:700,color:t.ok,textTransform:"uppercase",marginBottom:4}}>Key Learnings</div>
-            {glucVals.length>=2&&glucVals[glucVals.length-1]<glucVals[0]&&<div style={{fontSize:12,color:t.ok,fontWeight:600,lineHeight:1.6}}>{"\u2713"} Fasting trending down this week</div>}
-            {glucAvg&&glucAvg<=100&&<div style={{fontSize:12,color:t.ok,fontWeight:600,lineHeight:1.6}}>{"\u2713"} Fasting avg in normal range ({glucAvg})</div>}
-            {sleepGood>=4&&<div style={{fontSize:12,color:t.ok,fontWeight:600,lineHeight:1.6}}>{"\u2713"} {sleepGood}/{sleepTotal} nights 7+ hours sleep</div>}
-          </div>
-          <div style={{background:"#dde8f5",borderRadius:12,padding:"10px 14px",marginBottom:10}}>
-            <div style={{fontSize:10,fontWeight:700,color:"#185fa5",textTransform:"uppercase",marginBottom:4}}>Next Week Focus</div>
-            <div style={{fontSize:12,color:t.text,fontWeight:600,lineHeight:1.6}}>{"\uD83D\uDE34"} Maintain sleep 7+ streak</div>
-            <div style={{fontSize:12,color:t.text,fontWeight:600,lineHeight:1.6}}>{"\uD83C\uDFCA"} Resume swimming / cardio</div>
-            <div style={{fontSize:12,color:t.text,fontWeight:600,lineHeight:1.6}}>{"\uD83E\uDDE0"} Trust low readings - don't panic eat</div>
-          </div>
-        </div>);
-      })()}
-
-      {/* Daily Notes - collapsible */}
-      <div onClick={()=>setShowNotes(!showNotes)} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 4px",cursor:"pointer"}}>
-        <span style={{fontSize:16,fontWeight:600,color:t.text}}>{"\uD83D\uDCDD"} Daily Notes</span>
-        <span style={{fontSize:11,color:t.muted,padding:"3px 10px",borderRadius:50,background:t.tile,boxShadow:t.sh}}>{showNotes?"Hide":"Show"}</span>
-      </div>
-      {showNotes&&<div>
-        <div onClick={(e)=>{e.stopPropagation();if(!analyzing)generateInsight()}} style={{textAlign:"center",padding:"10px 0",marginBottom:10}}>
-          <span style={{padding:"8px 20px",borderRadius:50,fontSize:12,fontWeight:600,cursor:analyzing?"wait":"pointer",background:analyzing?t.tile:`linear-gradient(135deg, ${t.accent}, ${t.dark})`,color:analyzing?t.muted:"#fff",boxShadow:t.shOn,display:"inline-flex",alignItems:"center",gap:5}}>
-            {analyzing?<>{"\u23F3"} Analyzing...</>:<>{"\u2728"} Generate Today's Insight</>}
-          </span>
-        </div>
-        <div style={{display:"flex",gap:4,flexWrap:"wrap",marginBottom:10}}>
-          {Object.keys(CLINICAL_NOTES).sort((a,b)=>{const dA=parseInt(a.match(/Day (\d+)/)?.[1]||"0");const dB=parseInt(b.match(/Day (\d+)/)?.[1]||"0");return dB-dA}).map(k=>{
-            const active=noteDay===k;
-            return(<div key={k} onClick={()=>setNoteDay(k)} style={{padding:"5px 12px",borderRadius:50,fontSize:11,fontWeight:active?700:500,cursor:"pointer",background:active?t.accent:t.tile,color:active?"#fff":t.muted,boxShadow:active?t.shOn:t.sh}}>{k.replace(/\s*\(Day\s*\d+\)/,"")}</div>);
-          })}
-        </div>
-        {noteDay&&CLINICAL_NOTES[noteDay]&&CLINICAL_NOTES[noteDay].map((n,i)=>{
-          const col={excellent:t.ok,ontrack:t.warn,grow:t.danger}[n.sev]||t.muted;
-          return(<div key={i} style={{display:"flex",gap:10,marginBottom:10,padding:"0 4px"}}>
-            <span style={{fontSize:16,flexShrink:0}}>{n.icon}</span>
-            <div><div style={{fontSize:13,fontWeight:700,color:col,marginBottom:2}}>{n.title}</div><div style={{fontSize:12,color:t.muted,lineHeight:1.5}}>{n.text}</div></div>
-          </div>);
-        })}
-      </div>}
 
       {/* Lab Data & Prediction - hideable scroll table */}
       <div onClick={()=>setShowLabs(!showLabs)} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 4px",cursor:"pointer",marginTop:8}}>
