@@ -114,6 +114,7 @@ function apiSave(date,data,action="saveDay"){clearTimeout(_st);_st=setTimeout(as
 function HomeTab({D,loading,setTab,notes}){
   const[showInsight,setShowInsight]=useState(false);
   const[showNotes,setShowNotes]=useState(false);
+  const[showLatest,setShowLatest]=useState(false);
   const[noteDay,setNoteDay]=useState(()=>{const keys=Object.keys(notes||{}).sort((a,b)=>{const dA=parseInt(a.match(/Day (\d+)/)?.[1]||"0");const dB=parseInt(b.match(/Day (\d+)/)?.[1]||"0");return dB-dA});return keys[0]||null});
   const day=dayN();const today=todayISO();const dates=Object.keys(D).sort();
   const todayD=D[today]||{};const todayLogged=!!(todayD.glucFast||todayD.berb||todayD.fish||todayD.noSweet||todayD.moveAfter||todayD.act);
@@ -212,23 +213,34 @@ function HomeTab({D,loading,setTab,notes}){
         )}
       </div>
 
-      {/* Latest insight teaser - P3 */}
+      {/* Latest insight - expandable in place */}
       {(()=>{
         const keys=Object.keys(notes||{}).sort((a,b)=>{const dA=parseInt(a.match(/Day (\d+)/)?.[1]||"0");const dB=parseInt(b.match(/Day (\d+)/)?.[1]||"0");return dB-dA});
         if(keys.length===0)return null;
-        const latestKey=keys[0];const latestNotes=(notes||{})[latestKey];const first=latestNotes?latestNotes[0]:null;if(!first)return null;
+        const latestKey=keys[0];const latestNotes=(notes||{})[latestKey];if(!latestNotes||!latestNotes.length)return null;
+        const first=latestNotes[0];
         const sevCol={excellent:t.ok,ontrack:t.warn,grow:t.danger}[first.sev]||t.muted;
         return(
-          <div onClick={()=>setTab("journey")} style={{background:t.card,borderRadius:16,padding:"12px 16px",marginTop:12,boxShadow:t.csh,cursor:"pointer"}}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-              <div style={{flex:1}}>
-                <div style={{fontSize:10,color:t.muted,marginBottom:3}}>{latestKey}</div>
+          <div style={{background:t.card,borderRadius:16,padding:"12px 16px",marginTop:12,boxShadow:t.csh}}>
+            <div style={{fontSize:10,color:t.muted,marginBottom:3}}>{latestKey}</div>
+            {!showLatest?(
+              <div onClick={()=>setShowLatest(true)} style={{cursor:"pointer"}}>
                 <div style={{fontSize:13,fontWeight:600,color:sevCol,lineHeight:1.3}}>{first.icon} {first.title}</div>
                 <div style={{fontSize:11,color:t.muted,marginTop:3,lineHeight:1.4,display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical",overflow:"hidden"}}>{first.text}</div>
+                <div style={{textAlign:"center",fontSize:11,color:t.accent,fontWeight:600,marginTop:8,paddingTop:6,borderTop:`1px solid ${t.tile}`}}>Show more {"\u25BC"}</div>
               </div>
-              <div style={{fontSize:16,color:t.light,marginLeft:10,flexShrink:0}}>{">"}</div>
-            </div>
-            <div style={{textAlign:"center",fontSize:10,color:t.accent,fontWeight:600,marginTop:8,paddingTop:6,borderTop:`1px solid ${t.tile}`}}>View full insights in Journey</div>
+            ):(
+              <div>
+                {latestNotes.map((n,i)=>{
+                  const col={excellent:t.ok,ontrack:t.warn,grow:t.danger}[n.sev]||t.muted;
+                  return(<div key={i} style={{display:"flex",gap:10,marginBottom:i<latestNotes.length-1?10:0,padding:"0 2px"}}>
+                    <span style={{fontSize:16,flexShrink:0}}>{n.icon}</span>
+                    <div><div style={{fontSize:13,fontWeight:700,color:col,marginBottom:2}}>{n.title}</div><div style={{fontSize:12,color:t.muted,lineHeight:1.5}}>{n.text}</div></div>
+                  </div>);
+                })}
+                <div onClick={()=>setShowLatest(false)} style={{textAlign:"center",fontSize:11,color:t.accent,fontWeight:600,marginTop:8,paddingTop:6,borderTop:`1px solid ${t.tile}`,cursor:"pointer"}}>Show less {"\u25B2"}</div>
+              </div>
+            )}
           </div>
         );
       })()}
@@ -236,7 +248,7 @@ function HomeTab({D,loading,setTab,notes}){
       {/* Weekly Insight - collapsible */}
       <div onClick={()=>setShowInsight(!showInsight)} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 4px",cursor:"pointer",marginTop:12}}>
         <span style={{fontSize:16,fontWeight:600,color:t.text}}>{"\uD83D\uDCA1"} Weekly Insight</span>
-        <span style={{fontSize:11,color:t.muted,padding:"3px 10px",borderRadius:50,background:t.tile,boxShadow:t.sh}}>{showInsight?"Hide":"Show"}</span>
+        <span style={{fontSize:12,color:t.muted}}>{showInsight?"\u25B2":"\u25BC"}</span>
       </div>
       {showInsight&&(()=>{
         const weekDt=getWeekDates();
@@ -278,7 +290,7 @@ function HomeTab({D,loading,setTab,notes}){
       {/* Daily Notes - collapsible */}
       <div onClick={()=>setShowNotes(!showNotes)} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 4px",cursor:"pointer"}}>
         <span style={{fontSize:16,fontWeight:600,color:t.text}}>{"\uD83D\uDCDD"} Daily Notes</span>
-        <span style={{fontSize:11,color:t.muted,padding:"3px 10px",borderRadius:50,background:t.tile,boxShadow:t.sh}}>{showNotes?"Hide":"Show"}</span>
+        <span style={{fontSize:12,color:t.muted}}>{showNotes?"\u25B2":"\u25BC"}</span>
       </div>
       {showNotes&&<div>
         <div style={{display:"flex",gap:4,flexWrap:"wrap",marginBottom:10}}>
@@ -384,7 +396,7 @@ function LogTab({D,setD}){
       {/* Body Measurements - collapsible */}
       <div onClick={()=>setShowBody(!showBody)} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 4px",cursor:"pointer",marginBottom:showBody?0:4}}>
         <span style={{fontSize:14,fontWeight:600,color:t.text}}>{"\u2696\uFE0F"} Body Measurements</span>
-        <span style={{fontSize:11,color:t.muted,padding:"3px 10px",borderRadius:50,background:t.tile,boxShadow:t.sh}}>{showBody?"Hide":"Show"}</span>
+        <span style={{fontSize:12,color:t.muted}}>{showBody?"\u25B2":"\u25BC"}</span>
       </div>
       {showBody&&<div style={{background:t.card,borderRadius:20,padding:16,marginBottom:10,boxShadow:t.csh}}>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
@@ -395,7 +407,7 @@ function LogTab({D,setD}){
       {/* Lab Markers - collapsible */}
       <div onClick={()=>setShowLab(!showLab)} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 4px",cursor:"pointer",marginBottom:showLab?0:4}}>
         <span style={{fontSize:14,fontWeight:600,color:t.text}}>{"\uD83E\uDE78"} Lab Markers</span>
-        <span style={{fontSize:11,color:t.muted,padding:"3px 10px",borderRadius:50,background:t.tile,boxShadow:t.sh}}>{showLab?"Hide":"Show"}</span>
+        <span style={{fontSize:12,color:t.muted}}>{showLab?"\u25B2":"\u25BC"}</span>
       </div>
       {showLab&&<div style={{background:t.card,borderRadius:20,padding:16,marginBottom:10,boxShadow:t.csh}}>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}}>
@@ -459,7 +471,7 @@ function JourneyTab({D,loading,notes:CLINICAL_NOTES,generateInsight,analyzing}){
       {/* Lab Data & Prediction - hideable scroll table */}
       <div onClick={()=>setShowLabs(!showLabs)} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 4px",cursor:"pointer",marginTop:8}}>
         <span style={{fontSize:16,fontWeight:600,color:t.text}}>{"\uD83E\uDE78"} Lab Data & Prediction</span>
-        <span style={{fontSize:11,color:t.muted,padding:"3px 10px",borderRadius:50,background:t.tile,boxShadow:t.sh}}>{showLabs?"Hide":"Show"}</span>
+        <span style={{fontSize:12,color:t.muted}}>{showLabs?"\u25B2":"\u25BC"}</span>
       </div>
       {showLabs&&(()=>{
         const labMeanings=SHARED_LAB_MEANINGS;
