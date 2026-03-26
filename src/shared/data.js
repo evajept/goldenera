@@ -18,6 +18,31 @@ export const TARGETS = {
 
 // ─── Clinical Notes (update this section with new days) ───
 export const clinicalNotes = {
+  "26 Mar (Day 25)": [
+    { icon: "\uD83D\uDCC9", sev: "excellent", title: "Fasting 106 - trending down after illness spike", text: "Liver gap -11 (night 117 to fasting 106). Best gap since the illness started. The body is recalibrating. IF 18:6 (7:20-13:00) with only 2 meals." },
+    { icon: "\uD83C\uDFCA", sev: "grow", title: "Exercise effect still muted", text: "Evening walk + carrying laundry basket. Felt like using a lot of energy but glucose didn't drop like pre-illness. The immune system is still drawing resources. Give it time." },
+    { icon: "\uD83D\uDC8A", sev: "ontrack", title: "NAC Day 4 + full protocol maintained", text: "NAC x1, berberine x2, fish oil x3, mag x2, D3K2 x2, basil seeds. No sugar. Protocol compliance excellent despite lingering cold." },
+  ],
+  "25 Mar (Day 24)": [
+    { icon: "\uD83C\uDFCA", sev: "grow", title: "Swimming resumed but glucose only -5", text: "Fasting 116. Had cardio/swim but glucose dropped only 5 points. Pre-illness, swimming dropped glucose 30+ points (131>101). The immune response is competing for the same energy resources muscles need." },
+    { icon: "\uD83D\uDE34", sev: "excellent", title: "Sleep 7+ and walks x3 maintained", text: "Despite still feeling unwell, kept up the key habits. Walking x3 after meals, all supplements. The consistency matters more than any single day." },
+    { icon: "\uD83E\uDDE0", sev: "ontrack", title: "Post-meal 148 - still elevated vs pre-illness", text: "Pre-illness post-meal was averaging 130-140. Now 148. The body's insulin response is slightly impaired by the ongoing cold. Expected - will normalize as illness clears." },
+  ],
+  "24 Mar (Day 23)": [
+    { icon: "\uD83D\uDCC8", sev: "ontrack", title: "Fasting 118 - slight improvement, walks x3 back", text: "Down from 123. Walking x3 after meals resumed. Post-meal spiked to 163 though - highest since Day 16. The cold is still affecting insulin response." },
+    { icon: "\uD83D\uDC8A", sev: "ontrack", title: "NAC Day 2 + basil seeds resumed", text: "NAC x1 continuing for liver/immune support. Basil seeds back in rotation. Full supplement stack maintained." },
+    { icon: "\uD83D\uDE34", sev: "excellent", title: "Sleep 7+ recovered", text: "After one bad night (<7h on Day 22), sleep back to 7+. One bad night of sleep can raise fasting 10-15 points." },
+  ],
+  "23 Mar (Day 22)": [
+    { icon: "\u26A0\uFE0F", sev: "grow", title: "Fasting 123 - illness pushing glucose up", text: "Liver gap -5 (night 128 to fasting 123). Cold symptoms continue. Cortisol from illness is fighting the protocol. Started NAC x1 for liver and immune support." },
+    { icon: "\uD83D\uDE34", sev: "grow", title: "Sleep dropped below 7h", text: "First night under 7h since Day 11. Poor sleep + illness = glucose double hit. One night of <7h sleep can raise fasting 10-15 points." },
+    { icon: "\uD83D\uDC8A", sev: "excellent", title: "NAC started - new addition to protocol", text: "N-Acetyl Cysteine for glutathione production. Supports liver detox and immune function. Day 1 of NAC alongside full berberine + fish oil stack." },
+  ],
+  "22 Mar (Day 21)": [
+    { icon: "\u26A0\uFE0F", sev: "grow", title: "Fasting JUMPS to 114 - illness effect begins", text: "Night 104 to fasting 114 = liver gap +10 (POSITIVE - liver dumping glucose). This is the illness cortisol response. The body's immune system is demanding glucose fuel." },
+    { icon: "\uD83C\uDFE0", sev: "ontrack", title: "Rest day at home, protocol maintained", text: "Not going out. Housework only. But maintained walks x3, berberine x2, fish oil x3, no sugar, basil seeds, IF 18:6. Even on a bad day, the habits held." },
+    { icon: "\uD83E\uDDE0", sev: "ontrack", title: "Night 128 - elevated, immune system drawing glucose", text: "Night glucose 128 is the highest since Day 10. The cold is actively raising baseline glucose. This is temporary - will resolve as illness clears." },
+  ],
   "21 Mar (Day 20)": [
     { icon: "\uD83E\uDD27", sev: "ontrack", title: "Sick day 2 - fasting 88 again (2 days in normal!)", text: "Congested, exhausted, cold symptoms continue. But fasting held at 88 for the second day. Liver gap -11 (night 99 to fasting 88). The body's metabolic progress isn't lost to illness." },
     { icon: "\uD83C\uDF56", sev: "grow", title: "Comfort food test: BBQ + coke zero + candy + KOI milk tea", text: "Ate what the body craved while sick. Spiked 88 to 131 (+43) - a moderate spike, not a disaster. Walking continuously brought it back to ~110. Important: even on a bad food day, the spike was manageable." },
@@ -119,8 +144,10 @@ export const chartData = {
     { m: "10 Mar", v: 123, c: true }, { m: "11 Mar", v: 120, c: true }, { m: "12 Mar", v: 123, c: true },
     { m: "13 Mar", v: 115, c: true }, { m: "14 Mar", v: 118, c: true }, { m: "15 Mar", v: 108, c: true },
     { m: "16 Mar", v: 95, c: true }, { m: "17 Mar", v: 80, c: true }, { m: "18 Mar", v: 101, c: true },
-    { m: "19 Mar", v: 104, c: true }, { m: "20 Mar", v: 88, c: true }, { m: "21 Mar", v: 88, c: true },
-    { m: "D30", v: 85 }, { m: "D60", v: 80 }, { m: "D90", v: 75 },
+    { m: "19 Mar", v: 104, c: true }, { m: "20 Mar", v: 77, c: true }, { m: "21 Mar", v: 88, c: true },
+    { m: "22 Mar", v: 114, c: true }, { m: "23 Mar", v: 123, c: true }, { m: "24 Mar", v: 118, c: true },
+    { m: "25 Mar", v: 116, c: true }, { m: "26 Mar", v: 106, c: true },
+    { m: "D30", v: 90 }, { m: "D60", v: 82 }, { m: "D90", v: 75 },
   ],
   hb: [{ m: "26 Feb", v: 9.4, c: true }, { m: "D30", v: 7.8 }, { m: "D60", v: 6.5 }, { m: "D90", v: 5.7 }],
   trig: [{ m: "26 Feb", v: 702, c: true }, { m: "16 Mar", v: 231, c: true }, { m: "D30", v: 170 }, { m: "D60", v: 125 }, { m: "D90", v: 95 }],
@@ -132,13 +159,13 @@ export const chartData = {
 
 // ─── Trend data (daily tracking for charts) ───
 export const trendData = {
-  labels: ["D1","D2","D3","D4","D5","D6","D7","D8","D9","D10","D11","D12","D13","D14","D15","D16","D17","D18","D19","D20"],
-  fasting: [180,170,160,142,140,147,150,150,123,120,123,115,118,108,95,80,101,104,88,88],
-  postMeal: [null,null,null,null,null,180,217,150,160,143,150,163,140,170,148,174,127,135,109,131],
-  night: [null,null,null,null,null,null,140,137,131,127,137,120,115,109,97,107,104,104,99,null],
-  scores: [33,40,60,67,73,67,61,85,89,93,91,105,106,96,null,null,null,null,null,null],
+  labels: ["D1","D2","D3","D4","D5","D6","D7","D8","D9","D10","D11","D12","D13","D14","D15","D16","D17","D18","D19","D20","D21","D22","D23","D24","D25"],
+  fasting: [180,170,160,142,140,147,150,150,123,120,123,115,118,108,95,80,101,104,77,88,114,123,118,116,106],
+  postMeal: [null,null,null,null,null,180,217,150,160,143,150,163,140,170,148,174,127,135,109,134,139,148,163,148,157],
+  night: [null,null,null,null,null,null,140,137,131,127,137,120,115,109,97,107,104,104,99,104,128,118,117,117,119],
+  scores: [33,40,60,67,73,67,61,85,89,93,91,105,106,96,null,null,null,null,null,null,null,null,null,null,null],
   weight: { labels: ["Base","D7","D14"], data: [73.6,71.8,70.9] },
-  ifHours: [14,12,14,15,15,15,12,15,15,15,14,15,18,18,17,16,16,15,16,null],
+  ifHours: [14,12,14,15,15,15,12,15,15,15,14,15,18,18,17,16,16,15,16,18,18,16,15,14,18],
 };
 
 // ─── Helper: get latest insight (for mobile teaser) ───
