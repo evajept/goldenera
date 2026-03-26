@@ -51,7 +51,7 @@ const cSets={
   wt:{data:chartData.wt,label:"Weight",ref:60,refL:"60kg",dom:[55,75]},
   ggt:{data:chartData.ggt,label:"GGT",ref:39,refL:"<39",dom:[0,200]},
   chol:{data:chartData.chol,label:"Cholesterol",ref:200,refL:"<200",dom:[150,240]},
-  gluc:{data:[chartData.gluc[0],chartData.gluc[15],chartData.gluc[19],chartData.gluc[20],chartData.gluc[21],chartData.gluc[22]],label:"Glucose",ref:99,refL:"<99",dom:[50,230]},
+  gluc:{data:[chartData.gluc[0],chartData.gluc[16],chartData.gluc[19],chartData.gluc[22],chartData.gluc[27],chartData.gluc[28],chartData.gluc[29]],label:"Glucose",ref:99,refL:"<99",dom:[50,230]},
   bmi:{data:chartData.bmi,label:"BMI",ref:23,refL:"<23",dom:[18,28]},
 };
 
@@ -80,6 +80,7 @@ const supps=[
   {name:"Fish Oil",dose:"3-4g EPA+DHA split",trig:"-20-50%",hb:"Min",icon:"🐟"},
   {name:"Magnesium",dose:"200mg+ bedtime",trig:"-5-15%",hb:"-0.3-0.5%",icon:"💎"},
   {name:"D3 + K2",dose:"2000-5000 IU + 100mcg",trig:"Indirect",hb:"-0.3-0.5%",icon:"☀️"},
+  {name:"NAC",dose:"600mg x1-2",trig:"Indirect",hb:"Liver support",icon:"\uD83D\uDEE1\uFE0F"},
 ];
 
 // ─── Tracker rows (matching Sheet) ───
@@ -97,6 +98,7 @@ const trackerRows=[
   {label:"🐟 Fish Oil",field:"fish",type:"select",opts:["0","x1","x2","x3"],section:"supps"},
   {label:"💊 Magnesium",field:"mag",type:"select",opts:["0","x1","x2","x3"],section:"supps"},
   {label:"☀️ D3 + K2",field:"d3k2",type:"select",opts:["0","x1","x2"],section:"supps"},
+  {label:"🛡️ NAC",field:"nac",type:"select",opts:["0","x1","x2"],section:"supps"},
   {label:"🥗 Fiber first",field:"fiberFirst",type:"check",section:"habits"},
   {label:"🚫 No sugar",field:"noSweet",type:"check",section:"habits"},
   {label:"💧 Water 2L",field:"water",type:"check",section:"habits"},
@@ -146,7 +148,7 @@ export default function GoldenEra(){
   const[sheetStatus,setSS]=useState("idle");
   const[labChart,setLC]=useState("hb");
   const[trendChart,setTC]=useState("glucose");
-  const[noteTab,setNT]=useState("19 Mar (Day 18)");
+  const[noteTab,setNT]=useState("26 Mar (Day 25)");
   const[labMeanTab,setLMT]=useState(0);
   const[expandedLab,setEL]=useState(null);
   const[sciTopic,setSciTopic]=useState(null);
